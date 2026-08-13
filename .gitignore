@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+server/node_modules/
+client/node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Environment — never commit real secrets
+.env
+.env.local
+.env.*.local
+
+# Prisma
+server/prisma/migrations/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# Test coverage
+coverage/
+
+# Vite
+client/dist/
+
+# Uploads (JD files uploaded during demo)
+server/uploads/
