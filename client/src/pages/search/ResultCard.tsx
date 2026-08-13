@@ -1,6 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { CheckCircle, ChevronDown } from 'lucide-react';
-import { useState } from 'react';
+import { CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Avatar } from '../../components/Card';
 import { Button } from '../../components/Button';
@@ -8,14 +7,6 @@ import { Card } from '../../components/Card';
 import { cn } from '../../lib/utils/cn';
 import { pipelineApi } from '../../lib/api/pipeline.api';
 import type { SearchResult } from '../../lib/api/search.api';
-
-const NOT_FIT_REASONS = [
-  'Not enough domain exposure',
-  'Wrong location',
-  'Availability doesn\'t work',
-  'Level mismatch',
-  'Already staffed elsewhere',
-] as const;
 
 interface Props {
   result:     SearchResult;
@@ -25,19 +16,10 @@ interface Props {
 
 export function ResultCard({ result, ircId, onShortlisted }: Props) {
   const navigate   = useNavigate();
-  const [notFitOpen,    setNotFitOpen]    = useState(false);
-  const [confirmedReasons, setConfirmedReasons] = useState<Set<string>>(new Set());
 
   const shortlistMut = useMutation({
     mutationFn: () => pipelineApi.shortlist(result.employeeId, ircId),
     onSuccess:  (entry) => onShortlisted(result.employeeId, entry.id),
-  });
-
-  const notFitMut = useMutation({
-    mutationFn: ({ id, reason }: { id: number; reason: string }) =>
-      pipelineApi.notFit(id, reason),
-    onSuccess: (_data, { reason }) =>
-      setConfirmedReasons(s => new Set([...s, reason])),
   });
 
   const firstName  = result.fullName.split(' ')[0];
@@ -106,32 +88,6 @@ export function ResultCard({ result, ircId, onShortlisted }: Props) {
           {result.skills.slice(0, 8).map(s => (
             <span key={s} className="rounded-full border border-[var(--border-subtle)] px-2 py-0.5 text-[10px] text-secure-gray">{s}</span>
           ))}
-        </div>
-
-        {/* Not-a-fit quick reasons — R16 */}
-        <div className="mt-3 border-t border-[var(--border-subtle)] pt-3">
-          <button onClick={() => setNotFitOpen(o => !o)}
-            className="flex items-center gap-1 text-xs text-[var(--fg-3)] hover:text-secure-gray">
-            <ChevronDown size={13} className={cn('transition-transform', notFitOpen && 'rotate-180')} />
-            Quick feedback
-          </button>
-          {notFitOpen && (
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {NOT_FIT_REASONS.map(reason => {
-                const done = confirmedReasons.has(reason);
-                return (
-                  <button key={reason}
-                    disabled={notFitMut.isPending || !result.pipelineCandidateId}
-                    onClick={() => result.pipelineCandidateId && notFitMut.mutate({ id: result.pipelineCandidateId, reason })}
-                    className={cn('rounded-full border px-2.5 py-1 text-[10px] transition-colors',
-                      done ? 'border-commerce-green bg-commerce-green/10 text-commerce-green'
-                           : 'border-[var(--border-default)] text-secure-gray hover:border-power-orange hover:text-power-orange')}>
-                    {done ? '✓ ' : ''}{reason}
-                  </button>
-                );
-              })}
-            </div>
-          )}
         </div>
 
         {/* Action row */}
