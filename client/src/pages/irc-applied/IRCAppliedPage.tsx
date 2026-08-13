@@ -1,6 +1,9 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Upload } from 'lucide-react';
+import { Modal } from '../../components/Modal';
+import { useAuth } from '../../auth/useAuth';
 import { StageChip } from '../../components/Badge';
 import { Avatar } from '../../components/Card';
 import { Button } from '../../components/Button';
@@ -13,10 +16,65 @@ import { cn } from '../../lib/utils/cn';
 
 export function IRCAppliedPage() {
   const navigate   = useNavigate();
-  const [projectId, setProjectId] = useState<number | null>(null);
-  const [stage,     setStage]     = useState('');
-  const [page,      setPage]      = useState(1);
-  const [sortKey,   setSortKey]   = useState<'appliedDate' | 'matchPct'>('appliedDate');
+  const { user }   = useAuth();
+  const qc         = useQueryClient();
+  const fileRef    = useRef<HTMLInputElement>(null);
+  const [projectId,   setProjectId]   = useState<number | null>(null);
+  const [stage,       setStage]       = useState('');
+  const [page,        setPage]        = useState(1);
+  const [sortKey,     setSortKey]     = useState<'appliedDate' | 'matchPct'>('appliedDate');
+  const [importModal, setImportModal] = useState(false);
+  const [importRows,  setImportRows]  = useState<Array<{ employeeId: number; ircId: number; error?: string; done?: boolean }>>([]);
+  const [importing,   setImporting]   = useState(false);
+  const [importError, setImportError] = useState('');
+
+  function handleCsvFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    if (!file.name.endsWith('.csv')) { setImportError('Only .csv files are accepted.'); setImportModal(true); return; }
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const lines = (ev.target?.result as string).split(/\r?\n/).filter(Boolean);
+      const header = lines[0]?.toLowerCase().split(',').map(h => h.trim());
+      const eIdx = header?.indexOf('employeeid') ?? -1;
+      const iIdx = header?.indexOf('ircid') ?? -1;
+      if (eIdx < 0 || iIdx < 0) {
+        setImportError('CSV must have "employeeId" and "ircId" columns.');
+        setImportRows([]);
+        setImportModal(true);
+        return;
+      }
+      const rows = lines.slice(1).map(line => {
+        const cols = line.split(',').map(c => c.trim());
+        const employeeId = Number(cols[eIdx]);
+        const ircId      = Number(cols[iIdx]);
+        if (!employeeId || !ircId) return { employeeId, ircId, error: 'Invalid row: non-numeric id' };
+        return { employeeId, ircId };
+      });
+      setImportError('');
+      setImportRows(rows);
+      setImportModal(true);
+    };
+    reader.readAsText(file);
+  }
+
+  async function handleImport() {
+    setImporting(true);
+    const updated = [...importRows];
+    for (let i = 0; i < updated.length; i++) {
+      if (updated[i].error) continue;
+      try {
+        await pipelineApi.shortlist(updated[i].employeeId, updated[i].ircId);
+        updated[i] = { ...updated[i], done: true };
+      } catch (err: any) {
+        updated[i] = { ...updated[i], error: err?.response?.data?.message ?? 'Failed' };
+      }
+      setImportRows([...updated]);
+    }
+    setImporting(false);
+    qc.invalidateQueries({ queryKey: ['pipeline'] });
+  }
 
   const projectsQ = useQuery({ queryKey: ['projects'], queryFn: () => projectsApi.list() });
 
@@ -70,6 +128,14 @@ export function IRCAppliedPage() {
           <Button variant={sortKey === 'matchPct' ? 'primary' : 'secondary'} size="sm" onClick={() => setSortKey('matchPct')}>
             By match %
           </Button>
+          {user?.role === 'hr' && (
+            <>
+              <input ref={fileRef} type="file" accept=".csv" className="hidden" onChange={handleCsvFile} />
+              <Button variant="secondary" size="sm" onClick={() => fileRef.current?.click()} className="flex items-center gap-1.5">
+                <Upload size={13} /> Import
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
@@ -132,6 +198,50 @@ export function IRCAppliedPage() {
       {meta && meta.pages > 1 && (
         <Pagination page={meta.page} pages={meta.pages} onChange={setPage} />
       )}
+      {/* CSV import modal — HR only */}
+      <Modal open={importModal} onClose={() => { if (!importing) setImportModal(false); }} title="Import pipeline entries from CSV">
+        {importError ? (
+          <p className="mb-4 text-sm text-power-orange">{importError}</p>
+        ) : (
+          <>
+            <p className="mb-3 text-xs text-[var(--fg-3)]">
+              Required columns: <code className="bg-culture-gray px-1">employeeId</code>, <code className="bg-culture-gray px-1">ircId</code>
+            </p>
+            <div className="mb-4 max-h-48 overflow-y-auto rounded-lg border border-[var(--border-subtle)]">
+              <table className="w-full text-xs">
+                <thead className="bg-culture-gray text-secure-gray">
+                  <tr>
+                    <th className="px-3 py-2 text-left">Employee ID</th>
+                    <th className="px-3 py-2 text-left">IRC ID</th>
+                    <th className="px-3 py-2 text-left">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--border-subtle)]">
+                  {importRows.map((row, i) => (
+                    <tr key={i} className={row.error ? 'bg-power-orange/5' : row.done ? 'bg-commerce-green/5' : ''}>
+                      <td className="px-3 py-1.5">{row.employeeId}</td>
+                      <td className="px-3 py-1.5">{row.ircId}</td>
+                      <td className="px-3 py-1.5">
+                        {row.error ? <span className="text-power-orange">{row.error}</span>
+                          : row.done ? <span className="text-commerce-green">✓ Added</span>
+                          : <span className="text-[var(--fg-3)]">Pending</span>}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+        <div className="flex justify-end gap-2">
+          <Button variant="secondary" size="sm" disabled={importing} onClick={() => setImportModal(false)}>Close</Button>
+          {!importError && importRows.some(r => !r.error && !r.done) && (
+            <Button size="sm" disabled={importing} onClick={handleImport}>
+              {importing ? 'Importing…' : `Import ${importRows.filter(r => !r.error).length} row(s)`}
+            </Button>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 }
