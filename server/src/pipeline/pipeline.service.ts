@@ -128,6 +128,17 @@ export class PipelineService {
       include: ENTRY_INCLUDE,
     });
 
+    // Write history row for every stage transition
+    await this.prisma.pipelineStageHistory.create({
+      data: {
+        pipelineCandidateId: id,
+        fromStage:   entry.stage,
+        toStage:     dto.stage,
+        changedById: user.sub,
+        reason:      dto.direction === 'backward' ? (dto.note ?? null) : null,
+      },
+    });
+
     await this.notify(
       entry.irc.project.managerId,
       user.sub,
@@ -148,6 +159,15 @@ export class PipelineService {
       }),
       this.prisma.notFitFeedback.create({
         data: { pipelineCandidateId: id, reason: dto.reason },
+      }),
+      this.prisma.pipelineStageHistory.create({
+        data: {
+          pipelineCandidateId: id,
+          fromStage:   entry.stage,
+          toStage:     'Rejected',
+          changedById: user.sub,
+          reason:      dto.reason,
+        },
       }),
     ]);
 
@@ -200,6 +220,15 @@ export class PipelineService {
     await this.findActiveEntry(id, user);
     return this.prisma.feedbackRound.create({
       data: { pipelineCandidateId: id, ...dto },
+    });
+  }
+
+  async getStageHistory(id: number, user: JwtPayload) {
+    await this.findActiveEntry(id, user);
+    return this.prisma.pipelineStageHistory.findMany({
+      where: { pipelineCandidateId: id },
+      include: { changedBy: { select: { name: true, role: true } } },
+      orderBy: { changedAt: 'desc' },
     });
   }
 

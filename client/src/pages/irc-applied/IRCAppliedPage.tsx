@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Upload } from 'lucide-react';
+import { Upload, History } from 'lucide-react';
 import { Modal } from '../../components/Modal';
 import { useAuth } from '../../auth/useAuth';
 import { StageChip } from '../../components/Badge';
@@ -24,6 +24,7 @@ export function IRCAppliedPage() {
   const [page,        setPage]        = useState(1);
   const [sortKey,     setSortKey]     = useState<'appliedDate' | 'matchPct'>('appliedDate');
   const [importModal, setImportModal] = useState(false);
+  const [historyId,   setHistoryId]   = useState<number | null>(null);
   const [importRows,  setImportRows]  = useState<Array<{ employeeId: number; ircId: number; error?: string; done?: boolean }>>([]);
   const [importing,   setImporting]   = useState(false);
   const [importError, setImportError] = useState('');
@@ -186,7 +187,13 @@ export function IRCAppliedPage() {
                     ) : '—'}
                   </td>
                   <td className="px-4 py-3">
-                    <Button size="sm" variant="ghost" onClick={() => navigate(`/employees/${e.employee.id}`)}>Profile</Button>
+                    <div className="flex gap-1.5">
+                      <Button size="sm" variant="ghost" onClick={() => navigate(`/employees/${e.employee.id}`)}>Profile</Button>
+                      <Button size="sm" variant="ghost" onClick={() => setHistoryId(e.id)}
+                        className="flex items-center gap-1" title="Stage history">
+                        <History size={12} />
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -242,6 +249,46 @@ export function IRCAppliedPage() {
           )}
         </div>
       </Modal>
+
+      {/* Stage history modal */}
+      {historyId !== null && (
+        <StageHistoryModal id={historyId} onClose={() => setHistoryId(null)} />
+      )}
     </div>
+  );
+}
+
+function StageHistoryModal({ id, onClose }: { id: number; onClose: () => void }) {
+  const q = useQuery({
+    queryKey: ['stage-history', id],
+    queryFn:  () => pipelineApi.getHistory(id),
+  });
+  return (
+    <Modal open title="Stage history" onClose={onClose}>
+      {q.isPending && <Spinner />}
+      {q.isError   && <p className="text-sm text-power-orange">Failed to load history.</p>}
+      {q.data?.length === 0 && <p className="text-sm text-[var(--fg-3)]">No stage changes recorded yet.</p>}
+      {q.data && q.data.length > 0 && (
+        <div className="space-y-3">
+          {q.data.map(h => (
+            <div key={h.id} className="flex items-start gap-3">
+              <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-celestial-blue" />
+              <div className="text-sm">
+                <p className="font-medium text-network-blue">
+                  {h.fromStage} → {h.toStage}
+                </p>
+                <p className="text-xs text-[var(--fg-3)]">
+                  {h.changedBy.name} · {new Date(h.changedAt).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                </p>
+                {h.reason && <p className="mt-0.5 text-xs text-secure-gray">Reason: {h.reason}</p>}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      <div className="mt-4 flex justify-end">
+        <Button variant="secondary" size="sm" onClick={onClose}>Close</Button>
+      </div>
+    </Modal>
   );
 }

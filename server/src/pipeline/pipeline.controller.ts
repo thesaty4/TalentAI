@@ -84,6 +84,16 @@ export class PipelineController {
     return this.pipelineService.getFeedback(id, user);
   }
 
+  @Get(':id/history')
+  @ApiOperation({ summary: 'Stage transition history for a pipeline entry' })
+  @ApiParam({ name: 'id', type: Number })
+  getStageHistory(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.pipelineService.getStageHistory(id, user);
+  }
+
   @Post(':id/feedback')
   @ApiOperation({ summary: 'Add a feedback/interview round — R17' })
   @ApiParam({ name: 'id', type: Number })

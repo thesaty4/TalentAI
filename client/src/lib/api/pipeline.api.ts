@@ -13,6 +13,15 @@ export interface PipelineMeta { total: number; page: number; limit: number; page
 
 export interface PipelinePage { data: PipelineEntry[]; meta: PipelineMeta; }
 
+export interface StageHistoryEntry {
+  id:          number;
+  fromStage:   string;
+  toStage:     string;
+  changedAt:   string;
+  reason:      string | null;
+  changedBy:   { name: string; role: string };
+}
+
 export interface UpdateStageDto {
   stage:     string;
   direction: 'forward' | 'backward';
@@ -31,4 +40,7 @@ export const pipelineApi = {
 
   notFit: (id: number, reason: string) =>
     apiClient.post(`/pipeline/${id}/not-fit`, { reason }).then(r => r.data),
+
+  getHistory: (id: number) =>
+    apiClient.get<{ data: StageHistoryEntry[] }>(`/pipeline/${id}/history`).then(r => r.data.data),
 };

@@ -23,6 +23,7 @@ model User {
   projects      Project[]
   notifications Notification[]
   searchLogs    SearchLog[]
+  stageHistory  PipelineStageHistory[]
 }
 
 enum Role {
@@ -145,6 +146,7 @@ model PipelineCandidate {
 
   feedbackRounds FeedbackRound[]
   notFitFeedback NotFitFeedback[]
+  stageHistory   PipelineStageHistory[]
 
   // Only one ACTIVE record per (employee, IRC) — R4
   @@unique([employeeId, ircId, isActive])
@@ -190,4 +192,16 @@ model NotFitFeedback {
   pipelineCandidateId Int
   reason              String
   createdAt           DateTime          @default(now())
+}
+
+model PipelineStageHistory {
+  id                  Int               @id @default(autoincrement())
+  pipelineCandidate   PipelineCandidate @relation(fields: [pipelineCandidateId], references: [id], onDelete: Cascade)
+  pipelineCandidateId Int
+  fromStage           String
+  toStage             String
+  changedBy           User              @relation(fields: [changedById], references: [id])
+  changedById         Int
+  changedAt           DateTime          @default(now())
+  reason              String?
 }
