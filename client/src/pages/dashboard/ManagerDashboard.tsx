@@ -67,6 +67,7 @@ function ProjectRow({ project, pipelineCount }: { project: Project; pipelineCoun
 // ─── Manager Dashboard ────────────────────────────────────────────────────────
 
 export function ManagerDashboard() {
+  const navigate                                          = useNavigate();
   const { user }                                          = useAuth();
   const { projectsQ, pipelineQ, projects, kpis, funnel, pipelinePerProject } = useDashboard();
 
@@ -94,7 +95,10 @@ export function ManagerDashboard() {
       <div className="grid gap-6 lg:grid-cols-2">
         <HiringFunnel funnel={funnel} />
         <Card>
-          <h3 className="border-b border-[var(--border-subtle)] px-5 py-3 text-sm font-semibold text-network-blue">Active projects</h3>
+          <h3 className="border-b border-[var(--border-subtle)] px-5 py-3 text-sm font-semibold text-network-blue flex items-center justify-between">
+            Active projects
+            <Button variant="ghost" size="sm" onClick={() => navigate('/projects')} className="text-xs text-celestial-blue">View all</Button>
+          </h3>
           {projects.length === 0
             ? <EmptyState title="No projects assigned" />
             : projects.map(p => (

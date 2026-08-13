@@ -62,6 +62,7 @@ function ProjectRow({ project, pipelineCount }: { project: Project; pipelineCoun
 
 export function HRDashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { projectsQ, pipelineQ, projects, kpis, funnel, pipelinePerProject } = useDashboard();
 
   const benchQ = useQuery({ queryKey: ['pool', 'bench'],     queryFn: () => poolApi.count('Bench') });
@@ -97,7 +98,10 @@ export function HRDashboard() {
       <div className="grid gap-6 lg:grid-cols-2">
         <HiringFunnel funnel={funnel} />
         <Card>
-          <h3 className="border-b border-[var(--border-subtle)] px-5 py-3 text-sm font-semibold text-network-blue">All projects</h3>
+          <h3 className="border-b border-[var(--border-subtle)] px-5 py-3 text-sm font-semibold text-network-blue flex items-center justify-between">
+            All projects
+            <Button variant="ghost" size="sm" onClick={() => navigate('/projects')} className="text-xs text-celestial-blue">View all</Button>
+          </h3>
           {projects.length === 0
             ? <EmptyState title="No projects found" />
             : projects.map(p => <ProjectRow key={p.id} project={p} pipelineCount={pipelinePerProject.get(p.id) ?? 0} />)}
