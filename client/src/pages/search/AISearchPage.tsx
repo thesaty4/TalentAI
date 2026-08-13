@@ -19,6 +19,7 @@ export function AISearchPage() {
   const [scope,   setScope]   = useState<'all' | 'applied'>('all');
   const [jdFile,       setJdFile]       = useState<File | null>(null);
   const [profileId,    setProfileId]    = useState<number | null>(null);
+  const [resultLimit,  setResultLimit]  = useState<5 | 10 | null>(null);
 
   const projectsQ = useQuery({
     queryKey: ['projects'],
@@ -46,6 +47,7 @@ export function AISearchPage() {
 
   function handleSubmit() {
     if (!selectedIrc) return;
+    setResultLimit(null);
     if (jdFile) {
       // User attached a JD — run the JD-aware search path
       uploadJd({ ircId: selectedIrc, scope, file: jdFile, query: query.trim() || undefined });
@@ -115,23 +117,39 @@ export function AISearchPage() {
         )}
 
         {/* Results */}
-        {!isPending && results && results.length > 0 && (
-          <div className="space-y-4">
-            <p className="text-sm text-[var(--fg-3)]">
-              {results.length} candidate{results.length !== 1 ? 's' : ''} matched
-              {jdFilename && <span className="ml-1 text-celestial-blue">· JD: {jdFilename}</span>}
-            </p>
-            {results.map(r => (
-              <ResultCard
-                key={r.employeeId}
-                result={r}
-                ircId={selectedIrc!}
-                onShortlisted={handleShortlisted}
-                onViewProfile={setProfileId}
-              />
-            ))}
-          </div>
-        )}
+        {!isPending && results && results.length > 0 && (() => {
+          const visible = resultLimit ? results.slice(0, resultLimit) : results;
+          return (
+            <div className="space-y-4">
+              {/* Result count + limit filter */}
+              <div className="flex items-center gap-3">
+                <p className="text-sm text-[var(--fg-3)]">
+                  {results.length} candidate{results.length !== 1 ? 's' : ''} matched
+                  {jdFilename && <span className="ml-1 text-celestial-blue">· JD: {jdFilename}</span>}
+                </p>
+                <div className="ml-auto flex gap-1">
+                  {([5, 10, null] as const).map(n => (
+                    <button key={String(n)} onClick={() => setResultLimit(n)}
+                      className={`rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors ${
+                        resultLimit === n ? 'bg-network-blue text-white' : 'bg-level-gray text-secure-gray hover:bg-culture-gray'
+                      }`}>
+                      {n === null ? 'All' : `Top ${n}`}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {visible.map(r => (
+                <ResultCard
+                  key={r.employeeId}
+                  result={r}
+                  ircId={selectedIrc!}
+                  onShortlisted={handleShortlisted}
+                  onViewProfile={setProfileId}
+                />
+              ))}
+            </div>
+          );
+        })()}
       </div>
     </div>
 
