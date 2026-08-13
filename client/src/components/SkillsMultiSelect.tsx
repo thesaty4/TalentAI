@@ -39,19 +39,24 @@ export function SkillsMultiSelect({ selected, onChange, placeholder = 'Search sk
 
   return (
     <div ref={containerRef} className="relative">
-      {/* Trigger / selected chip row */}
+      {/* Trigger: shows first few chips + overflow count + search input */}
       <div
-        className="flex min-h-[36px] w-full cursor-text flex-wrap gap-1 rounded-lg border border-[var(--border-default)] px-2 py-1 focus-within:border-celestial-blue"
+        className="flex max-h-[34px] w-full cursor-text items-center gap-1 overflow-hidden rounded-lg border border-[var(--border-default)] px-2 py-1 focus-within:border-celestial-blue"
         onClick={() => setOpen(true)}
       >
-        {selected.map(s => (
-          <span key={s} className="flex items-center gap-0.5 rounded-full bg-celestial-blue/10 px-2 py-0.5 text-[10px] font-medium text-celestial-blue">
+        {selected.slice(0, 3).map(s => (
+          <span key={s} className="flex shrink-0 items-center gap-0.5 rounded-full bg-celestial-blue/10 px-2 py-0.5 text-[10px] font-medium text-celestial-blue">
             {s}
             <button type="button" onClick={e => { e.stopPropagation(); toggle(s); }} className="hover:text-power-orange">
               <X size={9} />
             </button>
           </span>
         ))}
+        {selected.length > 3 && (
+          <span className="shrink-0 rounded-full bg-level-gray px-2 py-0.5 text-[10px] text-secure-gray">
+            +{selected.length - 3}
+          </span>
+        )}
         <input
           className="min-w-[6rem] flex-1 bg-transparent text-sm outline-none placeholder:text-[var(--fg-3)]"
           placeholder={selected.length === 0 ? placeholder : ''}
