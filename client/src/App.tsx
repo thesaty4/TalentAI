@@ -10,6 +10,7 @@ import { PipelinePage } from './pages/pipeline/PipelinePage';
 import { ResourcePoolPage } from './pages/pool/ResourcePoolPage';
 import { IRCAppliedPage } from './pages/irc-applied/IRCAppliedPage';
 import { AllProjectsPage } from './pages/projects/AllProjectsPage';
+import { ProjectDetailPage } from './pages/projects/ProjectDetailPage';
 import { CandidateProfilePage } from './pages/employees/CandidateProfilePage';
 import { OpenIRCsPage } from './pages/candidate/OpenIRCsPage';
 import { MyPipelinePage } from './pages/candidate/MyPipelinePage';
@@ -33,6 +34,7 @@ export function App() {
           <Route path="/pool"           element={<ResourcePoolPage />} />
           <Route path="/irc-applied"    element={<IRCAppliedPage />} />
           <Route path="/projects"       element={<AllProjectsPage />} />
+          <Route path="/projects/:id"   element={<ProjectDetailPage />} />
           <Route path="/employees/:id"  element={<CandidateProfilePage />} />
           <Route path="/open-ircs"      element={<OpenIRCsPage />} />
           <Route path="/my-pipeline"    element={<MyPipelinePage />} />

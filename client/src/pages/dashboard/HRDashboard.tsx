@@ -40,8 +40,8 @@ function ProjectRow({ project, pipelineCount }: { project: Project; pipelineCoun
   const startDate = project.startDate ? new Date(project.startDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
   return (
     <div className="flex flex-col gap-2 border-b border-[var(--border-subtle)] px-5 py-4 last:border-0 sm:flex-row sm:items-center sm:justify-between">
-      <div className="min-w-0 flex-1">
-        <p className="truncate font-medium text-network-blue">{project.name}</p>
+      <div className="min-w-0 flex-1 cursor-pointer" onClick={() => navigate(`/projects/${project.id}`)}>
+        <p className="truncate font-medium text-network-blue hover:text-celestial-blue">{project.name}</p>
         <p className="text-xs text-[var(--fg-3)]">{project.customer} · starts {startDate}</p>
         <div className="mt-1.5 flex flex-wrap gap-1">
           {project.ircs.map(irc => (

@@ -16,6 +16,8 @@ export interface Project {
 }
 
 export const projectsApi = {
-  list: (params?: Record<string, unknown>) =>
+  list:   (params?: Record<string, unknown>) =>
     apiClient.get<{ data: Project[] }>('/projects', { params }).then(r => r.data.data),
+  getOne: (id: number) =>
+    apiClient.get<{ data: Project }>(`/projects/${id}`).then(r => r.data.data),
 };
