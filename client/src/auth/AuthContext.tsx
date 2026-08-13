@@ -1,12 +1,7 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useEffect, useState } from 'react';
+import type { JwtUser } from '../lib/api/auth.api';
 
-export interface JwtUser {
-  id:          number;
-  name:        string;
-  email:       string;
-  role:        'manager' | 'hr' | 'candidate';
-  employeeId?: number | null;
-}
+export type { JwtUser };
 
 interface AuthContextValue {
   user:            JwtUser | null;
