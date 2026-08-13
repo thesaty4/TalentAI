@@ -7,6 +7,10 @@
     "start": "node dist/main",
     "start:dev": "nest start --watch",
     "dev": "nest start --watch",
+    "prisma:studio": "prisma studio --port 5555",
+    "db:migrate": "prisma migrate dev --name init",
+    "db:seed": "prisma db seed",
+    "db:reset:seed": "prisma migrate reset --force && prisma db seed",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
     "test": "jest"
   },

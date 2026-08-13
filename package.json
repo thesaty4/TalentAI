@@ -5,8 +5,11 @@
   "description": "TalentLens AI — Fortis hackathon demo for internal talent matching",
   "scripts": {
     "dev": "concurrently -k -p \"[{name}]\" -n \"SERVER,CLIENT\" -c \"cyan,magenta\" \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
+    "dev:backend": "concurrently -k -p \"[{name}]\" -n \"SERVER,STUDIO\" -c \"cyan,yellow\" \"npm run dev --prefix server\" \"npm run prisma:studio --prefix server\"",
     "install:all": "npm install && npm install --prefix server && npm install --prefix client",
-    "setup-db": "cd server && npx prisma migrate dev --name init && npx prisma db seed"
+    "setup-db": "cd server && npx prisma migrate dev --name init && npx prisma db seed",
+    "db:migrate": "npm run db:migrate --prefix server",
+    "db:seed": "npm run db:seed --prefix server"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
