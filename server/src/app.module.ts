@@ -8,6 +8,8 @@ import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
 import { ProjectsModule } from './projects/projects.module';
 import { IrcsModule } from './ircs/ircs.module';
+import { PoolModule } from './pool/pool.module';
+import { EmployeesModule } from './employees/employees.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 
@@ -31,6 +33,8 @@ import { RolesGuard } from './common/guards/roles.guard';
     AuthModule,
     ProjectsModule,
     IrcsModule,
+    PoolModule,
+    EmployeesModule,
     // Feature modules added in later specs
   ],
   providers: [
