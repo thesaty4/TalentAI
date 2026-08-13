@@ -6,6 +6,8 @@ import configuration from './config/configuration';
 import { PrismaModule } from './prisma/prisma.module';
 import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
+import { ProjectsModule } from './projects/projects.module';
+import { IrcsModule } from './ircs/ircs.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 
@@ -27,6 +29,8 @@ import { RolesGuard } from './common/guards/roles.guard';
     PrismaModule,
     HealthModule,
     AuthModule,
+    ProjectsModule,
+    IrcsModule,
     // Feature modules added in later specs
   ],
   providers: [
