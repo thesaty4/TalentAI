@@ -1,0 +1,8 @@
+{
+  "servers": {
+    "TalentAI Docs": {
+      "type": "sse",
+      "url": "https://gitmcp.io/thesaty4/TalentAI"
+    }
+  }
+}

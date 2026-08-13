@@ -1,214 +1,375 @@
-import { useMutation } from '@tanstack/react-query';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../auth/useAuth';
-import { Button } from '../../components/Button';
-import { ErrorBanner } from '../../components/Feedback';
-import { authApi, type JwtUser } from '../../lib/api/auth.api';
-import { cn } from '../../lib/utils/cn';
+import { useMutation } from "@tanstack/react-query";
+import { Eye, EyeOff, Check } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../auth/useAuth";
+import { authApi, type JwtUser } from "../../lib/api/auth.api";
 
-// Backend can return message as string or string[] (class-validator)
-function toMsg(err: unknown): string {
-  const raw = (err as any)?.response?.data?.message;
-  return Array.isArray(raw) ? raw[0] : (raw ?? 'Something went wrong');
+// ─── Theme (teal + dark-slate — scoped to auth screen only) ──────────────────
+const C = {
+  accentTeal:  "#3B6E64",
+  accentHover: "#2C4A44",
+  heroBg:      "#1B2430",
+  danger:      "#C1502E",
+  pageBg:      "#F5F6F8",
+  subtleBg:    "#E7EFEC",
+  fg1:         "#1B2430",
+  fg2:         "#333D4A",
+  fg3:         "#8891A0",
+  onDark2:     "#B7C1C8",
+  border:      "#D3D7DC",
+  borderSub:   "#E3E5E9",
+  focusRing:   "0 0 0 3px rgba(59,110,100,0.35)",
+} as const;
+
+// ─── Shared input style ───────────────────────────────────────────────────────
+function inputStyle(hasError: boolean): React.CSSProperties {
+  return {
+    width: "100%", padding: "10px 12px", border: `1px solid ${hasError ? C.danger : C.border}`,
+    borderRadius: 8, fontSize: 14, color: C.fg1, outline: "none", boxSizing: "border-box" as const,
+    backgroundColor: "#fff",
+  };
 }
 
-// ─── Login form ───────────────────────────────────────────────────────────────
-
-function LoginForm({ onSuccess }: { onSuccess: (token: string, user: JwtUser) => void }) {
-  const [email,    setEmail]    = useState('');
-  const [password, setPassword] = useState('');
-  const [show,     setShow]     = useState(false);
-
-  const { mutate, isPending, error } = useMutation({
-    mutationFn: () => authApi.login({ email, password }),
-    onSuccess:  ({ token, user }) => onSuccess(token, user),
-  });
-
+// ─── Field wrapper with label + inline error ──────────────────────────────────
+function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
   return (
-    <form onSubmit={e => { e.preventDefault(); mutate(); }} className="space-y-4">
-      {error && <ErrorBanner message={toMsg(error)} />}
-      <div>
-        <label className="mb-1 block text-sm font-medium text-secure-gray">Work email</label>
-        <input
-          type="email" required value={email} onChange={e => setEmail(e.target.value)}
-          className="w-full rounded-lg border border-[var(--border-default)] px-3 py-2 text-sm focus:border-celestial-blue focus:outline-none"
-        />
-      </div>
-      <div>
-        <label className="mb-1 block text-sm font-medium text-secure-gray">Password</label>
-        <div className="relative">
-          <input
-            type={show ? 'text' : 'password'} required value={password}
-            onChange={e => setPassword(e.target.value)}
-            className="w-full rounded-lg border border-[var(--border-default)] px-3 py-2 pr-9 text-sm focus:border-celestial-blue focus:outline-none"
-          />
-          <button type="button" onClick={() => setShow(s => !s)}
-            className="absolute right-2.5 top-2.5 text-[var(--fg-3)]">
-            {show ? <EyeOff size={16} /> : <Eye size={16} />}
-          </button>
-        </div>
-        <a href="#" className="mt-1 block text-right text-xs text-celestial-blue hover:underline">Forgot password?</a>
-      </div>
-      <Button type="submit" className="w-full" disabled={isPending}>
-        {isPending ? <Loader2 size={16} className="animate-spin" /> : 'Log in'}
-      </Button>
-    </form>
-  );
-}
-
-// ─── Sign-up form ─────────────────────────────────────────────────────────────
-
-function SignupForm({ onSuccess }: { onSuccess: (token: string, user: JwtUser) => void }) {
-  const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '', role: 'manager' as const, terms: false });
-  const [validErr, setValidErr] = useState('');
-
-  const { mutate, reset, isPending, error } = useMutation({
-    mutationFn: () => authApi.signup({ name: form.name, email: form.email, password: form.password, role: form.role }),
-    onSuccess:  ({ token, user }) => onSuccess(token, user),
-  });
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setValidErr('');
-    reset(); // clear any previous API error before client-side checks
-    if (form.password !== form.confirm) return setValidErr('Passwords do not match');
-    if (!form.terms) return setValidErr('You must agree to the terms of service');
-    mutate();
-  }
-
-  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
-    setForm(f => ({ ...f, [k]: e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value }));
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {(validErr || error) && (
-        <ErrorBanner message={validErr || toMsg(error)} />
-      )}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div>
-          <label className="mb-1 block text-sm font-medium text-secure-gray">Full name</label>
-          <input required value={form.name} onChange={set('name')}
-            className="w-full rounded-lg border border-[var(--border-default)] px-3 py-2 text-sm focus:border-celestial-blue focus:outline-none" />
-        </div>
-        <div>
-          <label className="mb-1 block text-sm font-medium text-secure-gray">Role</label>
-          <select value={form.role} onChange={set('role')}
-            className="w-full rounded-lg border border-[var(--border-default)] px-3 py-2 text-sm focus:border-celestial-blue focus:outline-none">
-            <option value="manager">Manager</option>
-            <option value="hr">HR</option>
-            <option value="candidate">Candidate</option>
-          </select>
-        </div>
-      </div>
-      <div>
-        <label className="mb-1 block text-sm font-medium text-secure-gray">Work email</label>
-        <input type="email" required value={form.email} onChange={set('email')}
-          className="w-full rounded-lg border border-[var(--border-default)] px-3 py-2 text-sm focus:border-celestial-blue focus:outline-none" />
-      </div>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div>
-          <label className="mb-1 block text-sm font-medium text-secure-gray">Password</label>
-          <input type="password" required minLength={8} value={form.password} onChange={set('password')}
-            className="w-full rounded-lg border border-[var(--border-default)] px-3 py-2 text-sm focus:border-celestial-blue focus:outline-none" />
-        </div>
-        <div>
-          <label className="mb-1 block text-sm font-medium text-secure-gray">Confirm password</label>
-          <input type="password" required value={form.confirm} onChange={set('confirm')}
-            className="w-full rounded-lg border border-[var(--border-default)] px-3 py-2 text-sm focus:border-celestial-blue focus:outline-none" />
-        </div>
-      </div>
-      <label className="flex items-center gap-2 text-sm text-secure-gray">
-        <input type="checkbox" checked={form.terms} onChange={set('terms')} className="rounded" />
-        I agree to the terms of service
+    <div style={{ marginBottom: 14 }}>
+      <label style={{ display: "block", marginBottom: 6, fontSize: 13, fontWeight: 500, color: C.fg2 }}>
+        {label} <span style={{ color: C.danger }}>*</span>
       </label>
-      <Button type="submit" className="w-full" disabled={isPending}>
-        {isPending ? <Loader2 size={16} className="animate-spin" /> : 'Create account'}
-      </Button>
-    </form>
+      {children}
+      {error && <p style={{ marginTop: 4, fontSize: 12, color: C.danger }}>{error}</p>}
+    </div>
   );
 }
 
-// ─── Demo login block ─────────────────────────────────────────────────────────
-
-function DemoBlock({ onSuccess }: { onSuccess: (token: string, user: JwtUser) => void }) {
-  const [loading, setLoading] = useState<string | null>(null);
-  const [error,   setError]   = useState('');
-
-  async function handleDemo(role: 'manager' | 'hr' | 'candidate') {
-    setLoading(role); setError('');
-    try {
-      const { token, user } = await authApi.demoLogin(role);
-      onSuccess(token, user);
-    } catch {
-      setError('Demo login failed. Is the server running?');
-    } finally { setLoading(null); }
-  }
-
+// ─── Hero (left pane) ─────────────────────────────────────────────────────────
+function HeroPane() {
+  const benefits = [
+    "Evidence-backed talent matching",
+    "IRC-level staffing transparency",
+    "One workspace for candidates, managers, and HR",
+  ];
   return (
-    <div className="mt-6 rounded-xl border border-[var(--border-subtle)] bg-culture-gray p-4">
-      <p className="mb-3 text-center text-xs font-semibold uppercase tracking-wide text-[var(--fg-3)]">
-        Demo login (judging only)
+    <div style={{
+      flex: 1, minWidth: 380, maxWidth: 560, background: C.heroBg,
+      padding: "56px 60px", display: "flex", flexDirection: "column",
+    }} className="hero-pane">
+      {/* Logo */}
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 40 }}>
+        <div style={{
+          width: 34, height: 34, borderRadius: 9, background: C.accentTeal,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontWeight: 700, fontSize: 17, color: "#fff", fontFamily: "var(--font-display)",
+        }}>T</div>
+        <span style={{ color: "#fff", fontWeight: 600, fontSize: 18, fontFamily: "var(--font-display)" }}>
+          TalentLens AI
+        </span>
+      </div>
+      {/* Headline */}
+      <h1 style={{
+        color: "#fff", fontWeight: 600, fontSize: 34, lineHeight: 1.2, maxWidth: 420,
+        marginBottom: 14, fontFamily: "var(--font-display)",
+      }} className="hero-headline">
+        See talent clearly.<br />Move opportunities forward.
+      </h1>
+      {/* Subhead */}
+      <p style={{ color: C.onDark2, fontSize: 14.5, lineHeight: 1.6, maxWidth: 400, marginBottom: 26 }}>
+        TalentLens AI brings candidate evidence, staffing pipelines, and hiring progress into one focused workspace.
       </p>
-      {error && <p className="mb-2 text-center text-xs text-power-orange">{error}</p>}
-      <div className="grid grid-cols-3 gap-2">
-        {(['manager', 'hr', 'candidate'] as const).map(role => (
-          <Button key={role} variant="secondary" size="sm"
-            disabled={loading !== null} onClick={() => handleDemo(role)}
-            className="flex items-center justify-center gap-1 capitalize">
-            {loading === role ? <Loader2 size={12} className="animate-spin" /> : null}
-            {role}
-          </Button>
+      {/* Benefits */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 28 }}>
+        {benefits.map(b => (
+          <div key={b} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{
+              width: 20, height: 20, borderRadius: "50%", background: "rgba(59,110,100,0.45)",
+              display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+            }}>
+              <Check size={11} color="#fff" strokeWidth={3} />
+            </div>
+            <span style={{ color: "#fff", fontSize: 13.5 }}>{b}</span>
+          </div>
+        ))}
+      </div>
+      {/* Decorative cards (desktop only) */}
+      <div className="hero-cards" style={{ display: "flex", alignItems: "center", gap: 0 }}>
+        {[0, 1, 2].map(i => (
+          <div key={i} style={{ display: "flex", alignItems: "center" }}>
+            <div style={{
+              width: 68, height: 86, border: "1px solid rgba(255,255,255,0.22)", borderRadius: 10,
+              background: "rgba(255,255,255,0.05)", padding: 10, display: "flex", flexDirection: "column", gap: 6,
+            }}>
+              <div style={{ width: 20, height: 20, borderRadius: "50%", background: "rgba(59,110,100,0.55)" }} />
+              <div style={{ height: 5, borderRadius: 3, background: "rgba(255,255,255,0.25)", width: "80%" }} />
+              <div style={{ height: 5, borderRadius: 3, background: "rgba(255,255,255,0.15)", width: "60%" }} />
+            </div>
+            {i < 2 && <div style={{ width: 24, height: 1, background: "rgba(255,255,255,0.22)" }} />}
+          </div>
         ))}
       </div>
     </div>
   );
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
+// ─── Login form ───────────────────────────────────────────────────────────────
+type DemoRole = "manager" | "hr" | "candidate";
 
+function LoginForm({ onSuccess }: { onSuccess: (t: string, u: JwtUser) => void }) {
+  const [email,     setEmail]     = useState("");
+  const [password,  setPassword]  = useState("");
+  const [showPwd,   setShowPwd]   = useState(false);
+  const [remember,  setRemember]  = useState(false);
+  const [demoRole,  setDemoRole]  = useState<DemoRole | null>(null);
+  const [errors,    setErrors]    = useState<Record<string, string>>({});
+
+  const loginMut = useMutation({
+    mutationFn: () => authApi.login({ email, password }),
+    onSuccess:  ({ token, user }) => onSuccess(token, user),
+    onError:    (e: any) => setErrors({ api: e?.response?.data?.message ?? "Invalid credentials" }),
+  });
+  const demoMut = useMutation({
+    mutationFn: (role: DemoRole) => authApi.demoLogin(role),
+    onSuccess:  ({ token, user }) => onSuccess(token, user),
+    onError:    () => setErrors({ api: "Demo login failed. Is the server running?" }),
+  });
+
+  function validate() {
+    const errs: Record<string, string> = {};
+    if (!email.trim()) errs.email = "Email is required.";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = "Enter a valid email.";
+    if (!password) errs.password = "Password is required.";
+    else if (password.length < 6) errs.password = "Password must be at least 6 characters.";
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (validate()) loginMut.mutate();
+  }
+
+  const busy = loginMut.isPending || demoMut.isPending;
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {errors.api && <p style={{ marginBottom: 14, fontSize: 13, color: C.danger }}>{errors.api}</p>}
+      <Field label="Email address" error={errors.email}>
+        <input type="email" value={email} placeholder="you@globallogic.com"
+          onChange={e => setEmail(e.target.value)} style={inputStyle(!!errors.email)}
+          onFocus={e => Object.assign(e.target.style, { borderColor: C.accentTeal, boxShadow: C.focusRing })}
+          onBlur={e => Object.assign(e.target.style, { borderColor: errors.email ? C.danger : C.border, boxShadow: "none" })} />
+      </Field>
+      <Field label="Password" error={errors.password}>
+        <div style={{ position: "relative" }}>
+          <input type={showPwd ? "text" : "password"} value={password}
+            onChange={e => setPassword(e.target.value)}
+            style={{ ...inputStyle(!!errors.password), paddingRight: 38 }}
+            onFocus={e => Object.assign(e.target.style, { borderColor: C.accentTeal, boxShadow: C.focusRing })}
+            onBlur={e => Object.assign(e.target.style, { borderColor: errors.password ? C.danger : C.border, boxShadow: "none" })} />
+          <button type="button" onClick={() => setShowPwd(s => !s)} style={{
+            position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)",
+            background: "none", border: "none", cursor: "pointer", color: C.fg3, padding: 0,
+          }}>{showPwd ? <EyeOff size={16} /> : <Eye size={16} />}</button>
+        </div>
+      </Field>
+      {/* Remember me + Forgot */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+        <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: C.fg2, cursor: "pointer" }}>
+          <input type="checkbox" checked={remember} onChange={e => setRemember(e.target.checked)}
+            style={{ accentColor: C.accentTeal, width: 15, height: 15 }} />
+          Remember me
+        </label>
+        <a href="#" style={{ fontSize: 13, fontWeight: 600, color: C.accentTeal, textDecoration: "none" }}>
+          Forgot password?
+        </a>
+      </div>
+      {/* Demo login box */}
+      <div style={{ background: C.subtleBg, borderRadius: 10, padding: 14, marginBottom: 20 }}>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 5, marginBottom: 8 }}>
+          <span style={{ fontWeight: 700, fontSize: 11.5, textTransform: "uppercase" as const, letterSpacing: "0.03em", color: C.fg1 }}>
+            Login as
+          </span>
+          <span style={{ fontSize: 11.5, color: C.fg3 }}>(demo only)</span>
+        </div>
+        <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
+          {(["manager", "hr", "candidate"] as DemoRole[]).map(role => (
+            <button key={role} type="button" disabled={busy}
+              onClick={() => { setDemoRole(role); demoMut.mutate(role); }}
+              style={{
+                flex: 1, borderRadius: 7, padding: "7px 4px", fontSize: 12, fontWeight: 600,
+                cursor: "pointer", textTransform: "capitalize" as const,
+                background: demoRole === role && demoMut.isPending ? C.accentTeal : demoRole === role ? C.accentTeal : "#fff",
+                color: demoRole === role ? "#fff" : C.fg2,
+                border: `1px solid ${demoRole === role ? C.accentTeal : C.border}`,
+              }}>
+              {demoMut.isPending && demoRole === role ? "…" : role.charAt(0).toUpperCase() + role.slice(1)}
+            </button>
+          ))}
+        </div>
+        <p style={{ fontSize: 11.5, color: C.fg3 }}>Demo access — choose a role to preview the relevant workspace.</p>
+      </div>
+      {/* Submit */}
+      <button type="submit" disabled={busy} style={{
+        width: "100%", background: busy ? C.border : C.accentTeal, color: busy ? C.fg3 : "#fff",
+        border: "none", borderRadius: 9, padding: "12px", fontSize: 14.5, fontWeight: 600,
+        cursor: busy ? "not-allowed" : "pointer",
+      }}>{loginMut.isPending ? "Logging in…" : "Log in"}</button>
+    </form>
+  );
+}
+
+// ─── Signup form ──────────────────────────────────────────────────────────────
+function SignupForm({ onSuccess }: { onSuccess: (t: string, u: JwtUser) => void }) {
+  const [form,    setForm]    = useState({ name: "", email: "", password: "", confirm: "", role: "manager", terms: false });
+  const [showPwd, setShowPwd] = useState(false);
+  const [errors,  setErrors]  = useState<Record<string, string>>({});
+
+  const set = (k: string, v: string | boolean) => setForm(f => ({ ...f, [k]: v }));
+
+  const signupMut = useMutation({
+    mutationFn: () => authApi.signup({ name: form.name, email: form.email, password: form.password, role: form.role }),
+    onSuccess:  ({ token, user }) => onSuccess(token, user),
+    onError:    (e: any) => setErrors({ api: e?.response?.data?.message ?? "Signup failed" }),
+  });
+
+  function validate() {
+    const errs: Record<string, string> = {};
+    if (!form.name.trim()) errs.name = "Full name is required.";
+    if (!form.email.trim()) errs.email = "Work email is required.";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errs.email = "Enter a valid email.";
+    if (!form.password) errs.password = "Password is required.";
+    else if (form.password.length < 8) errs.password = "Use 8+ characters with a mix of letters and numbers.";
+    if (form.password !== form.confirm) errs.confirm = "Passwords do not match.";
+    if (!form.terms) errs.terms = "You must agree to the Terms of Service.";
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  }
+
+  function handleSubmit(e: React.FormEvent) { e.preventDefault(); if (validate()) signupMut.mutate(); }
+
+  const busy = signupMut.isPending;
+  const inputFocus = (e: React.FocusEvent<HTMLInputElement>) =>
+    Object.assign(e.target.style, { borderColor: C.accentTeal, boxShadow: C.focusRing });
+  const inputBlur = (key: string) => (e: React.FocusEvent<HTMLInputElement>) =>
+    Object.assign(e.target.style, { borderColor: errors[key] ? C.danger : C.border, boxShadow: "none" });
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {errors.api && <p style={{ marginBottom: 14, fontSize: 13, color: C.danger }}>{errors.api}</p>}
+      <Field label="Full name" error={errors.name}>
+        <input value={form.name} onChange={e => set("name", e.target.value)} style={inputStyle(!!errors.name)}
+          onFocus={inputFocus} onBlur={inputBlur("name")} />
+      </Field>
+      <Field label="Work email" error={errors.email}>
+        <input type="email" value={form.email} placeholder="you@globallogic.com"
+          onChange={e => set("email", e.target.value)} style={inputStyle(!!errors.email)}
+          onFocus={inputFocus} onBlur={inputBlur("email")} />
+      </Field>
+      <Field label="Password" error={errors.password}>
+        <div style={{ position: "relative" }}>
+          <input type={showPwd ? "text" : "password"} value={form.password}
+            onChange={e => set("password", e.target.value)}
+            style={{ ...inputStyle(!!errors.password), paddingRight: 38 }}
+            onFocus={inputFocus} onBlur={inputBlur("password")} />
+          <button type="button" onClick={() => setShowPwd(s => !s)} style={{
+            position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)",
+            background: "none", border: "none", cursor: "pointer", color: C.fg3, padding: 0,
+          }}>{showPwd ? <EyeOff size={16} /> : <Eye size={16} />}</button>
+        </div>
+        {!errors.password && (
+          <p style={{ marginTop: 4, fontSize: 12, color: C.fg3 }}>Use 8+ characters with a mix of letters and numbers.</p>
+        )}
+      </Field>
+      <Field label="Confirm password" error={errors.confirm}>
+        <input type="password" value={form.confirm} onChange={e => set("confirm", e.target.value)}
+          style={inputStyle(!!errors.confirm)} onFocus={inputFocus} onBlur={inputBlur("confirm")} />
+      </Field>
+      <div style={{ marginBottom: 20 }}>
+        <label style={{ display: "flex", alignItems: "flex-start", gap: 8, fontSize: 13, color: C.fg2, cursor: "pointer" }}>
+          <input type="checkbox" checked={form.terms} onChange={e => set("terms", e.target.checked)}
+            style={{ accentColor: C.accentTeal, width: 15, height: 15, marginTop: 1, flexShrink: 0 }} />
+          I agree to the Terms of Service and Privacy Policy.
+        </label>
+        {errors.terms && <p style={{ marginTop: 4, fontSize: 12, color: C.danger }}>{errors.terms}</p>}
+      </div>
+      <button type="submit" disabled={busy} style={{
+        width: "100%", background: busy ? C.border : C.accentTeal, color: busy ? C.fg3 : "#fff",
+        border: "none", borderRadius: 9, padding: "12px", fontSize: 14.5, fontWeight: 600,
+        cursor: busy ? "not-allowed" : "pointer",
+      }}>{busy ? "Creating account…" : "Create account"}</button>
+    </form>
+  );
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
 export function LoginPage() {
-  const [tab, setTab] = useState<'login' | 'signup'>('login');
+  const [tab, setTab] = useState<"login" | "signup">("login");
   const { login }     = useAuth();
   const navigate      = useNavigate();
 
   function handleSuccess(token: string, user: JwtUser) {
-    login(token, user);
-    navigate('/dashboard', { replace: true });
+    login(token, user); navigate("/dashboard", { replace: true });
   }
 
+  const tabHeadings = {
+    login:  { h: "Welcome back",         sub: "Sign in to continue to your TalentLens AI workspace." },
+    signup: { h: "Create your account",  sub: "Set up your TalentLens AI access in a few steps." },
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-culture-gray p-4">
-      <div className="w-full max-w-md">
-        {/* Logo */}
-        <div className="mb-6 flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-power-orange text-lg font-bold text-white">T</span>
-          <div>
-            <p className="font-display font-semibold text-network-blue">TalentLens AI</p>
-            <p className="text-xs text-[var(--fg-3)]">Internal Staffing Platform</p>
+    <>
+      <style>{`
+        .login-root { min-height: 100vh; display: flex; flex-direction: row; background: ${C.pageBg}; }
+        .hero-pane  { display: flex; }
+        .hero-cards { display: flex; }
+        @media (max-width: 920px) {
+          .login-root { flex-direction: column; }
+          .hero-pane  { min-width: unset !important; max-width: unset !important; padding: 32px 24px !important; }
+          .hero-headline { font-size: 26px !important; }
+          .hero-cards { display: none !important; }
+          .auth-pane  { align-items: flex-start !important; padding: 24px 20px 40px !important; }
+        }
+      `}</style>
+      <div className="login-root">
+        <HeroPane />
+        {/* Right auth pane */}
+        <div className="auth-pane" style={{
+          flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 40,
+        }}>
+          <div style={{
+            maxWidth: 420, width: "100%", background: "#fff",
+            border: `1px solid ${C.borderSub}`, borderRadius: 14, padding: 32,
+            boxShadow: "0 2px 4px rgba(0,0,0,0.06)",
+          }}>
+            {/* Tab switcher */}
+            <div style={{
+              background: C.pageBg, borderRadius: 9, padding: 3,
+              display: "flex", marginBottom: 22,
+            }}>
+              {(["login", "signup"] as const).map(t => (
+                <button key={t} type="button" onClick={() => setTab(t)} style={{
+                  flex: 1, border: "none", borderRadius: 7, padding: "9px", fontSize: 13,
+                  fontWeight: 600, cursor: "pointer",
+                  background:  tab === t ? "#fff"        : "transparent",
+                  color:       tab === t ? C.accentTeal  : C.fg3,
+                  boxShadow:   tab === t ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
+                }}>
+                  {t === "login" ? "Log in" : "Sign up"}
+                </button>
+              ))}
+            </div>
+            {/* Heading */}
+            <h2 style={{ margin: "0 0 4px", fontSize: 21, fontWeight: 600, color: C.fg1, fontFamily: "var(--font-display)" }}>
+              {tabHeadings[tab].h}
+            </h2>
+            <p style={{ margin: "0 0 22px", fontSize: 13, color: C.fg3 }}>{tabHeadings[tab].sub}</p>
+            {tab === "login"
+              ? <LoginForm  onSuccess={handleSuccess} />
+              : <SignupForm onSuccess={handleSuccess} />}
           </div>
         </div>
-
-        {/* Card */}
-        <div className="rounded-xl bg-white p-6 shadow-md">
-          {/* Tabs */}
-          <div className="mb-6 flex gap-1 rounded-lg bg-culture-gray p-1">
-            {(['login', 'signup'] as const).map(t => (
-              <button key={t} onClick={() => setTab(t)}
-                className={cn('flex-1 rounded-md py-1.5 text-sm font-medium capitalize transition-colors',
-                  tab === t ? 'bg-white text-network-blue shadow-xs' : 'text-[var(--fg-3)] hover:text-secure-gray')}>
-                {t === 'login' ? 'Log in' : 'Sign up'}
-              </button>
-            ))}
-          </div>
-          {tab === 'login'
-            ? <LoginForm  onSuccess={handleSuccess} />
-            : <SignupForm onSuccess={handleSuccess} />}
-        </div>
-
-        <DemoBlock onSuccess={handleSuccess} />
       </div>
-    </div>
+    </>
   );
 }
