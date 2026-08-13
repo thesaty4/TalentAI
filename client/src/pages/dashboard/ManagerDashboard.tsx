@@ -4,34 +4,50 @@ import { Card, KpiCard } from '../../components/Card';
 import { EmptyState, ErrorBanner, Spinner } from '../../components/Feedback';
 import { Badge } from '../../components/Badge';
 import { cn } from '../../lib/utils/cn';
-import { PIPELINE_STAGES, STAGE_COLORS } from '../../lib/constants/pipeline.constants';
+import { PIPELINE_STAGES } from '../../lib/constants/pipeline.constants';
 import type { Project } from '../../lib/api/projects.api';
 import { useAuth } from '../../auth/useAuth';
 import { useDashboard } from './useDashboard';
 
 // ─── Hiring funnel ────────────────────────────────────────────────────────────
 
+// Inline colors avoid Tailwind JIT purging dynamically-constructed class names
+const FUNNEL_COLORS: Record<string, string> = {
+  'AI Shortlisted':           '#4197CB',
+  'Manager Screening':        '#D9A400',
+  'Internal Tech Evaluation': '#FF6B00',
+  'Client Interview':         '#003057',
+  'Selected':                 '#00945E',
+  'Allocated':                '#00263A',
+};
+
 function HiringFunnel({ funnel }: { funnel: Record<string, number> }) {
-  const max = Math.max(...Object.values(funnel), 1);
+  const total = Object.values(funnel).reduce((s, n) => s + n, 0);
+  const max   = Math.max(...Object.values(funnel), 1);
   return (
     <Card className="p-5">
       <h3 className="mb-4 text-sm font-semibold text-network-blue">Hiring funnel</h3>
-      <div className="space-y-3">
-        {PIPELINE_STAGES.map(stage => {
-          const count  = funnel[stage] ?? 0;
-          const bgCls  = STAGE_COLORS[stage]?.split(' ')[0] ?? 'bg-level-gray';
-          return (
-            <div key={stage} className="flex items-center gap-3">
-              <span className="w-36 truncate text-xs text-secure-gray">{stage}</span>
-              <div className="h-2 flex-1 overflow-hidden rounded-full bg-level-gray">
-                <div className={cn('h-2 rounded-full transition-all', bgCls)}
-                  style={{ width: `${(count / max) * 100}%` }} />
+      {total === 0 ? (
+        <p className="py-4 text-center text-xs text-[var(--fg-3)]">No pipeline entries yet</p>
+      ) : (
+        <div className="space-y-3">
+          {PIPELINE_STAGES.map(stage => {
+            const count = funnel[stage] ?? 0;
+            return (
+              <div key={stage} className="flex items-center gap-3">
+                <span className="w-36 truncate text-xs text-secure-gray">{stage}</span>
+                <div className="h-2 flex-1 overflow-hidden rounded-full bg-level-gray">
+                  <div
+                    className="h-2 rounded-full transition-all"
+                    style={{ width: `${(count / max) * 100}%`, backgroundColor: FUNNEL_COLORS[stage] ?? '#D9D8D6' }}
+                  />
+                </div>
+                <span className="w-5 text-right text-xs font-medium text-secure-gray">{count}</span>
               </div>
-              <span className="w-5 text-right text-xs font-medium text-secure-gray">{count}</span>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </Card>
   );
 }

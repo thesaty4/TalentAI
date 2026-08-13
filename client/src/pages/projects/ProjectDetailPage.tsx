@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
-import { Badge } from '../../components/Badge';
 import { EmptyState, ErrorBanner, Spinner } from '../../components/Feedback';
 import { cn } from '../../lib/utils/cn';
 import { projectsApi } from '../../lib/api/projects.api';
