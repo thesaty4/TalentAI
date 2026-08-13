@@ -14,8 +14,10 @@ export function AISearchPage() {
     const v = params.get('projectId'); return v ? +v : null;
   });
   const [selectedIrc, setSelectedIrc] = useState<number | null>(null);
-  const [query,  setQuery]  = useState('');
-  const [scope,  setScope]  = useState<'all' | 'applied'>('all');
+  const [query,   setQuery]   = useState('');
+  const [scope,   setScope]   = useState<'all' | 'applied'>('all');
+  // Attached JD file — stored locally; search API called only on explicit Submit
+  const [jdFile,  setJdFile]  = useState<File | null>(null);
 
   const projectsQ = useQuery({
     queryKey: ['projects'],
@@ -43,12 +45,21 @@ export function AISearchPage() {
 
   function handleSubmit() {
     if (!selectedIrc) return;
-    search({ ircId: selectedIrc, query: query.trim() || undefined, scope });
+    if (jdFile) {
+      // User attached a JD — run the JD-aware search path
+      uploadJd({ ircId: selectedIrc, scope, file: jdFile, query: query.trim() || undefined });
+    } else {
+      search({ ircId: selectedIrc, query: query.trim() || undefined, scope });
+    }
   }
 
+  // Store file in state only — do NOT trigger search on upload (#8)
   function handleJdUpload(file: File) {
-    if (!selectedIrc) return;
-    uploadJd({ ircId: selectedIrc, scope, file, query: query.trim() || undefined });
+    setJdFile(file);
+  }
+
+  function handleJdRemove() {
+    setJdFile(null);
   }
 
   function handleShortlisted(employeeId: number, pipelineCandidateId: number) {
@@ -63,7 +74,7 @@ export function AISearchPage() {
         selectedIrc={selectedIrc}
         query={query}
         scope={scope}
-        jdFilename={jdFilename}
+        jdFilename={jdFile?.name ?? null}
         isPending={isPending}
         onProjectChange={setSelectedProject}
         onIrcChange={setSelectedIrc}
@@ -71,7 +82,7 @@ export function AISearchPage() {
         onScopeChange={setScope}
         onSubmit={handleSubmit}
         onJdUpload={handleJdUpload}
-        onJdRemove={() => {}}
+        onJdRemove={handleJdRemove}
       />
 
       <div className="flex-1 p-6">
