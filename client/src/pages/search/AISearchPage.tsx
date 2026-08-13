@@ -1,4 +1,4 @@
-import { Loader2 } from 'lucide-react';
+import { Loader2, Download } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -69,6 +69,37 @@ export function AISearchPage() {
 
   function handleShortlisted(employeeId: number, pipelineCandidateId: number) {
     updateResult(employeeId, { alreadyInPipeline: true, pipelineCandidateId });
+  }
+
+  function buildVisible() {
+    if (!results) return [];
+    let ordered = [...results];
+    if (expSort === 'desc') ordered.sort((a, b) => b.experienceYears - a.experienceYears);
+    if (expSort === 'asc')  ordered.sort((a, b) => a.experienceYears - b.experienceYears);
+    return resultLimit ? ordered.slice(0, resultLimit) : ordered;
+  }
+
+  function handleExportCsv() {
+    const visible = buildVisible();
+    const header  = 'Name,Role,BU,Location,Exp (yrs),Match %,Why Recommend,Skills,Available Date,In Pipeline';
+    const rows    = visible.map(r => [
+      `"${r.fullName}"`,
+      `"${r.roleTitle}"`,
+      `"${r.businessUnit}"`,
+      r.location,
+      r.experienceYears,
+      r.matchPct,
+      `"${r.whyRecommend.replace(/"/g, '""')}"`,
+      `"${r.skills.slice(0, 6).join('; ')}"`,
+      r.availableDate ?? '—',
+      r.alreadyInPipeline ? 'Yes' : 'No',
+    ].join(','));
+    const csv  = [header, ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = 'ai-search-results.csv'; a.click();
+    URL.revokeObjectURL(url);
   }
 
   return (
@@ -150,6 +181,12 @@ export function AISearchPage() {
                       expSort ? 'bg-celestial-blue text-white' : 'bg-level-gray text-secure-gray hover:bg-culture-gray'
                     }`}>
                     Exp {expSort === 'asc' ? '↑' : expSort === 'desc' ? '↓' : '↕'}
+                  </button>
+                  <span className="text-level-gray">|</span>
+                  {/* Export — exports the currently visible filtered/sorted set */}
+                  <button onClick={handleExportCsv}
+                    className="flex items-center gap-1 rounded-full bg-level-gray px-2.5 py-0.5 text-xs font-medium text-secure-gray hover:bg-culture-gray">
+                    <Download size={10} /> Export
                   </button>
                 </div>
               </div>
