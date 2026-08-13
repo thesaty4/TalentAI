@@ -41,3 +41,4 @@ client/dist/
 
 # Uploads (JD files uploaded during demo)
 server/uploads/
+client/node_modules
