@@ -48,7 +48,7 @@ export function SearchComposer(p: Props) {
   }
 
   return (
-    <div className="sticky top-0 z-10 border-b border-[var(--border-subtle)] bg-white px-6 py-4 shadow-sm" style={{ isolation: 'isolate' }}>
+    <div className="sticky -top-6 z-10 border-b border-[var(--border-subtle)] bg-white px-6 py-4 shadow-sm" style={{ isolation: 'isolate' }}>
       {/* Row 1: Project + IRC + Scope */}
       <div className="flex flex-wrap items-center gap-3">
         <select
