@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { ArrowRight, Paperclip, X } from 'lucide-react';
 import { Button } from '../../components/Button';
 import { cn } from '../../lib/utils/cn';
@@ -25,13 +25,26 @@ const SELECT_CLS = 'rounded-lg border border-[var(--border-default)] bg-white px
 
 export function SearchComposer(p: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
-  const project = p.projects.find(pr => pr.id === p.selectedProject);
+  const [uploadError, setUploadError] = useState('');
+
+  const project  = p.projects.find(pr => pr.id === p.selectedProject);
   const openIrcs = project?.ircs.filter(i => i.status === 'Open') ?? [];
+
+  const ALLOWED_TYPES = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+  const ALLOWED_EXT   = ['.pdf', '.docx'];
 
   function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    if (file) p.onJdUpload(file);
     e.target.value = '';
+    if (!file) return;
+
+    const ext = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
+    if (!ALLOWED_TYPES.includes(file.type) && !ALLOWED_EXT.includes(ext)) {
+      setUploadError('Only PDF and DOCX files are supported. Please select a valid file.');
+      return;
+    }
+    setUploadError('');
+    p.onJdUpload(file);
   }
 
   return (
@@ -95,6 +108,10 @@ export function SearchComposer(p: Props) {
           <Paperclip size={10} /> {p.jdFilename}
           <button onClick={p.onJdRemove} className="ml-0.5 hover:text-power-orange"><X size={10} /></button>
         </div>
+      )}
+      {/* Upload validation error */}
+      {uploadError && (
+        <p className="mt-2 text-xs text-power-orange">{uploadError}</p>
       )}
     </div>
   );
