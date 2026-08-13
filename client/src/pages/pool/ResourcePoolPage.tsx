@@ -5,6 +5,7 @@ import { Avatar } from '../../components/Card';
 import { Button } from '../../components/Button';
 import { EmptyState, ErrorBanner, Spinner } from '../../components/Feedback';
 import { Pagination } from '../../components/Pagination';
+import { SkillsMultiSelect } from '../../components/SkillsMultiSelect';
 import { cn } from '../../lib/utils/cn';
 import { usePool } from './usePool';
 
@@ -47,11 +48,12 @@ export function ResourcePoolPage() {
             <option value="Allocated">Allocated</option>
           </select>
         </div>
-        <div className="min-w-36">
-          <label className="mb-1 block text-xs font-medium text-secure-gray">Skills (comma-separated)</label>
-          <input value={skillInput} onChange={e => setSkills(e.target.value)}
-            placeholder="Python, React…"
-            className="w-full rounded-lg border border-[var(--border-default)] px-3 py-1.5 text-sm focus:border-celestial-blue focus:outline-none" />
+        <div className="min-w-48 flex-1">
+          <label className="mb-1 block text-xs font-medium text-secure-gray">Skills</label>
+          <SkillsMultiSelect
+            selected={skillInput ? skillInput.split(',').map(s => s.trim()).filter(Boolean) : []}
+            onChange={skills => setSkills(skills.join(','))}
+          />
         </div>
         <div className="flex gap-2">
           <input type="number" min={0} placeholder="Min exp" value={filters.minExp ?? ''} onChange={e => setFilter('minExp', e.target.value ? +e.target.value : undefined)}
