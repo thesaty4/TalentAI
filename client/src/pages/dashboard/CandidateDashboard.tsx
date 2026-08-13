@@ -17,7 +17,7 @@ export function CandidateDashboard() {
   const upcomingQ  = useQuery({ queryKey: ['upcoming'],             queryFn: () => candidateApi.upcoming() });
 
   if (openIrcsQ.isPending || pipelineQ.isPending) return <Spinner />;
-  if (openIrcsQ.isError) return <ErrorBanner message="Failed to load dashboard" onRetry={openIrcsQ.refetch} />;
+  if (openIrcsQ.isError || pipelineQ.isError) return <ErrorBanner message="Failed to load dashboard" onRetry={() => { openIrcsQ.refetch(); pipelineQ.refetch(); }} />;
 
   const openIrcs    = openIrcsQ.data ?? [];
   const pipeline    = pipelineQ.data ?? [];

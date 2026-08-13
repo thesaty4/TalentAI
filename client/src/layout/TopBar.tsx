@@ -12,12 +12,15 @@ function initials(name: string) {
   return name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
 }
 
+// Stable callback via ref — avoids re-adding listener on every render
 function useClickOutside(ref: React.RefObject<HTMLElement>, cb: () => void) {
+  const cbRef = useRef(cb);
+  cbRef.current = cb;
   useEffect(() => {
-    const h = (e: MouseEvent) => { if (!ref.current?.contains(e.target as Node)) cb(); };
+    const h = (e: MouseEvent) => { if (!ref.current?.contains(e.target as Node)) cbRef.current(); };
     document.addEventListener('mousedown', h);
     return () => document.removeEventListener('mousedown', h);
-  }, [cb]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 }
 
 const DROPDOWN_STYLE: React.CSSProperties = {
