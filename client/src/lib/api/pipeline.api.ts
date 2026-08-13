@@ -1,11 +1,12 @@
 import { apiClient } from './client';
 
 export interface PipelineEntry {
-  id:       number;
-  stage:    string;
-  matchPct: number | null;
-  employee: { id: number; fullName: string; roleTitle: string; location: string };
-  irc:      { id: number; ircCode: string; roleTitle: string };
+  id:           number;
+  stage:        string;
+  matchPct:     number | null;
+  appliedDate:  string | null;
+  employee:     { id: number; fullName: string; roleTitle: string; location: string };
+  irc:          { id: number; ircCode: string; roleTitle: string };
 }
 
 export interface PipelineMeta { total: number; page: number; limit: number; pages: number; }
