@@ -14,7 +14,9 @@ apiClient.interceptors.request.use(config => {
 apiClient.interceptors.response.use(
   res => res,
   err => {
-    if (err.response?.status === 401) {
+    // Auth endpoints return 401 for wrong credentials — don't redirect; let the form handle it
+    const isAuthEndpoint = (err.config?.url as string | undefined)?.startsWith('/auth/');
+    if (err.response?.status === 401 && !isAuthEndpoint) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';

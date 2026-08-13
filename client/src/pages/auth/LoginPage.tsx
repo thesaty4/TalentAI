@@ -8,6 +8,12 @@ import { ErrorBanner } from '../../components/Feedback';
 import { authApi, type JwtUser } from '../../lib/api/auth.api';
 import { cn } from '../../lib/utils/cn';
 
+// Backend can return message as string or string[] (class-validator)
+function toMsg(err: unknown): string {
+  const raw = (err as any)?.response?.data?.message;
+  return Array.isArray(raw) ? raw[0] : (raw ?? 'Something went wrong');
+}
+
 // ─── Login form ───────────────────────────────────────────────────────────────
 
 function LoginForm({ onSuccess }: { onSuccess: (token: string, user: JwtUser) => void }) {
@@ -22,7 +28,7 @@ function LoginForm({ onSuccess }: { onSuccess: (token: string, user: JwtUser) =>
 
   return (
     <form onSubmit={e => { e.preventDefault(); mutate(); }} className="space-y-4">
-      {error && <ErrorBanner message={(error as any)?.response?.data?.message ?? 'Login failed'} />}
+      {error && <ErrorBanner message={toMsg(error)} />}
       <div>
         <label className="mb-1 block text-sm font-medium text-secure-gray">Work email</label>
         <input
@@ -58,7 +64,7 @@ function SignupForm({ onSuccess }: { onSuccess: (token: string, user: JwtUser) =
   const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '', role: 'manager' as const, terms: false });
   const [validErr, setValidErr] = useState('');
 
-  const { mutate, isPending, error } = useMutation({
+  const { mutate, reset, isPending, error } = useMutation({
     mutationFn: () => authApi.signup({ name: form.name, email: form.email, password: form.password, role: form.role }),
     onSuccess:  ({ token, user }) => onSuccess(token, user),
   });
@@ -66,8 +72,9 @@ function SignupForm({ onSuccess }: { onSuccess: (token: string, user: JwtUser) =
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setValidErr('');
+    reset(); // clear any previous API error before client-side checks
     if (form.password !== form.confirm) return setValidErr('Passwords do not match');
-    if (!form.terms) return setValidErr('You must agree to the terms');
+    if (!form.terms) return setValidErr('You must agree to the terms of service');
     mutate();
   }
 
@@ -76,7 +83,9 @@ function SignupForm({ onSuccess }: { onSuccess: (token: string, user: JwtUser) =
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {(validErr || error) && <ErrorBanner message={validErr || (error as any)?.response?.data?.message} />}
+      {(validErr || error) && (
+        <ErrorBanner message={validErr || toMsg(error)} />
+      )}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label className="mb-1 block text-sm font-medium text-secure-gray">Full name</label>
