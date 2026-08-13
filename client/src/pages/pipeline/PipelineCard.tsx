@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MoreVertical } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MoreVertical } from 'lucide-react';
 import { Avatar } from '../../components/Card';
 import { Modal } from '../../components/Modal';
 import { Button } from '../../components/Button';
@@ -22,18 +22,22 @@ interface Props {
 
 export function PipelineCard({ entry, onAdvance, onRevert, onNotFit }: Props) {
   const navigate   = useNavigate();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen]       = useState(false);
   const [revertModal, setRevertModal] = useState(false);
   const [notFitModal, setNotFitModal] = useState(false);
   const [revertNote,  setRevertNote]  = useState('');
   const [selectedReason, setSelectedReason] = useState('');
+  const [busy, setBusy] = useState(false);
 
   const stageIdx  = PIPELINE_STAGES.indexOf(entry.stage as any);
   const nextStage = stageIdx < PIPELINE_STAGES.length - 1 ? PIPELINE_STAGES[stageIdx + 1] : null;
   const prevStage = stageIdx > 0 ? PIPELINE_STAGES[stageIdx - 1] : null;
 
-  function handleAdvance() { setMenuOpen(false); if (nextStage) onAdvance(entry.id, nextStage); }
-  function openRevert()    { setMenuOpen(false); setRevertNote(''); setRevertModal(true); }
+  function handleAdvance() {
+    setMenuOpen(false);
+    if (nextStage && !busy) { setBusy(true); onAdvance(entry.id, nextStage); }
+  }
+  function openRevert() { setMenuOpen(false); setRevertNote(''); setRevertModal(true); }
   function openNotFit()    { setMenuOpen(false); setSelectedReason(''); setNotFitModal(true); }
 
   return (
@@ -43,7 +47,12 @@ export function PipelineCard({ entry, onAdvance, onRevert, onNotFit }: Props) {
         <div className="flex min-w-0 items-start gap-2">
           <Avatar name={entry.employee.fullName} className="mt-0.5 h-7 w-7 shrink-0 text-[10px]" />
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium text-network-blue">{entry.employee.fullName}</p>
+            <div className="flex items-baseline gap-1.5">
+              <p className="truncate text-sm font-medium text-network-blue">{entry.employee.fullName}</p>
+              {entry.matchPct != null && (
+                <span className="shrink-0 text-[10px] font-semibold text-celestial-blue">{entry.matchPct}%</span>
+              )}
+            </div>
             <p className="truncate text-xs text-[var(--fg-3)]">{entry.employee.roleTitle}</p>
           </div>
         </div>
@@ -77,12 +86,34 @@ export function PipelineCard({ entry, onAdvance, onRevert, onNotFit }: Props) {
         </div>
       </div>
 
-      {/* Meta */}
-      <div className="mt-2 flex flex-wrap items-center gap-1.5">
-        <span className="rounded border border-[var(--border-subtle)] px-1.5 py-0.5 text-[10px] text-secure-gray">{entry.irc.ircCode}</span>
-        {entry.matchPct != null && (
-          <span className="text-[10px] font-medium text-celestial-blue">{entry.matchPct}%</span>
-        )}
+      {/* ← IRC → full-width stage navigation */}
+      <div className="mt-2 flex w-full items-center justify-between">
+        {/* ← Previous stage */}
+        <button
+          disabled={!prevStage || busy || entry.stage === 'Rejected'}
+          onClick={openRevert}
+          title={prevStage ? `Revert to ${prevStage}` : 'No previous stage'}
+          className={cn('flex h-6 w-6 items-center justify-center rounded text-secure-gray transition-colors',
+            prevStage && !busy && entry.stage !== 'Rejected' ? 'hover:bg-culture-gray hover:text-network-blue' : 'opacity-30'
+          )}>
+          <ChevronLeft size={14} />
+        </button>
+
+        {/* IRC code — centred */}
+        <span className="rounded border border-[var(--border-subtle)] px-2 py-0.5 text-[10px] font-medium text-secure-gray">
+          {entry.irc.ircCode}
+        </span>
+
+        {/* → Next stage */}
+        <button
+          disabled={!nextStage || busy || entry.stage === 'Allocated' || entry.stage === 'Rejected'}
+          onClick={handleAdvance}
+          title={nextStage ? `Advance to ${nextStage}` : 'No next stage'}
+          className={cn('flex h-6 w-6 items-center justify-center rounded text-secure-gray transition-colors',
+            nextStage && !busy && entry.stage !== 'Allocated' && entry.stage !== 'Rejected' ? 'hover:bg-culture-gray hover:text-commerce-green' : 'opacity-30'
+          )}>
+          <ChevronRight size={14} />
+        </button>
       </div>
 
       {/* Revert modal — R13 */}
