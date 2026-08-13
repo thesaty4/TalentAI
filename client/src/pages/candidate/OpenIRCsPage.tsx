@@ -17,6 +17,8 @@ function IrcCard({ irc }: { irc: OpenIrc }) {
       qc.setQueryData<OpenIrc[]>(['candidate-open-ircs'], old =>
         old?.map(i => i.id === irc.id ? { ...i, hasApplied: true } : i) ?? old
       );
+      // Invalidate so My Pipeline and Candidate Dashboard reflect the new entry immediately
+      qc.invalidateQueries({ queryKey: ['my-pipeline'] });
     },
   });
 
