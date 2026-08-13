@@ -262,6 +262,7 @@ function StageHistoryModal({ id, onClose }: { id: number; onClose: () => void })
   const q = useQuery({
     queryKey: ['stage-history', id],
     queryFn:  () => pipelineApi.getHistory(id),
+    staleTime: 0, // always refetch on open — history grows after every stage change
   });
   return (
     <Modal open title="Stage history" onClose={onClose}>
