@@ -23,14 +23,14 @@ export function EmployeeProfileModal({ employeeId, onClose }: Props) {
 
   return (
     // Backdrop
-    <div className="fixed inset-0 z-50 flex items-start justify-end bg-black/40" onClick={onClose}>
-      {/* Drawer panel — stops click propagation so inner clicks don't close */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
+      {/* Centered popup panel */}
       <div
-        className="relative flex h-full w-full max-w-xl flex-col overflow-y-auto bg-white shadow-md"
+        className="relative flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-md"
         onClick={e => e.stopPropagation()}
       >
         {/* Header bar */}
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[var(--border-subtle)] bg-white px-5 py-3">
+        <div className="flex items-center justify-between border-b border-[var(--border-subtle)] bg-white px-5 py-3">
           <p className="text-sm font-semibold text-network-blue">
             {query.data?.fullName ?? 'Employee Profile'}
           </p>
@@ -39,7 +39,7 @@ export function EmployeeProfileModal({ employeeId, onClose }: Props) {
           </button>
         </div>
 
-        <div className="flex-1 space-y-5 p-5">
+        <div className="flex-1 space-y-5 overflow-y-auto p-5">
           {query.isPending && <Spinner />}
           {query.isError && <p className="text-sm text-power-orange">Failed to load profile.</p>}
 
