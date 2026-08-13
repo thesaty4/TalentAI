@@ -27,6 +27,13 @@ export function AISearchPage() {
     loadingMessage, search, uploadJd, updateResult,
   } = useAISearch();
 
+  // Auto-select first project when data loads (if not pre-selected via URL)
+  useEffect(() => {
+    if (selectedProject == null && projectsQ.data?.length) {
+      setSelectedProject(projectsQ.data[0].id);
+    }
+  }, [projectsQ.data]);
+
   // Auto-select first Open IRC when project changes
   useEffect(() => {
     const project = projectsQ.data?.find(p => p.id === selectedProject);
