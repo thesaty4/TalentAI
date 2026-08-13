@@ -6,7 +6,7 @@ import { Button } from '../../components/Button';
 import { EmptyState, ErrorBanner, Spinner } from '../../components/Feedback';
 import { cn } from '../../lib/utils/cn';
 import { projectsApi } from '../../lib/api/projects.api';
-import { PIPELINE_STAGES, STAGE_COLORS } from '../../lib/constants/pipeline.constants';
+import { PIPELINE_STAGES, STAGE_HEX } from '../../lib/constants/pipeline.constants';
 import { usePipeline } from './usePipeline';
 import { PipelineCard } from './PipelineCard';
 import { AddCandidateModal } from './AddCandidateModal';
@@ -60,18 +60,24 @@ export function PipelinePage() {
         <div className="flex gap-3 overflow-x-auto pb-2">
           {PIPELINE_STAGES.map(stage => {
             const entries = byStage[stage] ?? [];
-            const headerCls = STAGE_COLORS[stage] ?? 'bg-level-gray text-secure-gray';
             return (
-              <div key={stage} className="flex w-60 shrink-0 flex-col rounded-xl border border-[var(--border-subtle)] bg-culture-gray">
+              <div key={stage} style={{
+                  display: 'flex', flexDirection: 'column', width: 230, flexShrink: 0,
+                  background: (STAGE_HEX[stage] ?? '#8A8C8E') + '17',
+                  borderRadius: 12, overflow: 'hidden',
+                }}>
                 {/* Column header */}
-                <div className={cn('flex items-center justify-between rounded-t-xl px-3 py-2', headerCls)}>
-                  <span className="text-xs font-semibold">{stage}</span>
-                  <span className="rounded-full bg-white/20 px-1.5 text-[10px] font-bold">{entries.length}</span>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                    <div style={{ width: 9, height: 9, borderRadius: '50%', background: STAGE_HEX[stage] ?? '#8A8C8E', flexShrink: 0 }} />
+                    <span style={{ fontSize: 12.5, fontWeight: 600, color: '#1B2430' }}>{stage}</span>
+                  </div>
+                  <span style={{ fontSize: 11, color: '#8891A0' }}>({entries.length})</span>
                 </div>
                 {/* Cards */}
-                <div className="flex flex-col gap-2 p-2">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 9, padding: 12, overflowY: 'auto' }}>
                   {entries.length === 0 && (
-                    <p className="py-4 text-center text-xs text-[var(--fg-3)]">—</p>
+                    <p style={{ textAlign: 'center', fontSize: 12, color: '#8891A0', padding: '12px 0' }}>No candidates here.</p>
                   )}
                   {entries.map(e => (
                     <PipelineCard

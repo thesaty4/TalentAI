@@ -1,20 +1,23 @@
 import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '../lib/utils/cn';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-celestial-blue disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex items-center justify-center gap-2 rounded-lg text-sm font-semibold transition-colors focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
-        primary:   'bg-celestial-blue text-white hover:bg-[#33739A]',
-        secondary: 'border border-border-default bg-white text-network-blue hover:bg-culture-gray',
-        danger:    'bg-power-orange text-white hover:bg-[#B5361E]',
-        ghost:     'text-secure-gray hover:bg-culture-gray',
+        // Primary: teal bg
+        primary:   'bg-[#3B6E64] text-white hover:bg-[#2C4A44]',
+        // Secondary: white bg, subtle border
+        secondary: 'border border-[#E3E5E9] bg-white text-[#1B2430] hover:bg-[#F5F6F8]',
+        // Muted/tertiary: no border
+        ghost:     'bg-[#F5F6F8] text-[#1B2430] hover:bg-[#E7EFEC] border-none',
+        // Danger: rust-red
+        danger:    'bg-[#C1502E] text-white hover:bg-[#A83F22]',
       },
       size: {
-        sm: 'h-8 px-3',
-        md: 'h-9 px-4',
-        lg: 'h-10 px-6',
+        sm: 'h-8 px-3 text-xs',
+        md: 'h-9 px-4 text-sm',
+        lg: 'h-10 px-6 text-sm',
       },
     },
     defaultVariants: { variant: 'primary', size: 'md' },
@@ -26,5 +29,11 @@ interface ButtonProps
     VariantProps<typeof buttonVariants> {}
 
 export function Button({ className, variant, size, ...props }: ButtonProps) {
-  return <button className={cn(buttonVariants({ variant, size }), className)} {...props} />;
+  return (
+    <button
+      className={`${buttonVariants({ variant, size })} ${className ?? ''}`}
+      style={{ borderRadius: '8px' }}
+      {...props}
+    />
+  );
 }

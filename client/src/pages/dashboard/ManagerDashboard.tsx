@@ -25,30 +25,35 @@ function HiringFunnel({ funnel }: { funnel: Record<string, number> }) {
   const total = Object.values(funnel).reduce((s, n) => s + n, 0);
   const max   = Math.max(...Object.values(funnel), 1);
   return (
-    <Card className="p-5">
-      <h3 className="mb-4 text-sm font-semibold text-network-blue">Hiring funnel</h3>
+    <div style={{ background: '#fff', border: '1px solid #E3E5E9', borderRadius: 12, padding: 18 }}>
+      <h3 style={{ fontSize: 12, fontWeight: 700, marginBottom: 14, textTransform: 'uppercase', letterSpacing: '0.03em', color: '#8891A0' }}>
+        Hiring Funnel
+      </h3>
       {total === 0 ? (
-        <p className="py-4 text-center text-xs text-[var(--fg-3)]">No pipeline entries yet</p>
+        <p style={{ textAlign: 'center', fontSize: 13, color: '#8891A0', padding: '16px 0' }}>No pipeline entries yet</p>
       ) : (
-        <div className="space-y-3">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {PIPELINE_STAGES.map(stage => {
             const count = funnel[stage] ?? 0;
+            const color = FUNNEL_COLORS[stage] ?? '#D3D7DC';
             return (
-              <div key={stage} className="flex items-center gap-3">
-                <span className="w-36 truncate text-xs text-secure-gray">{stage}</span>
-                <div className="h-2 flex-1 overflow-hidden rounded-full bg-level-gray">
-                  <div
-                    className="h-2 rounded-full transition-all"
-                    style={{ width: `${(count / max) * 100}%`, backgroundColor: FUNNEL_COLORS[stage] ?? '#D9D8D6' }}
-                  />
+              <div key={stage}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <span style={{ fontSize: 12, color: '#333D4A' }}>{stage}</span>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: '#1B2430' }}>{count}</span>
                 </div>
-                <span className="w-5 text-right text-xs font-medium text-secure-gray">{count}</span>
+                <div style={{ height: 10, background: '#F5F6F8', borderRadius: 999, overflow: 'hidden' }}>
+                  <div style={{
+                    height: 10, borderRadius: 999, transition: 'width 0.4s',
+                    width: `${(count / max) * 100}%`, background: color,
+                  }} />
+                </div>
               </div>
             );
           })}
         </div>
       )}
-    </Card>
+    </div>
   );
 }
 
@@ -100,12 +105,13 @@ export function ManagerDashboard() {
       </p>
 
       {/* KPI cards */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }} className="lg-4-cols">
         <KpiCard label="Open Requisitions"   value={kpis.openIrcs} />
         <KpiCard label="Active Pipeline"     value={kpis.activePipeline} />
         <KpiCard label="Awaiting Review"     value={kpis.awaitingReview} sub="AI Shortlisted" />
         <KpiCard label="Positions Filled"    value={kpis.filled} />
       </div>
+      <style>{'@media (min-width: 1024px) { .lg-4-cols { grid-template-columns: repeat(4, 1fr) !important; } }'}</style>
 
       {/* Hiring funnel + projects */}
       <div className="grid gap-6 lg:grid-cols-2">
