@@ -16,7 +16,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
 import { SignupDto } from './dto/signup.dto';
 
-type SafeUser = Pick<User, 'id' | 'name' | 'email' | 'role'>;
+type SafeUser = Pick<User, 'id' | 'name' | 'email' | 'role' | 'employeeId'>;
 
 @Injectable()
 export class AuthService {
@@ -59,8 +59,9 @@ export class AuthService {
   }
 
   private buildResponse(user: SafeUser) {
-    const { id, name, email, role } = user;
-    const token = this.jwt.sign({ sub: id, email, role, name }, { expiresIn: JWT_EXPIRY });
+    const { id, name, email, role, employeeId } = user;
+    const payload = { sub: id, email, role, name, ...(employeeId != null && { employeeId }) };
+    const token   = this.jwt.sign(payload, { expiresIn: JWT_EXPIRY });
     return { token, user: { id, name, email, role } };
   }
 }

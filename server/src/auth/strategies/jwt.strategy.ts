@@ -5,10 +5,11 @@ import { Role } from '@prisma/client';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
 export interface JwtPayload {
-  sub:   number;
-  email: string;
-  role:  Role;
-  name:  string;
+  sub:         number;
+  email:       string;
+  role:        Role;
+  name:        string;
+  employeeId?: number | null;
 }
 
 @Injectable()
