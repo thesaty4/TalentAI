@@ -10,7 +10,7 @@ interface Props {
   onViewProfile: (employeeId: number) => void;
 }
 
-export function ResultTable({ results, ircId, onShortlisted, onViewProfile }: Props) {
+export function ResultTable({ results, onShortlisted, onViewProfile }: Props) {
   return (
     <div className="overflow-x-auto rounded-xl border border-[var(--border-subtle)] bg-white">
       <table className="w-full text-sm">
