@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { X } from 'lucide-react';
-import { cn } from '../lib/utils/cn';
 import { SKILL_LIST } from '../lib/constants/skills.constants';
 
 interface Props {
@@ -17,7 +16,6 @@ export function SkillsMultiSelect({ selected, onChange, placeholder = 'Search sk
   const filtered = SKILL_LIST.filter(
     s => s.toLowerCase().includes(search.toLowerCase()) && !selected.includes(s)
   );
-  const allSelected = filtered.length === 0 && search === '';
 
   function toggle(skill: string) {
     onChange(selected.includes(skill) ? selected.filter(s => s !== skill) : [...selected, skill]);
