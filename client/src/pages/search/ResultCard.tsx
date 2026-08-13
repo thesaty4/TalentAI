@@ -74,19 +74,11 @@ export function ResultCard({ result, ircId, onShortlisted }: Props) {
             <div className="mt-1 h-1.5 w-24 overflow-hidden rounded-full bg-level-gray">
               <div className={cn('h-1.5 rounded-full', matchColor)} style={{ width: `${result.matchPct}%` }} />
             </div>
-            <span className={cn('mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-medium',
-              result.conflict ? 'bg-charge-yellow/20 text-[#8A6A00]' : 'bg-commerce-green/10 text-commerce-green')}>
-              {result.conflict ? 'Conflict — see details' : 'Available now'}
+            <span className="mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-medium bg-commerce-green/10 text-commerce-green">
+              Available now
             </span>
           </div>
         </div>
-
-        {/* Conflict strip — R8 */}
-        {result.conflict && result.conflictNote && (
-          <div className="mt-3 rounded-lg bg-charge-yellow/10 px-3 py-2 text-xs text-[#8A6A00]">
-            ⚠ {result.conflictNote}
-          </div>
-        )}
 
         {/* Why recommend — R6 */}
         <div className="mt-3 flex gap-2 rounded-lg bg-commerce-green/5 px-3 py-2.5">
