@@ -95,8 +95,8 @@ export function SearchComposer(p: Props) {
             className="flex items-center gap-1.5">
             <Paperclip size={13} /> JD
           </Button>
-          <Button size="sm" disabled={!p.selectedIrc || p.isPending} onClick={p.onSubmit}
-            className="bg-power-orange hover:bg-[#B5361E]">
+          <Button size="sm" disabled={!p.selectedIrc || p.isPending || (!p.query.trim() && !p.jdFilename)} onClick={p.onSubmit}
+            className="bg-power-orange hover:bg-[#B5361E] disabled:opacity-40">
             <ArrowRight size={15} />
           </Button>
         </div>
