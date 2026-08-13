@@ -1,6 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
 import { CheckCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { Avatar } from '../../components/Card';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
@@ -9,13 +8,13 @@ import { pipelineApi } from '../../lib/api/pipeline.api';
 import type { SearchResult } from '../../lib/api/search.api';
 
 interface Props {
-  result:     SearchResult;
-  ircId:      number;
+  result:        SearchResult;
+  ircId:         number;
   onShortlisted: (employeeId: number, pipelineCandidateId: number) => void;
+  onViewProfile: (employeeId: number) => void;
 }
 
-export function ResultCard({ result, ircId, onShortlisted }: Props) {
-  const navigate   = useNavigate();
+export function ResultCard({ result, ircId, onShortlisted, onViewProfile }: Props) {
 
   const shortlistMut = useMutation({
     mutationFn: () => pipelineApi.shortlist(result.employeeId, ircId),
@@ -92,7 +91,7 @@ export function ResultCard({ result, ircId, onShortlisted }: Props) {
 
         {/* Action row */}
         <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-[var(--border-subtle)] pt-3">
-          <Button size="sm" variant="secondary" onClick={() => navigate(`/employees/${result.employeeId}`)}>
+          <Button size="sm" variant="secondary" onClick={() => onViewProfile(result.employeeId)}>
             View profile
           </Button>
           <Button size="sm"

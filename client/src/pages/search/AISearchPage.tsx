@@ -6,6 +6,7 @@ import { ErrorBanner, EmptyState } from '../../components/Feedback';
 import { projectsApi } from '../../lib/api/projects.api';
 import { SearchComposer } from './SearchComposer';
 import { ResultCard } from './ResultCard';
+import { EmployeeProfileModal } from './EmployeeProfileModal';
 import { useAISearch } from './useAISearch';
 
 export function AISearchPage() {
@@ -16,8 +17,8 @@ export function AISearchPage() {
   const [selectedIrc, setSelectedIrc] = useState<number | null>(null);
   const [query,   setQuery]   = useState('');
   const [scope,   setScope]   = useState<'all' | 'applied'>('all');
-  // Attached JD file — stored locally; search API called only on explicit Submit
-  const [jdFile,  setJdFile]  = useState<File | null>(null);
+  const [jdFile,       setJdFile]       = useState<File | null>(null);
+  const [profileId,    setProfileId]    = useState<number | null>(null);
 
   const projectsQ = useQuery({
     queryKey: ['projects'],
@@ -67,8 +68,9 @@ export function AISearchPage() {
   }
 
   return (
-    <div className="-m-6 flex min-h-full flex-col bg-culture-gray">
-      <SearchComposer
+    <>
+      <div className="-m-6 flex min-h-full flex-col bg-culture-gray">
+        <SearchComposer
         projects={projectsQ.data ?? []}
         selectedProject={selectedProject}
         selectedIrc={selectedIrc}
@@ -125,11 +127,17 @@ export function AISearchPage() {
                 result={r}
                 ircId={selectedIrc!}
                 onShortlisted={handleShortlisted}
+                onViewProfile={setProfileId}
               />
             ))}
           </div>
         )}
       </div>
     </div>
+
+    {profileId !== null && (
+      <EmployeeProfileModal employeeId={profileId} onClose={() => setProfileId(null)} />
+    )}
+    </>
   );
 }
