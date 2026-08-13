@@ -22,7 +22,7 @@ async function bootstrap(): Promise<void> {
       legacyHeaders: false,
     }),
   );
-  app.enableCors({ origin: config.get<string>('clientUrl'), credentials: true });
+  app.enableCors({ origin: true, credentials: true });
 
   app.useGlobalPipes(
     new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
