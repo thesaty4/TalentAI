@@ -10,6 +10,7 @@ import { ProjectsModule } from './projects/projects.module';
 import { IrcsModule } from './ircs/ircs.module';
 import { PoolModule } from './pool/pool.module';
 import { EmployeesModule } from './employees/employees.module';
+import { PipelineModule } from './pipeline/pipeline.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 
@@ -35,6 +36,7 @@ import { RolesGuard } from './common/guards/roles.guard';
     IrcsModule,
     PoolModule,
     EmployeesModule,
+    PipelineModule,
     // Feature modules added in later specs
   ],
   providers: [
