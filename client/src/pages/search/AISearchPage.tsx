@@ -20,6 +20,7 @@ export function AISearchPage() {
   const [jdFile,       setJdFile]       = useState<File | null>(null);
   const [profileId,    setProfileId]    = useState<number | null>(null);
   const [resultLimit,  setResultLimit]  = useState<5 | 10 | null>(null);
+  const [expSort,      setExpSort]      = useState<'asc' | 'desc' | null>(null);
 
   const projectsQ = useQuery({
     queryKey: ['projects'],
@@ -48,6 +49,7 @@ export function AISearchPage() {
   function handleSubmit() {
     if (!selectedIrc) return;
     setResultLimit(null);
+    setExpSort(null);
     if (jdFile) {
       // User attached a JD — run the JD-aware search path
       uploadJd({ ircId: selectedIrc, scope, file: jdFile, query: query.trim() || undefined });
@@ -118,16 +120,21 @@ export function AISearchPage() {
 
         {/* Results */}
         {!isPending && results && results.length > 0 && (() => {
-          const visible = resultLimit ? results.slice(0, resultLimit) : results;
+          // Apply experience sort before slicing
+          let ordered = [...results];
+          if (expSort === 'desc') ordered.sort((a, b) => b.experienceYears - a.experienceYears);
+          if (expSort === 'asc')  ordered.sort((a, b) => a.experienceYears - b.experienceYears);
+          const visible = resultLimit ? ordered.slice(0, resultLimit) : ordered;
           return (
             <div className="space-y-4">
-              {/* Result count + limit filter */}
-              <div className="flex items-center gap-3">
+              {/* Result count + filters */}
+              <div className="flex flex-wrap items-center gap-2">
                 <p className="text-sm text-[var(--fg-3)]">
                   {results.length} candidate{results.length !== 1 ? 's' : ''} matched
                   {jdFilename && <span className="ml-1 text-celestial-blue">· JD: {jdFilename}</span>}
                 </p>
-                <div className="ml-auto flex gap-1">
+                <div className="ml-auto flex flex-wrap gap-1">
+                  {/* Limit pills */}
                   {([5, 10, null] as const).map(n => (
                     <button key={String(n)} onClick={() => setResultLimit(n)}
                       className={`rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors ${
@@ -136,6 +143,14 @@ export function AISearchPage() {
                       {n === null ? 'All' : `Top ${n}`}
                     </button>
                   ))}
+                  <span className="text-level-gray">|</span>
+                  {/* Experience sort */}
+                  <button onClick={() => setExpSort(s => s === 'desc' ? 'asc' : 'desc')}
+                    className={`rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors ${
+                      expSort ? 'bg-celestial-blue text-white' : 'bg-level-gray text-secure-gray hover:bg-culture-gray'
+                    }`}>
+                    Exp {expSort === 'asc' ? '↑' : expSort === 'desc' ? '↓' : '↕'}
+                  </button>
                 </div>
               </div>
               {visible.map(r => (

@@ -6,6 +6,7 @@ export interface SearchResult {
   roleTitle:           string;
   location:            string;
   businessUnit:        string;
+  experienceYears:     number;
   skills:              string[];
   currentAllocation:   string | null;
   availableDate:       string | null;
