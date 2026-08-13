@@ -67,7 +67,7 @@ export function AISearchPage() {
   }
 
   return (
-    <div className="-m-6 flex min-h-full flex-col">
+    <div className="-m-6 flex min-h-full flex-col bg-culture-gray">
       <SearchComposer
         projects={projectsQ.data ?? []}
         selectedProject={selectedProject}
