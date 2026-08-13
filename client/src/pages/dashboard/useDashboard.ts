@@ -9,10 +9,10 @@ export function useDashboard() {
     queryFn:  () => projectsApi.list(),
   });
 
-  // Fetch all active pipeline entries (up to 200 — more than enough for a demo)
+  // Fetch all active pipeline entries — backend cap is 100 (QueryPipelineDto @Max)
   const pipelineQ = useQuery({
     queryKey: ['pipeline', 'dashboard'],
-    queryFn:  () => pipelineApi.list({ limit: 200 }),
+    queryFn:  () => pipelineApi.list({ limit: 100 }),
   });
 
   const projects = projectsQ.data ?? [];
