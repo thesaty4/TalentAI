@@ -78,6 +78,7 @@ export class SearchService {
           isDuplicate:       !!dup,
           duplicateNote:     dup ?? null,
           alreadyInPipeline: inThisPipeline.has(r.employeeId),
+          pipelineCandidateId: inThisPipeline.get(r.employeeId) ?? null,
         };
       });
 
@@ -197,11 +198,11 @@ export class SearchService {
     return map;
   }
 
-  private async findInThisPipeline(ircId: number): Promise<Set<number>> {
+  private async findInThisPipeline(ircId: number): Promise<Map<number, number>> {
     const rows = await this.prisma.pipelineCandidate.findMany({
       where: { ircId, isActive: true, stage: { not: 'Rejected' } },
-      select: { employeeId: true },
+      select: { employeeId: true, id: true },
     });
-    return new Set(rows.map(r => r.employeeId));
+    return new Map(rows.map(r => [r.employeeId, r.id]));
   }
 }

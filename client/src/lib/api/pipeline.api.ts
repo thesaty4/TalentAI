@@ -15,4 +15,10 @@ export interface PipelinePage { data: PipelineEntry[]; meta: PipelineMeta; }
 export const pipelineApi = {
   list: (params?: Record<string, unknown>) =>
     apiClient.get<PipelinePage>('/pipeline', { params }).then(r => r.data),
+
+  shortlist: (employeeId: number, ircId: number) =>
+    apiClient.post<{ data: PipelineEntry }>('/pipeline', { employeeId, ircId }).then(r => r.data.data),
+
+  notFit: (id: number, reason: string) =>
+    apiClient.post(`/pipeline/${id}/not-fit`, { reason }).then(r => r.data),
 };
