@@ -5,6 +5,7 @@ import { Shell } from './layout/Shell';
 import { LoginPage } from './pages/auth/LoginPage';
 import { ManagerDashboard } from './pages/dashboard/ManagerDashboard';
 import { HRDashboard } from './pages/dashboard/HRDashboard';
+import { CandidateDashboard } from './pages/dashboard/CandidateDashboard';
 import { AISearchPage } from './pages/search/AISearchPage';
 import { PipelinePage } from './pages/pipeline/PipelinePage';
 import { ResourcePoolPage } from './pages/pool/ResourcePoolPage';
@@ -19,7 +20,9 @@ import { UpcomingPage } from './pages/candidate/UpcomingPage';
 
 function RoleDashboard() {
   const { user } = useAuth();
-  return user?.role === "hr" ? <HRDashboard /> : <ManagerDashboard />;
+  if (user?.role === 'hr')        return <HRDashboard />;
+  if (user?.role === 'candidate') return <CandidateDashboard />;
+  return <ManagerDashboard />;
 }
 
 export function App() {
