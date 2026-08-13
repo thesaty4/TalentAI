@@ -1,16 +1,23 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import { candidateApi, type OpenIrc } from '../../lib/api/candidate.api';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
+import { Modal } from '../../components/Modal';
 import { EmptyState, ErrorBanner, Spinner } from '../../components/Feedback';
 
 function IrcCard({ irc }: { irc: OpenIrc }) {
   const qc = useQueryClient();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
   const applyMut = useMutation({
     mutationFn: () => candidateApi.apply(irc.id),
-    onSuccess:  () => qc.setQueryData<OpenIrc[]>(['candidate-open-ircs'], old =>
-      old?.map(i => i.id === irc.id ? { ...i, hasApplied: true } : i) ?? old
-    ),
+    onSuccess:  () => {
+      setConfirmOpen(false);
+      qc.setQueryData<OpenIrc[]>(['candidate-open-ircs'], old =>
+        old?.map(i => i.id === irc.id ? { ...i, hasApplied: true } : i) ?? old
+      );
+    },
   });
 
   const mandatory  = irc.mandatorySkills.split(',').map(s => s.trim()).filter(Boolean);
@@ -32,8 +39,8 @@ function IrcCard({ irc }: { irc: OpenIrc }) {
         ) : (
           <Button size="sm" disabled={applyMut.isPending}
             className="shrink-0 bg-power-orange hover:bg-[#B5361E]"
-            onClick={() => applyMut.mutate()}>
-            {applyMut.isPending ? 'Applying…' : 'Apply'}
+            onClick={() => setConfirmOpen(true)}>
+            Apply
           </Button>
         )}
       </div>
@@ -71,6 +78,24 @@ function IrcCard({ irc }: { irc: OpenIrc }) {
           {(applyMut.error as any)?.response?.data?.message ?? 'Apply failed — try again'}
         </p>
       )}
+
+      {/* Confirmation modal */}
+      <Modal open={confirmOpen} onClose={() => !applyMut.isPending && setConfirmOpen(false)}
+        title="Apply for this IRC?">
+        <p className="mb-1 font-medium text-network-blue">{irc.roleTitle}</p>
+        <p className="mb-4 text-sm text-secure-gray">{irc.project.name} · {irc.ircCode}</p>
+        <div className="flex justify-end gap-2">
+          <Button variant="secondary" size="sm" disabled={applyMut.isPending}
+            onClick={() => setConfirmOpen(false)}>
+            Cancel
+          </Button>
+          <Button size="sm" disabled={applyMut.isPending}
+            className="bg-power-orange hover:bg-[#B5361E]"
+            onClick={() => applyMut.mutate()}>
+            {applyMut.isPending ? 'Applying…' : 'Yes, Apply'}
+          </Button>
+        </div>
+      </Modal>
     </Card>
   );
 }
