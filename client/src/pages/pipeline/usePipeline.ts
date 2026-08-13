@@ -10,7 +10,7 @@ export function usePipeline(params: Record<string, unknown>) {
 
   const query = useQuery({
     queryKey: qKey,
-    queryFn:  () => pipelineApi.list({ ...params, limit: 200 }),
+    queryFn:  () => pipelineApi.list({ ...params, limit: 100 }),
   });
 
   const advanceMut = useMutation({
