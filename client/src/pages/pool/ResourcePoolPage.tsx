@@ -16,7 +16,7 @@ function SortIcon({ col, current }: { col: string; current?: string }) {
 
 export function ResourcePoolPage() {
   const navigate = useNavigate();
-  const { query, filters, skillInput, setFilter, setSkills, toggleSort, exportCsv } = usePool();
+  const { query, filters, skillInput, setFilter, setSearch, setSkills, toggleSort, exportCsv } = usePool();
   const [exportLoading, setExportLoading] = useState(false);
   const [openMenu, setOpenMenu] = useState<number | null>(null);
 
@@ -34,7 +34,7 @@ export function ResourcePoolPage() {
       <div className="flex flex-wrap items-end gap-3 rounded-xl border border-[var(--border-subtle)] bg-white p-4">
         <div className="flex-1 min-w-36">
           <label className="mb-1 block text-xs font-medium text-secure-gray">Search</label>
-          <input value={filters.search ?? ''} onChange={e => setFilter('search', e.target.value || undefined)}
+          <input value={filters.search ?? ''} onChange={e => setSearch(e.target.value)}
             placeholder="Name or role…"
             className="w-full rounded-lg border border-[var(--border-default)] px-3 py-1.5 text-sm focus:border-celestial-blue focus:outline-none" />
         </div>
