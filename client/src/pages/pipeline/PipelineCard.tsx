@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, MoreVertical } from 'lucide-react';
 import { Avatar } from '../../components/Card';
@@ -29,6 +29,12 @@ export function PipelineCard({ entry, onAdvance, onRevert, onNotFit }: Props) {
   const [selectedReason, setSelectedReason] = useState('');
   const [busy, setBusy] = useState(false);
 
+  // Reset busy when stage changes (optimistic update resolved)
+  useEffect(() => { setBusy(false); }, [entry.stage, entry.id]);
+
+  // Reset busy when the stage changes (optimistic update resolved)
+  useEffect(() => { setBusy(false); }, [entry.stage, entry.id]);
+
   const stageIdx  = PIPELINE_STAGES.indexOf(entry.stage as any);
   const nextStage = stageIdx < PIPELINE_STAGES.length - 1 ? PIPELINE_STAGES[stageIdx + 1] : null;
   const prevStage = stageIdx > 0 ? PIPELINE_STAGES[stageIdx - 1] : null;
@@ -37,8 +43,14 @@ export function PipelineCard({ entry, onAdvance, onRevert, onNotFit }: Props) {
     setMenuOpen(false);
     if (nextStage && !busy) { setBusy(true); onAdvance(entry.id, nextStage); }
   }
-  function openRevert() { setMenuOpen(false); setRevertNote(''); setRevertModal(true); }
-  function openNotFit()    { setMenuOpen(false); setSelectedReason(''); setNotFitModal(true); }
+  function openRevert() {
+    if (busy) return;
+    setMenuOpen(false); setRevertNote(''); setRevertModal(true);
+  }
+  function openNotFit() {
+    if (busy) return;
+    setMenuOpen(false); setSelectedReason(''); setNotFitModal(true);
+  }
 
   return (
     <div className="rounded-lg border border-[var(--border-subtle)] bg-white p-3 shadow-xs">
@@ -58,7 +70,7 @@ export function PipelineCard({ entry, onAdvance, onRevert, onNotFit }: Props) {
         </div>
         {/* Action menu */}
         <div className="relative shrink-0">
-          <button onClick={() => setMenuOpen(o => !o)} className="rounded p-1 hover:bg-culture-gray text-secure-gray">
+          <button onClick={() => !busy && setMenuOpen(o => !o)} disabled={busy} className={cn('rounded p-1 text-secure-gray', busy ? 'opacity-40 cursor-not-allowed' : 'hover:bg-culture-gray')}>
             <MoreVertical size={14} />
           </button>
           {menuOpen && (
