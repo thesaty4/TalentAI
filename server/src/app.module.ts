@@ -13,6 +13,7 @@ import { EmployeesModule } from './employees/employees.module';
 import { PipelineModule } from './pipeline/pipeline.module';
 import { SearchModule } from './search/search.module';
 import { CandidateModule } from './candidate/candidate.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 
@@ -41,6 +42,7 @@ import { RolesGuard } from './common/guards/roles.guard';
     PipelineModule,
     SearchModule,
     CandidateModule,
+    NotificationsModule,
     // Feature modules added in later specs
   ],
   providers: [
