@@ -1,4 +1,4 @@
-import { Loader2, Download } from 'lucide-react';
+import { Loader2, Download, LayoutGrid, List } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -6,6 +6,7 @@ import { ErrorBanner, EmptyState } from '../../components/Feedback';
 import { projectsApi } from '../../lib/api/projects.api';
 import { SearchComposer } from './SearchComposer';
 import { ResultCard } from './ResultCard';
+import { ResultTable } from './ResultTable';
 import { EmployeeProfileModal } from './EmployeeProfileModal';
 import { useAISearch } from './useAISearch';
 
@@ -21,6 +22,7 @@ export function AISearchPage() {
   const [profileId,    setProfileId]    = useState<number | null>(null);
   const [resultLimit,  setResultLimit]  = useState<5 | 10 | null>(null);
   const [expSort,      setExpSort]      = useState<'asc' | 'desc' | null>(null);
+  const [viewMode,     setViewMode]     = useState<'card' | 'table'>('card');
 
   const projectsQ = useQuery({
     queryKey: ['projects'],
@@ -188,17 +190,29 @@ export function AISearchPage() {
                     className="flex items-center gap-1 rounded-full bg-level-gray px-2.5 py-0.5 text-xs font-medium text-secure-gray hover:bg-culture-gray">
                     <Download size={10} /> Export
                   </button>
+                  <span className="text-level-gray">|</span>
+                  {/* View switcher */}
+                  <button onClick={() => setViewMode('card')}
+                    className={`rounded p-1 ${viewMode === 'card' ? 'bg-network-blue text-white' : 'text-secure-gray hover:bg-culture-gray'}`}
+                    title="Card view">
+                    <LayoutGrid size={13} />
+                  </button>
+                  <button onClick={() => setViewMode('table')}
+                    className={`rounded p-1 ${viewMode === 'table' ? 'bg-network-blue text-white' : 'text-secure-gray hover:bg-culture-gray'}`}
+                    title="Table view">
+                    <List size={13} />
+                  </button>
                 </div>
               </div>
-              {visible.map(r => (
-                <ResultCard
-                  key={r.employeeId}
-                  result={r}
-                  ircId={selectedIrc!}
-                  onShortlisted={handleShortlisted}
-                  onViewProfile={setProfileId}
-                />
-              ))}
+              {viewMode === 'table' ? (
+                <ResultTable results={visible} ircId={selectedIrc!}
+                  onShortlisted={handleShortlisted} onViewProfile={setProfileId} />
+              ) : (
+                visible.map(r => (
+                  <ResultCard key={r.employeeId} result={r} ircId={selectedIrc!}
+                    onShortlisted={handleShortlisted} onViewProfile={setProfileId} />
+                ))
+              )}
             </div>
           );
         })()}
