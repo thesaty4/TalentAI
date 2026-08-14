@@ -58,7 +58,7 @@ export type PipelineStage = typeof PIPELINE_STAGES[number] | 'Rejected';
 `POST /pipeline/:id/not-fit` body: `{ reason: string }`. Sets `stage = 'Rejected'`, writes `NotFitFeedback` row. `reason` is `@IsString @MinLength(3)`.
 
 **R15 — rejected candidates excluded from search:**
-The search service (spec 07) queries `pipeline_candidates` to exclude `stage = 'Rejected'` entries before building the Gemini pool. This endpoint only sets the stage; the exclusion logic lives in the search service.
+The search service (spec 07) queries `pipeline_candidates` to exclude `stage = 'Rejected'` entries before building the ranking pool. This endpoint only sets the stage; the exclusion logic lives in the search service.
 
 **R15a — re-activate creates a new record:**
 `POST /pipeline/:id/reactivate` — the original rejected record stays (`stage = 'Rejected'`). Create a NEW `PipelineCandidate` row for the same (employeeId, ircId) starting at `AI Shortlisted`. (The `@@unique` constraint must be relaxed or a soft-delete approach used — use `isActive: Boolean @default(true)` flag and change unique constraint to `@@unique([employeeId, ircId, isActive])` where only active records are unique.)

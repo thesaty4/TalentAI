@@ -15,7 +15,7 @@
 | Validation | `class-validator` + `class-transformer` (global `ValidationPipe`) |
 | API docs | Swagger/OpenAPI via `@nestjs/swagger` |
 | Health check | `@nestjs/terminus` |
-| AI | `@google/generative-ai` (Gemini) |
+| AI | Llama3 via Ollama-compatible HTTP APIs |
 | File upload | `multer` (NestJS built-in wrapper) |
 | Config | `@nestjs/config` with Joi schema validation |
 | Password hashing | `bcryptjs` |
@@ -44,7 +44,7 @@ Controller  →  Service  →  PrismaService
 | `PrismaModule` | `PrismaService` | Global module — available everywhere without re-importing |
 | `ProjectsModule` | — | Scoped by manager vs HR via `RolesGuard` |
 | `IrcsModule` | — | Sub-resource of projects |
-| `SearchModule` | — | **Three services, not one:** `SearchService` (orchestrator), `GeminiService` (AI), `HeuristicService` (fallback) |
+| `SearchModule` | — | **Four services, not one:** `SearchService` (orchestrator), `RetrievalService` (semantic retrieval), `LlamaService` (AI ranking), `HeuristicService` (fallback) |
 | `PipelineModule` | — | |
 | `PoolModule` | — | |
 | `EmployeesModule` | — | |
@@ -134,9 +134,11 @@ export default () => ({
   port: parseInt(process.env.PORT ?? '3001', 10),
   databaseUrl: process.env.DATABASE_URL,
   jwtSecret: process.env.JWT_SECRET,
-  geminiApiKey: process.env.GEMINI_API_KEY,
-  geminiModel: process.env.GEMINI_MODEL ?? 'gemini-1.5-flash',
-  geminiBaseUrl: process.env.GEMINI_BASE_URL,
+  llamaBaseUrl: process.env.LLAMA_BASE_URL ?? 'http://localhost:11434',
+  llamaApiKey: process.env.LLAMA_API_KEY,
+  llamaModel: process.env.LLAMA_MODEL ?? 'llama3',
+  llamaEmbedModel: process.env.LLAMA_EMBED_MODEL ?? 'nomic-embed-text',
+  rankingProvider: process.env.RANKING_PROVIDER ?? 'llama',
   clientUrl: process.env.CLIENT_URL ?? 'http://localhost:5173',
 });
 ```
@@ -144,12 +146,14 @@ export default () => ({
 Required env vars (validated at startup via `validationSchema`):
 - `DATABASE_URL`
 - `JWT_SECRET`
-- `GEMINI_API_KEY`
 
 Optional:
 - `PORT` (default `3001`)
-- `GEMINI_MODEL` (default `gemini-1.5-flash`)
-- `GEMINI_BASE_URL`
+- `LLAMA_BASE_URL` (default `http://localhost:11434`)
+- `LLAMA_API_KEY`
+- `LLAMA_MODEL` (default `llama3`)
+- `LLAMA_EMBED_MODEL` (default `nomic-embed-text`)
+- `RANKING_PROVIDER` (`llama` or `heuristic`, default `llama`)
 - `CLIENT_URL`
 
 ---
@@ -230,30 +234,33 @@ Seeds the following for demo:
 
 ## AI Search Flow (`search/` module)
 
-This module has **three services** with distinct responsibilities — do not collapse them.
+This module has **four services** with distinct responsibilities — do not collapse them.
 
 ### Service responsibilities
 
 | File | Owns | Does NOT own |
 |------|------|-------------|
-| `search.service.ts` | Orchestration flow (steps 1–10 below) | Prompt building, Gemini calls, scoring logic |
-| `gemini.service.ts` | Prompt construction, Gemini API call, Zod validation | Business logic, DB queries |
-| `heuristic.service.ts` | Skill-overlap % scoring + generic why/why-not text | Gemini, DB queries |
+| `search.service.ts` | Orchestration flow (steps below), business rules, provider gating, fallback routing | Prompt building, embedding calls, model parsing |
+| `retrieval.service.ts` | Effective query composition, query embedding, hybrid retrieval (SQL filters + vector ranking) | Business-rule decisions, response shaping |
+| `llama.service.ts` | Prompt construction, Llama API call, Zod validation + one retry | Business logic, DB queries |
+| `heuristic.service.ts` | Skill-overlap % scoring + generic why/why-not text | Llama calls, DB queries |
 
 ### Request flow (every `POST /search` call)
 
 1. **Validate** — `SearchDto` via global `ValidationPipe` (ircId, query?, scope, jdText?).
 2. **Load context** — `SearchService` fetches IRC + parent project from Prisma.
-3. **Pre-filter pool** — cheap mandatory-skill overlap check; keeps ≤ `MAX_GEMINI_CANDIDATES` (35) candidates to cap Gemini prompt size.
-4. **Rank**:
-   - Happy path → `GeminiService.rank(irc, pool, query, jdText)` — builds prompt, calls Gemini with JSON response mode, validates output with Zod.
-   - Failure path → `HeuristicService.rank(irc, pool)` — pure skill-overlap scorer, no external calls.
-5. **Re-hydrate** — for each result, replace ALL display fields (`fullName`, `skills`, `location`, `businessUnit`, etc.) with DB data keyed by `employeeId`. Trust model only for `matchPct`, `whyRecommend`, `whyNot`, `conflict`, `conflictNote`.
-6. **Duplicate check** — query `pipeline_candidates` to flag any employee already active in a *different* open IRC.
-7. **Log** — write `search_logs` row (user, irc, query text, jd filename if any, timestamp).
-8. **Return** — sorted by `matchPct` descending.
+3. **Pre-filter pool** — mandatory-skill overlap check; keeps ≤ `MAX_RANKING_CANDIDATES` (35) candidates.
+4. **Build effective query** — normalize and combine manager query and JD text in `retrieval.service.ts`.
+5. **Retrieve semantic evidence** — `RetrievalService` embeds query and returns vector-ranked project rows with hard SQL filters.
+6. **Rank**:
+  - Happy path → `LlamaService.rank(irc, pool, query, jdText)`.
+  - Failure path (retrieval/model/parse) → `HeuristicService.rank(irc, pool)`.
+7. **Re-hydrate** — replace ALL display fields (`fullName`, `skills`, `location`, `businessUnit`, etc.) with DB data keyed by `employeeId`. Trust model only for `matchPct`, `whyRecommend`, `whyNot`, `conflict`, `conflictNote`.
+8. **Duplicate check** — query `pipeline_candidates` to flag any employee already active in a *different* open IRC.
+9. **Log** — write `search_logs` row (user, irc, query text, jd filename if any, timestamp).
+10. **Return** — sorted by `matchPct` descending.
 
-### Gemini prompt structure (`gemini.service.ts`)
+### Llama3 prompt structure (`llama.service.ts`)
 
 ```
 SYSTEM: You are an internal staffing analyst. Score candidates by real project evidence,
@@ -271,23 +278,45 @@ USER:
    availableDate, joiningNotice, projectHistory[{projectName, duration, description}]>
 ```
 
-### Zod validation schema (output from Gemini)
+### Llama API call contract
+
+- `POST ${LLAMA_BASE_URL}/api/generate`
+- Headers: `Authorization: Bearer ${LLAMA_API_KEY}` (when configured), `Content-Type: application/json`
+- Body: `{ model: ${LLAMA_MODEL}, prompt: <text>, stream: false }`
+- Parse output from response field `response`
+
+### Zod validation schema (output from Llama)
 
 ```typescript
 const RankedItemSchema = z.object({
   employeeId:    z.number().int(),
   matchPct:      z.number().int().min(0).max(100),
   whyRecommend:  z.string().min(10),
-  whyNot:        z.array(z.string()),
+  whyNot:        z.array(z.string()).min(1),
   conflict:      z.boolean(),
   conflictNote:  z.string().optional(),
 });
-export const GeminiResponseSchema = z.array(RankedItemSchema);
+export const LlamaResponseSchema = z.array(RankedItemSchema);
 ```
+
+### Retrieval flow (`retrieval.service.ts`)
+
+- Builds `effectiveQuery` from manager query and JD text.
+- JD handling:
+  - supports PDF/DOCX extraction upstream in controller
+  - trims and normalizes whitespace/newlines
+  - caps text via `JD_TEXT_MAX_LENGTH`
+  - falls back to manager query if JD extraction is empty/unusable
+- Embedding endpoint:
+  - `POST ${LLAMA_BASE_URL}/api/embeddings`
+  - Body: `{ model: ${LLAMA_EMBED_MODEL}, prompt: <effectiveQuery> }`
+- Hybrid retrieval SQL:
+  - hard filters in `WHERE` (scope/rejected/skills)
+  - vector cosine ordering on `EmployeeProject.embedding`
 
 ### Heuristic fallback (`heuristic.service.ts`)
 
-Used when Gemini errors or times out. Pure function — no async, no external calls.
+Used when retrieval or Llama ranking errors/time out/parse-fail. Pure function — no async, no external calls.
 
 Score = `(mandatory skill matches / total mandatory skills) × 100`, capped at 85.
 `whyRecommend` = generic sentence listing matched skills.

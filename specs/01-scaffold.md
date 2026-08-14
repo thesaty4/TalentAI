@@ -77,14 +77,16 @@ export default () => ({
   port: parseInt(process.env.PORT ?? '3001', 10),
   databaseUrl: process.env.DATABASE_URL,
   jwtSecret: process.env.JWT_SECRET,
-  geminiApiKey: process.env.GEMINI_API_KEY,
-  geminiModel: process.env.GEMINI_MODEL ?? 'gemini-1.5-flash',
-  geminiBaseUrl: process.env.GEMINI_BASE_URL,
+  llamaBaseUrl: process.env.LLAMA_BASE_URL ?? 'http://localhost:11434',
+  llamaApiKey: process.env.LLAMA_API_KEY,
+  llamaModel: process.env.LLAMA_MODEL ?? 'llama3',
+  llamaEmbedModel: process.env.LLAMA_EMBED_MODEL ?? 'nomic-embed-text',
+  rankingProvider: process.env.RANKING_PROVIDER ?? 'llama',
   clientUrl: process.env.CLIENT_URL ?? 'http://localhost:5173',
 });
 ```
 
-Required env vars validated at startup (Joi): `DATABASE_URL`, `JWT_SECRET`, `GEMINI_API_KEY`.
+Required env vars validated at startup (Joi): `DATABASE_URL`, `JWT_SECRET`.
 
 **`server/src/common/filters/global-exception.filter.ts`** — catches all exceptions, returns `{ statusCode, message, error }`.
 
@@ -111,9 +113,11 @@ Required env vars validated at startup (Joi): `DATABASE_URL`, `JWT_SECRET`, `GEM
 ```
 DATABASE_URL=postgres://postgres:password@localhost:5432/talentlens
 JWT_SECRET=change_me_32_chars_minimum
-GEMINI_API_KEY=your_key_here
-GEMINI_MODEL=gemini-1.5-flash
-GEMINI_BASE_URL=
+LLAMA_BASE_URL=http://localhost:11434
+LLAMA_API_KEY=
+LLAMA_MODEL=llama3
+LLAMA_EMBED_MODEL=nomic-embed-text
+RANKING_PROVIDER=llama
 PORT=3001
 CLIENT_URL=http://localhost:5173
 VITE_API_URL=http://localhost:3001

@@ -41,7 +41,7 @@ function buildPaginationMeta(total: number, page: number, limit: number) {
 | Type | Convention | Example |
 |------|-----------|---------|
 | NestJS module file | `kebab-case.module.ts` | `pipeline.module.ts` |
-| NestJS service | `kebab-case.service.ts` | `gemini-search.service.ts` |
+| NestJS service | `kebab-case.service.ts` | `llama.service.ts` |
 | NestJS controller | `kebab-case.controller.ts` | `candidates.controller.ts` |
 | DTO | `kebab-case.dto.ts` | `add-to-pipeline.dto.ts` |
 | Prisma schema | `schema.prisma` | — |
@@ -145,7 +145,7 @@ Every list view must handle three states explicitly:
 
 ```typescript
 // ✅ — explains *why*, not what
-// Gemini limits context to ~8k tokens; pre-filter to top 35 candidates by skill overlap
+// Llama prompt context is capped; pre-filter to top 35 candidates by skill overlap
 const preFiltered = applyHeuristicFilter(pool, irc, 35);
 
 // ❌ — restates the code
@@ -163,7 +163,7 @@ If code needs to be removed, delete it. If it may return, put it in version cont
 
 ```typescript
 // ✅
-const MAX_GEMINI_CANDIDATES = 35;
+const MAX_RANKING_CANDIDATES = 35;
 const PIPELINE_STAGES = ['AI Shortlisted', 'Manager Screening', /* … */] as const;
 
 // ❌

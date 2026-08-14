@@ -84,7 +84,7 @@ No undocumented endpoint. Every DTO property: `@ApiProperty` or `@ApiPropertyOpt
 ```
 server/src/
 ├── common/
-│   ├── constants/          ← PIPELINE_STAGES, MAX_GEMINI_CANDIDATES, ROLES
+│   ├── constants/          ← PIPELINE_STAGES, MAX_RANKING_CANDIDATES, ROLES
 │   ├── decorators/         ← @CurrentUser()
 │   ├── filters/            ← GlobalExceptionFilter
 │   ├── guards/             ← JwtAuthGuard, RolesGuard

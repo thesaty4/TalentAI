@@ -13,7 +13,7 @@ IRC and Project creation/closing are out of scope. This product only consumes a 
 `Closed` IRCs remain visible in read views (history, all-projects list) but cannot be targeted by AI search, shortlist, or apply actions. Enforce this in the service layer, not just the UI.
 
 **R3. IRC fields are real matching inputs.**
-Mandatory skills, preferred skills, experience range, location, and remote policy are inputs to the AI ranking — not just display metadata. The search service must pass them to Gemini and the heuristic fallback.
+Mandatory skills, preferred skills, experience range, location, and remote policy are inputs to the AI ranking — not just display metadata. The search service must pass them to the active ranking provider and the heuristic fallback.
 
 ---
 

@@ -22,7 +22,7 @@ If any answer is "no", redesign first.
 | Type | Convention | Example |
 |------|-----------|---------|
 | NestJS module | `kebab-case.module.ts` | `pipeline.module.ts` |
-| NestJS service | `kebab-case.service.ts` | `gemini.service.ts` |
+| NestJS service | `kebab-case.service.ts` | `llama.service.ts` |
 | NestJS controller | `kebab-case.controller.ts` | `pipeline.controller.ts` |
 | DTO | `kebab-case.dto.ts` | `update-stage.dto.ts` |
 | React component | `PascalCase.tsx` | `StageChip.tsx` |
@@ -34,7 +34,7 @@ If any answer is "no", redesign first.
 - Booleans: `is`, `has`, `can`, `should` prefix — `isLoading`, `hasConflict`
 - Event handlers: `handle` prefix — `handleStageChange`, `handleSubmit`
 - Collections: plural noun — `employees`, `stages`
-- Module-level constants: `SCREAMING_SNAKE_CASE` — `MAX_GEMINI_CANDIDATES`
+- Module-level constants: `SCREAMING_SNAKE_CASE` — `MAX_RANKING_CANDIDATES`
 
 ---
 
@@ -54,7 +54,7 @@ Split by responsibility when approaching limits.
 
 ```typescript
 // ✅  server/src/common/constants/search.constants.ts
-const MAX_GEMINI_CANDIDATES = 35;
+const MAX_RANKING_CANDIDATES = 35;
 // ❌  pool.slice(0, 35)
 ```
 
@@ -65,8 +65,8 @@ Constants: `server/src/common/constants/` · `client/src/lib/constants/`
 ## Comments: why, not what
 
 ```typescript
-// ✅ Gemini context window caps at ~8k tokens; pre-filter keeps prompt tight
-const pool = preFilter(employees, irc, MAX_GEMINI_CANDIDATES);
+// ✅ Ranking context window caps at ~8k tokens; pre-filter keeps prompt tight
+const pool = preFilter(employees, irc, MAX_RANKING_CANDIDATES);
 // ❌ Filter employees to max candidates
 ```
 

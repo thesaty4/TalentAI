@@ -32,7 +32,7 @@ server/
 │   │   │   └── transform.interceptor.ts  # wraps responses in { data, meta }
 │   │   └── utils/
 │   │       ├── pagination.util.ts
-│   │       └── heuristic-scorer.util.ts  # Gemini fallback scorer
+│   │       └── heuristic-scorer.util.ts  # AI fallback scorer
 │   │
 │   ├── config/
 │   │   └── configuration.ts    # @nestjs/config schema + validation
@@ -67,9 +67,10 @@ server/
 │   ├── search/                      # AI ranking — more files than a standard module
 │   │   ├── search.module.ts
 │   │   ├── search.controller.ts     # POST /search · POST /search/upload-jd
-│   │   ├── search.service.ts        # orchestrates: pre-filter → rank → duplicate-check → log
-│   │   ├── gemini.service.ts        # prompt construction + Gemini API call + Zod validation only
-│   │   ├── heuristic.service.ts     # local fallback scorer (skill-overlap %) — used when Gemini fails
+│   │   ├── search.service.ts        # orchestrates: pre-filter → retrieval → rank → duplicate-check → log
+│   │   ├── retrieval.service.ts     # effective query + embeddings + hybrid vector retrieval
+│   │   ├── llama.service.ts         # prompt construction + Llama API call + Zod validation only
+│   │   ├── heuristic.service.ts     # local fallback scorer (skill-overlap %) — used when AI path fails
 │   │   └── dto/
 │   │       ├── search.dto.ts        # SearchDto: ircId, query?, scope, jdText?
 │   │       └── search-result.dto.ts # RankedCandidateDto: employeeId, matchPct, whyRecommend, whyNot, conflict*
