@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { PoolCandidate, RankedItem } from './gemini.service';
+import { PoolCandidate, RankedItem } from './llama.service';
 
 interface IrcInfo {
   mandatorySkills: string;
   project: { startDate: Date | null };
 }
 
-// Pure synchronous — no async, no DB, no external calls (per instructions)
+// Pure synchronous — no async, no DB, no external calls
 @Injectable()
 export class HeuristicService {
   rank(irc: IrcInfo, pool: PoolCandidate[]): RankedItem[] {

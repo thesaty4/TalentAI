@@ -1,11 +1,13 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Prisma } from '@prisma/client';
 import { JwtPayload } from '../auth/strategies/jwt.strategy';
-import { MAX_GEMINI_CANDIDATES } from '../common/constants/search.constants';
+import { MAX_RANKING_CANDIDATES } from '../common/constants/search.constants';
 import { PrismaService } from '../prisma/prisma.service';
 import { SearchDto } from './dto/search.dto';
-import { GeminiService, PoolCandidate, RankedItem } from './gemini.service';
+import { LlamaService, PoolCandidate, RankedItem } from './llama.service';
 import { HeuristicService } from './heuristic.service';
+import { writeSearchLog } from '../common/utils/search-logger.util';
 
 type EmployeeWithRelations = Prisma.EmployeeGetPayload<{
   include: {
@@ -20,7 +22,8 @@ export class SearchService {
 
   constructor(
     private readonly prisma:     PrismaService,
-    private readonly gemini:     GeminiService,
+    private readonly config:     ConfigService,
+    private readonly llama:     LlamaService,
     private readonly heuristic:  HeuristicService,
   ) {}
 
@@ -34,18 +37,25 @@ export class SearchService {
     if (irc.status !== 'Open') throw new BadRequestException('IRC is not Open (R2)');
 
     // Step 2: build candidate pool
-    const pool = await this.buildPool(dto, irc.id, irc.mandatorySkills);
+    const pool = await this.buildPool(dto, irc.id);
+    this.logger.log(
+      `Pool built — ${pool.length} candidates | scope=${dto.scope} | query="${(dto.query ?? '').slice(0, 80)}" | jdText=${dto.jdText ? `${dto.jdText.length} chars` : 'none'}`,
+    );
     if (pool.length === 0) return [];
 
-    // Step 3: rank — Gemini with heuristic fallback on any error
+    // Step 3: rank — Llama3 with heuristic fallback on any failure
     let ranked: RankedItem[];
     try {
-      ranked = await this.gemini.rank(irc, pool, dto.query, dto.jdText);
+      // Use heuristic directly when RANKING_PROVIDER=heuristic
+      if (this.config.get<string>('rankingProvider') === 'heuristic') {
+        throw new Error('heuristic-only mode');
+      }
+      ranked = await this.llama.rank(irc, pool, dto.query, dto.jdText);
       // Filter hallucinated employeeIds not present in our pool
       const poolIds = new Set(pool.map(c => c.employeeId));
       ranked = ranked.filter(r => poolIds.has(r.employeeId));
     } catch (err) {
-      this.logger.warn(`Gemini failed — heuristic fallback: ${(err as Error).message}`);
+      this.logger.warn(`Llama failed — heuristic fallback: ${(err as Error).message}`);
       ranked = this.heuristic.rank(irc, pool);
     }
 
@@ -84,7 +94,26 @@ export class SearchService {
       });
 
     // R9: sort by matchPct descending
-    results.sort((a, b) => b.matchPct - a.matchPct);
+    results.sort((a, b) => b.matchPct - a.matchPct || a.employeeId - b.employeeId);
+
+    // Write full debug entry to file: pool size, query, per-candidate ranking
+    writeSearchLog({
+      ircId:      dto.ircId,
+      ircCode:    irc.ircCode,
+      scope:      dto.scope,
+      query:      dto.query ?? null,
+      jdChars:    dto.jdText?.length ?? 0,
+      poolSize:   pool.length,
+      provider:   this.config.get<string>('rankingProvider'),
+      rankings:   results.map(r => ({
+        employeeId: r.employeeId,
+        name:       r.fullName,
+        matchPct:   r.matchPct,
+        whyRecommend: r.whyRecommend,
+        whyNot:     r.whyNot,
+      })),
+    });
+    this.logger.log(`Top-3 rankings: ${results.slice(0, 3).map(r => `${r.fullName}(${r.matchPct}%)`).join(', ')}`);
 
     // Step 8: log every search regardless of AI or heuristic path
     await this.prisma.searchLog.create({
@@ -96,7 +125,7 @@ export class SearchService {
 
   // ─── Pool builder ──────────────────────────────────────────────────────────
 
-  private async buildPool(dto: SearchDto, ircId: number, mandatorySkills: string): Promise<PoolCandidate[]> {
+  private async buildPool(dto: SearchDto, ircId: number): Promise<PoolCandidate[]> {
     // R10: 'applied' scope = only employees already in this IRC's active pipeline
     if (dto.scope === 'applied') {
       const entries = await this.prisma.pipelineCandidate.findMany({
@@ -108,39 +137,22 @@ export class SearchService {
       return entries.map(pe => this.toPoolCandidate(pe.employee));
     }
 
-    // R15: exclude employees with a Rejected stage for this IRC
+    // R15: exclude employees Rejected for this IRC — everyone else goes to Llama
     const rejectedIds = await this.prisma.pipelineCandidate
       .findMany({ where: { ircId, stage: 'Rejected' }, select: { employeeId: true } })
       .then(rows => rows.map(r => r.employeeId));
 
-    const mandatory = mandatorySkills.split(',').map(s => s.trim()).filter(Boolean);
-
     const where: Prisma.EmployeeWhereInput = {
       ...(rejectedIds.length > 0 && { id: { notIn: rejectedIds } }),
-      ...(mandatory.length > 0 && {
-        skills: { some: { skill: { name: { in: mandatory } } } },
-      }),
+      // No mandatory-skill pre-filter: Llama ranks by the manager's query, not IRC skills
     };
 
     const employees = await this.prisma.employee.findMany({
       where,
       include: { skills: { include: { skill: true } }, projectHistory: true },
-      // When no mandatory filter, cap directly in Prisma to avoid loading all 65 rows
-      ...(mandatory.length === 0 && { take: MAX_GEMINI_CANDIDATES }),
     });
 
-    if (mandatory.length === 0) return employees.map(e => this.toPoolCandidate(e));
-
-    // Sort by mandatory-skill overlap descending; keep top MAX_GEMINI_CANDIDATES
-    return employees
-      .map(e => {
-        const empSkills = e.skills.map(es => es.skill.name.toLowerCase());
-        const overlap   = mandatory.filter(s => empSkills.includes(s.toLowerCase())).length;
-        return { e, overlap };
-      })
-      .sort((a, b) => b.overlap - a.overlap)
-      .slice(0, MAX_GEMINI_CANDIDATES)
-      .map(({ e }) => this.toPoolCandidate(e));
+    return employees.map(e => this.toPoolCandidate(e));
   }
 
   private toPoolCandidate(e: EmployeeWithRelations): PoolCandidate {
@@ -207,4 +219,5 @@ export class SearchService {
     });
     return new Map(rows.map(r => [r.employeeId, r.id]));
   }
+
 }
