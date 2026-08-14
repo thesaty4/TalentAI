@@ -1,11 +1,11 @@
 ---
 applyTo: "server/src/search/**"
-description: "TalentLens AI search module rules. Apply only to files inside server/src/search/. Covers the four-service split (SearchService/RetrievalService/LlamaService/HeuristicService), provider-gated ranking, effectiveQuery + JD handling, strict output validation, re-hydration rule (never trust model for display fields), fallback behaviour, and search logging requirement."
+description: "TalentLens AI search module rules. Three-service split: SearchService (orchestration + business rules), LlamaService (query-first Llama3 ranking + Zod validation), HeuristicService (synchronous skill-overlap fallback). Manager query is always the PRIMARY ranking signal; IRC JD provides refinement context only. Strict re-hydration rule — never trust model for display fields. Heuristic fallback on any Llama failure."
 ---
 
 # TalentLens AI — Search Module Standards
 
-This module has **four services with distinct, non-overlapping responsibilities**. Never merge them.
+Three services with **distinct, non-overlapping responsibilities**. Never merge them. Never add a fourth.
 
 ---
 
@@ -13,25 +13,25 @@ This module has **four services with distinct, non-overlapping responsibilities*
 
 | File | Owns | Must NOT touch |
 |------|------|----------------|
-| `search.service.ts` | Orchestration and business rules: open-IRC enforcement, scope/rejected handling, provider selection, fallback control, re-hydration, duplicate checks, sorting, logging | Prompt building, embedding calls, model parsing |
-| `retrieval.service.ts` | Effective query composition, query embedding, hybrid retrieval SQL (hard filters + vector ordering) | Pipeline/business rule decisions, API response shaping |
-| `llama.service.ts` | Llama prompt construction, `/api/generate` call, strict Zod validation + one retry on parse failure | DB queries, business rules, HTTP context |
-| `heuristic.service.ts` | Synchronous skill-overlap scoring + generic why/why-not fallback output | Llama calls, DB queries, async I/O |
+| `search.service.ts` | Orchestration + business rules: open-IRC enforcement, scope/rejected handling, pool pre-filter, Llama call, fallback control, re-hydration, duplicate checks, sorting, logging | Prompt building, model API calls, scoring algorithms |
+| `llama.service.ts` | `effectiveQuery` composition, prompt construction, `/api/generate` call, Zod validation + one retry on parse failure | DB queries, business rules, HTTP context |
+| `heuristic.service.ts` | Synchronous skill-overlap scoring + generic why/why-not text. No async, no I/O. | Llama calls, DB queries |
 
 ---
 
 ## Request flow (enforced in `search.service.ts`)
 
 1. Load IRC + parent project from Prisma.
-2. Build candidate pool with scope and rejected-candidate exclusions preserved.
-3. Build `effectiveQuery` (manager query + JD text rules), then call retrieval for embedding + semantic evidence when query context exists.
-4. Call ranking provider path:
-  - if `RANKING_PROVIDER=heuristic`, skip Llama and use heuristic ranking.
-  - otherwise call `LlamaService.rank()`; on any retrieval/ranking/parse error, fall back to `HeuristicService.rank()`.
-5. **Re-hydrate**: replace ALL display fields from DB by `employeeId`. Trust model only for the fields below.
-6. Duplicate-check: flag employees already active in a *different* open IRC.
-7. Write `search_logs` row — every call, regardless of AI or heuristic path.
-8. Return array sorted by `matchPct` descending.
+2. Build candidate pool — apply scope constraint (R10) and rejected-candidate exclusions (R15).
+3. Pre-filter: keep employees with at least 1 mandatory-skill match; cap at `MAX_RANKING_CANDIDATES` by overlap count.
+4. Call ranking:
+   - If `RANKING_PROVIDER=heuristic` → skip Llama, use heuristic directly.
+   - Otherwise call `LlamaService.rank(irc, pool, query, jdText)`.
+   - On any Llama failure (network, parse, timeout) → silently fall back to `HeuristicService.rank()`.
+5. **Re-hydrate** every result from DB by `employeeId` — replace ALL display fields.
+6. Duplicate-check: flag employees active in a *different* open IRC (R5).
+7. Write `search_logs` row — every call, regardless of path.
+8. Return sorted by `matchPct` descending (R9).
 
 ---
 
@@ -41,61 +41,72 @@ This module has **four services with distinct, non-overlapping responsibilities*
 matchPct · whyRecommend · whyNot · conflict · conflictNote
 ```
 
-Always re-hydrate from DB: `fullName`, `roleTitle`, `skills`, `location`, `businessUnit`, `benchStatus`, `currentAllocation`, `availableDate`.
+Always re-hydrate from DB: `fullName`, `roleTitle`, `skills`, `location`, `businessUnit`,
+`benchStatus`, `currentAllocation`, `availableDate`.
 
 ```typescript
-// ✅ Re-hydrate after model returns
-const employee = await this.prisma.employee.findUniqueOrThrow({ where: { id: item.employeeId }, include: { skills: true } });
-return { ...item, fullName: employee.fullName, skills: employee.skills.map(s => s.name), /* … */ };
+// ✅ Correct
+const emp = await prisma.employee.findUniqueOrThrow({ where: { id: item.employeeId } });
+return { ...item, fullName: emp.fullName, skills: emp.skills.map(s => s.name) };
 
-// ❌ Never use name/skills/location from the model response directly
+// ❌ Never use display fields directly from the Llama response
 ```
 
 ---
 
-## Effective query + JD handling (`retrieval.service.ts`)
+## Llama prompt structure — query is FIRST (`llama.service.ts`)
 
-- Supported upload types are PDF and DOCX only.
-- Normalize extracted JD text: trim + collapse repeated whitespace/newlines.
-- Apply safe max cap via named constant `JD_TEXT_MAX_LENGTH` (no magic number inline).
-- Build `effectiveQuery` with this priority:
-  - JD only: use JD text.
-  - Query + JD: combine with labeled sections:
-    - `Manager Query:`
-    - `JD Text:`
-  - Query only: use query.
-  - Empty extraction: fall back to query and log warning (do not fail request).
-
-## Llama prompt structure (`llama.service.ts`)
+The manager's query is the **primary ranking signal**. IRC JD fields are secondary context used only for refinement. This order must never be reversed.
 
 ```
 SYSTEM:
-  You are an internal staffing analyst. Score candidates only on real, specific project
-  evidence — not just skill tag overlap. A candidate with fewer skills but a directly relevant
-  project should outscore one with more tags but no evidence. Return strict JSON per the schema.
+  You are a staffing analyst. Rank candidates strictly by how well their real project
+  history matches the manager's specific requirement. A candidate with direct, relevant
+  project experience outranks one with more skills but no matching history.
+  Return strict JSON per the schema — no extra text.
 
 USER:
-  ## Open Requisition
-  Role: {roleTitle} | Mandatory: {mandatorySkills} | Preferred: {preferredSkills}
-  Experience: {experienceRange} | Location: {location} | Remote policy: {remotePolicy}
-  Project: {projectName} (starts {startDate})
+  ## What the manager needs [PRIMARY — match against this first]
+  {effectiveQuery}
 
-  ## Manager requirement
-  {effectiveQuery context}
+  ## Role context [SECONDARY — use for refinement only]
+  Role: {roleTitle}
+  Mandatory skills: {mandatorySkills}
+  Preferred skills: {preferredSkills}
+  Experience range: {experienceRange}
+  Location: {location} | Remote: {remotePolicy}
+  Project starts: {startDate}
 
   ## Candidate pool
-  [{employeeId, skills[], experienceYears, currentAllocation, availableDate,
+  [{employeeId, experienceYears, skills[], currentAllocation, availableDate,
     joiningNotice, projectHistory:[{projectName, duration, description}]}]
+
+  Return a JSON array. Each element:
+  { employeeId (int), matchPct (0-100), whyRecommend (cite specific project evidence, ≥10 chars),
+    whyNot (string[], at least 1 item — R7), conflict (bool), conflictNote (string, omit if no conflict) }
 ```
 
-LLM API contract:
-
+**LLM API contract:**
 - `POST ${LLAMA_BASE_URL}/api/generate`
-- Headers:
-  - `Authorization: Bearer ${LLAMA_API_KEY}` (when key configured)
-  - `Content-Type: application/json`
-- Body: `{ model: ${LLAMA_MODEL}, prompt: <text>, stream: false }`
-- Parse model output from response field `response`.
+- Headers: `Authorization: Bearer ${LLAMA_API_KEY}` (only when key is set), `Content-Type: application/json`
+- Body: `{ model: "${LLAMA_MODEL}", prompt: "<text>", stream: false }`
+- Parse from response field `response`
+
+---
+
+## `effectiveQuery` construction (`llama.service.ts`)
+
+Build `effectiveQuery` before inserting into the prompt:
+
+| Input available | `effectiveQuery` value |
+|-----------------|------------------------|
+| Query only | Use query as-is |
+| JD only | Use JD text (capped at `JD_TEXT_MAX_LENGTH`) |
+| Query + JD | `Manager requirement: {query}\n\nJob description:\n{jd_capped}` |
+| Neither | Empty string — prompt runs with role context only |
+
+Normalize JD text: trim + collapse repeated whitespace/newlines before capping.
+Apply `JD_TEXT_MAX_LENGTH` cap via the named constant — never inline the number.
 
 ---
 
@@ -113,17 +124,27 @@ const RankedItemSchema = z.object({
 export const LlamaResponseSchema = z.array(RankedItemSchema);
 ```
 
-Throw a typed error if Zod validation fails after one retry — `search.service.ts` catches it and falls back to heuristic.
+Retry once on Zod failure. Throw typed error on second failure — `search.service.ts` catches and falls back.
 
 ---
 
 ## Heuristic fallback (`heuristic.service.ts`)
 
-Pure synchronous function — no async, no external calls, no DB.
+Pure synchronous function — no async, no external calls, no DB access.
 
 ```
-score = (matched mandatory skills / total mandatory skills) × 100, capped at 85
+matchPct  = (matched mandatory / total mandatory) × 100, capped at 85
 whyRecommend = "Matches {n} of {total} mandatory skills: {list}"
-whyNot = unmatched mandatory skills as array
-conflict = availableDate > projectStartDate (simple date compare)
+whyNot    = unmatched mandatory skills (at least 1 — R7)
+conflict  = availableDate exists AND availableDate > project.startDate
 ```
+
+---
+
+## Environment config
+
+Validate all Llama env vars in `configuration.ts`:
+- `LLAMA_BASE_URL` — required
+- `LLAMA_API_KEY` — optional (omit header when not set)
+- `LLAMA_MODEL` — required (e.g. `llama3`)
+- `RANKING_PROVIDER` — `llama | heuristic` (default: `llama`)

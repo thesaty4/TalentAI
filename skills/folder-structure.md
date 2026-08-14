@@ -64,16 +64,15 @@ server/
 │   │   ├── ircs.controller.ts
 │   │   └── ircs.service.ts
 │   │
-│   ├── search/                      # AI ranking — more files than a standard module
+│   ├── search/                      # AI ranking — three services, no embedding pipeline
 │   │   ├── search.module.ts
 │   │   ├── search.controller.ts     # POST /search · POST /search/upload-jd
-│   │   ├── search.service.ts        # orchestrates: pre-filter → retrieval → rank → duplicate-check → log
-│   │   ├── retrieval.service.ts     # effective query + embeddings + hybrid vector retrieval
-│   │   ├── llama.service.ts         # prompt construction + Llama API call + Zod validation only
-│   │   ├── heuristic.service.ts     # local fallback scorer (skill-overlap %) — used when AI path fails
+│   │   ├── search.service.ts        # orchestrates: pre-filter → rank → re-hydrate → duplicate-check → log
+│   │   ├── llama.service.ts         # effectiveQuery + prompt (query-first) + Llama3 API + Zod validation
+│   │   ├── heuristic.service.ts     # synchronous skill-overlap fallback — no I/O, no async
 │   │   └── dto/
-│   │       ├── search.dto.ts        # SearchDto: ircId, query?, scope, jdText?
-│   │       └── search-result.dto.ts # RankedCandidateDto: employeeId, matchPct, whyRecommend, whyNot, conflict*
+│   │       ├── search.dto.ts        # ircId, query?, scope, jdText?
+│   │       └── search-result.dto.ts # employeeId, matchPct, whyRecommend, whyNot, conflict, alreadyInPipeline
 │   │
 │   ├── pipeline/
 │   │   ├── pipeline.module.ts
