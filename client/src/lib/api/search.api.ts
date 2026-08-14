@@ -26,6 +26,7 @@ export interface SearchDto {
   query?: string;
   scope: 'all' | 'applied';
   jdText?: string;
+  topN?: number;  // omit or 0 to return all ranked candidates
 }
 
 export const searchApi = {

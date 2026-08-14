@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, X,
          LayoutDashboard, Search, Columns, Users, FileText,
-         Target, Activity, MessageSquare, Calendar } from 'lucide-react';
+         Briefcase, Target, Activity, MessageSquare, Calendar } from 'lucide-react';
 import { useAuth } from '../auth/useAuth';
 
 interface Props {
@@ -15,6 +15,7 @@ const C = { bg: '#1B2430', accent: '#3B6E64' };
 
 const MANAGER_NAV = [
   { to: '/dashboard',   label: 'Dashboard',     Icon: LayoutDashboard },
+  { to: '/projects',    label: 'Projects',       Icon: Briefcase },
   { to: '/search',      label: 'AI Search',      Icon: Search },
   { to: '/pipeline',    label: 'Pipeline',       Icon: Columns },
   { to: '/pool',        label: 'Resource Pool',  Icon: Users },

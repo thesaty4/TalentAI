@@ -8,6 +8,7 @@
     "start:dev": "nest start --watch",
     "dev": "nest start --watch",
     "prisma:studio": "prisma studio --port 5555",
+    "embed": "ts-node --project tsconfig.json scripts/generate-embeddings.ts",
     "db:migrate": "prisma migrate dev --name init",
     "db:seed": "prisma db seed",
     "db:reset:seed": "prisma migrate reset --force && prisma db seed",

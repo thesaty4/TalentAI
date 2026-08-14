@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsIn, IsInt, IsOptional, IsPositive, IsString } from 'class-validator';
+import { IsIn, IsInt, IsOptional, IsPositive, IsString, Max, Min } from 'class-validator';
 
 export class SearchDto {
   @ApiProperty({ description: 'Open IRC to search against (R2: must be Open)' })
@@ -22,4 +22,12 @@ export class SearchDto {
   @IsOptional()
   @IsString()
   jdText?: string;
+
+  @ApiPropertyOptional({ description: 'Limit results to top N candidates. Omit (or 0) to return all.' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  topN?: number;
 }

@@ -79,6 +79,8 @@ model EmployeeProject {
   duration    String?
   description String
   domainTags  String[]
+  // pgvector column — managed via raw migration (20260814120000_add_pgvector)
+  embedding   Unsupported("vector(768)")?
 }
 
 model EmployeeRating {
