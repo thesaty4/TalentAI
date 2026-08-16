@@ -266,20 +266,24 @@ Ranking priority:
 4. Skill tag with limited project evidence.
 5. Weak project relevance.
 
-For a simple skill request such as:
+Example: 
+For understanding - 
+  """
+    For a simple skill request such as:
 
-"give me Python candidate"
+    "give me Python candidate"
 
-Python determines eligibility.
+    Python determines eligibility.
 
-Project history determines how strong the candidate ranks.
+    Project history determines how strong the candidate ranks.
 
-Secondary role requirements may help distinguish otherwise similar candidates, but they must NEVER:
+    Secondary role requirements may help distinguish otherwise similar candidates, but they must NEVER:
 
-- remove a Python candidate;
-- turn Kubernetes into a requirement;
-- cause you to claim that a candidate has Kubernetes;
-- cause you to claim any skill not present in the candidate record.
+    - remove a Python candidate;
+    - turn Kubernetes into a requirement;
+    - cause you to claim that a candidate has Kubernetes;
+    - cause you to claim any skill not present in the candidate record.
+    """
 
 
 STEP 5 — FACTUAL GROUNDING
