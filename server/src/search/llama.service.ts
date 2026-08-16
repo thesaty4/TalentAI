@@ -102,27 +102,29 @@ export class LlamaService {
       projectHistory:    c.projectHistory,
     }));
 
-    return `You are TalentLens AI's staffing analyst. Judge every candidate on real project-history evidence, not on skill tags — someone who has actually done this kind of work outranks someone who only lists the right keywords. Score honestly across the full range instead of clustering everyone high. Output raw JSON only — no markdown, no text outside the JSON.
+    return `You are TalentLens AI's staffing analyst. Judge every candidate according to the given scope below and score honestly across the full range instead of clustering everyone high. Output raw JSON only — no markdown, no text outside the JSON.
 
-USER:
-## What the manager is asking for [PRIMARY — apply this first]
+Scope:
+- We will look into the search input.
+  EXAMPLE:
+  - if asking for "give the python candidate", result: python skill should be mandatory.
+  - if asking for "give the Noida location candidate", result: Noida location should be mandatory.
+  - if user asking for domain specific, then result should be the domain specific.
+  - if experience range will input then we have to mandatory experience.
+  - Suppose we are asking for "Who has working experience" then look for candidate project description.
+  - If someone ask for "IRC specific candidate", we have to look into IRC specific fields, after this we have to look for project description that will be addon advantage for ranking candidate. How to distinguish that we are not searching IRC specific? It means search input will be having some keywords like skill | location | exp | domain or anything that manager is asking explicitly. If manager writes something generic which does not explicitly define any filter keywords, then it is IRC specific. Example: "give me matching candidates", "give me candidates who is fit for JD".
+
+USER INPUT:
+## What the manager is asking for. [PRIMARY — apply this first]
 ${effectiveQuery || '(No specific ask — use the role context below as the primary criteria instead.)'}
-
-MANDATORY FILTER: Every skill, technology, domain, or location named above is a hard requirement. If a candidate does not have it — in their skills list or project history — leave them out of the array entirely. Do not score them low. Do not include a "closest match". If nobody qualifies, return []. Only candidates who genuinely satisfy the requirement should appear.
-
-## Role context [SECONDARY — refine the ranking with this, don't override the above]
-Role: ${irc.roleTitle}
-Mandatory skills: ${irc.mandatorySkills}
-Preferred skills: ${irc.preferredSkills ?? 'N/A'}
-Experience range: ${irc.experienceRange}
-Location: ${irc.location} | Remote: ${irc.remotePolicy}
-Project starts: ${startDate}
 
 ## Candidate pool
 ${JSON.stringify(candidates, null, 2)}
 
-Return a JSON array only. Rules:
-- Score matchPct 0-100: 90+ needs direct, specific project evidence of doing this kind of work; 70-89 is solid adjacent evidence; 40-69 is skill-tag overlap with little real evidence (or good evidence undercut by a real gap); under 40 is little to no genuine fit.
+Return a JSON array only.
+
+Rules:
+- Score matchPct 0-100.
 - whyRecommend is exactly one sentence naming the specific evidence behind the score — never invent stronger evidence than what's actually in the candidate's record.
 - whyNot lists one or more short, genuine gaps or risks — every candidate needs at least one, including strong matches.
 - Set conflict to true and give a one-sentence conflictNote only when the candidate's availability genuinely can't meet when this role needs someone to start; otherwise conflict is false and conflictNote is left out entirely.
@@ -130,6 +132,20 @@ Return a JSON array only. Rules:
 - If a mandatory criterion leaves nobody eligible, return an empty array — don't loosen the criteria and don't substitute a "closest fit" candidate instead.
 - The full response must begin with the opening [ and end with the closing ] — nothing else outside those brackets.
 - Never truncate the list with ... or shorthand, never use // comments, never add commentary before or after the array.
+
+BEFORE writing the array, do this filtering step silently:
+1. Identify every mandatory criterion in the manager's ask — this could be a skill, a location, an experience range, or a domain. There can be more than one.
+2. For a skill criterion: check if the candidate's "skills" array contains that exact term (case-insensitive). Related-but-different terms (e.g. "Payments APIs" or "FastAPI" when the ask is "Python") do NOT count as a match.
+3. For a location criterion: check if the candidate's "location" field exactly matches (case-insensitive) the named location. "Remote" does not satisfy a specific city requirement unless the ask itself says "remote."
+4. For an experience criterion: check if the candidate's "experienceYears" falls within the stated range.
+5. For a domain criterion: check if the candidate's businessUnit or project history reflects that domain.
+6. A candidate must pass ALL mandatory criteria named in the ask to be included. If they fail even one, exclude them — regardless of how strong their other qualifications look.
+7. If the ask is generic (no explicit skill/location/experience/domain keyword), treat it as IRC-specific: apply no mandatory filter, and rank using role fit and project history instead.
+
+Do not include any fields other than the ones in the required shape below. Adding fields like fullName, roleTitle, location, businessUnit, isDuplicate, duplicateNote, alreadyInPipeline, or pipelineCandidateId is a violation of the output format.
+
+Before finalizing, re-scan your array: for every included employeeId, confirm their record actually satisfies every mandatory criterion identified in step 1. Remove any that don't.
+
 Required shape per element: { "employeeId": int, "matchPct": 0-100 int, "whyRecommend": "one sentence citing real evidence", "whyNot": ["one or more genuine gaps"], "conflict": bool, "conflictNote": "one sentence, left out entirely when conflict is false" }`;
   }
 
