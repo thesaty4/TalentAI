@@ -1,6 +1,6 @@
 ---
 applyTo: "server/src/search/**"
-description: "TalentLens AI search module rules. Three-service split: SearchService (orchestration + business rules), LlamaService (query-first LLM ranking + Zod validation), HeuristicService (synchronous skill-overlap fallback). Manager query is always the PRIMARY ranking signal; IRC JD provides refinement context only. Strict re-hydration rule — never trust model for display fields. Heuristic fallback on any LLM failure."
+description: "TalentLens AI search module rules. Three-service split: SearchService (orchestration + business rules), LlmService (query-first LLM ranking + Zod validation), HeuristicService (synchronous skill-overlap fallback). Manager query is always the PRIMARY ranking signal; IRC JD provides refinement context only. Strict re-hydration rule — never trust model for display fields. Heuristic fallback on any LLM failure."
 ---
 
 # TalentLens AI — Search Module Standards
@@ -14,7 +14,7 @@ Three services with **distinct, non-overlapping responsibilities**. Never merge 
 | File | Owns | Must NOT touch |
 |------|------|----------------|
 | `search.service.ts` | Orchestration + business rules: open-IRC enforcement, scope/rejected handling, pool pre-filter, LLM ranking call, fallback control, re-hydration, duplicate checks, sorting, logging | Prompt building, model API calls, scoring algorithms |
-| `llama.service.ts` | `effectiveQuery` composition, prompt construction, `/api/generate` call, Zod validation + one retry on parse failure | DB queries, business rules, HTTP context |
+| `llm.service.ts` | `effectiveQuery` composition, prompt construction, `/api/chat` call, Zod validation + one retry on parse failure | DB queries, business rules, HTTP context |
 | `heuristic.service.ts` | Synchronous skill-overlap scoring + generic why/why-not text. No async, no I/O. | LLM calls, DB queries |
 
 ---
@@ -59,17 +59,11 @@ return { ...item, fullName: emp.fullName, skills: emp.skills.map(s => s.name) };
 The manager's query is the **primary ranking signal**. IRC JD fields are secondary context used only for refinement. This order must never be reversed.
 
 ```
-SYSTEM:
-  You are a staffing analyst. Rank candidates strictly by how well their real project
-  history matches the manager's specific requirement. A candidate with direct, relevant
-  project experience outranks one with more skills but no matching history.
-  Return strict JSON per the schema — no extra text.
-
 USER:
-  ## What the manager needs [PRIMARY — match against this first]
+  ## What the manager is asking for [PRIMARY — apply this first]
   {effectiveQuery}
 
-  ## Role context [SECONDARY — use for refinement only]
+  ## Role context [SECONDARY — refine the ranking with this, don't override the above]
   Role: {roleTitle}
   Mandatory skills: {mandatorySkills}
   Preferred skills: {preferredSkills}
@@ -83,15 +77,17 @@ USER:
 
   Return a JSON array. Each element:
   { employeeId (int), matchPct (0-100), whyRecommend (cite specific project evidence, ≥10 chars),
-    whyNot (string[], at least 1 item — R7), conflict (bool), conflictNote (string, omit if no conflict) }
+    whyNot (string[], at least 1 item), conflict (bool), conflictNote (string, omit if no conflict) }
+  Include ALL candidates — score low fits honestly rather than excluding them.
 ```
 
 **Ollama API contract:**
-- `POST ${LLM_BASE_URL}/api/generate`
+- `POST ${LLM_BASE_URL}/api/chat`
 - Headers: `Authorization: Bearer ${LLM_API_KEY}` (only when key is set), `Content-Type: application/json`
-- Body: `{ model: "${LLM_MODEL}", prompt: "<text>", stream: false, options: { temperature: 0 } }`
-- Parse from response field `response`
-- Model configured via `LLM_MODEL` env var (e.g., `qwen3.5:9b`, `llama3`, `mistral`, etc.)
+- Body: `{ model: "${LLM_MODEL}", messages: [{role:"user", content: "<prompt>"}], stream: false, think: false, options: { temperature: 0 } }`
+- Parse from response field `message.content`
+- `think: false` is required — Qwen3 thinking models exhaust the token budget on chain-of-thought and leave the response empty without it
+- Model configured via `LLM_MODEL` env var (e.g., `qwen3.5:9b`, `mistral`, etc.)
 
 ---
 
@@ -122,7 +118,7 @@ const RankedItemSchema = z.object({
   conflict:     z.boolean(),
   conflictNote: z.string().optional(),
 });
-export const LlamaResponseSchema = z.array(RankedItemSchema);
+export const LlmResponseSchema = z.array(RankedItemSchema);
 ```
 
 Retry once on Zod failure. Throw typed error on second failure — `search.service.ts` catches and falls back.

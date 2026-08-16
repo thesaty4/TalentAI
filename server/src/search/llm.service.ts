@@ -109,8 +109,6 @@ USER:
 ## What the manager is asking for [PRIMARY — apply this first]
 ${effectiveQuery || '(No specific ask — use the role context below as the primary criteria instead.)'}
 
-MANDATORY FILTER: Every skill, technology, domain, or location named above is a hard requirement. If a candidate does not have it — in their skills list or project history — leave them out of the array entirely. Do not score them low. Do not include a "closest match". If nobody qualifies, return []. Only candidates who genuinely satisfy the requirement should appear.
-
 ## Role context [SECONDARY — refine the ranking with this, don't override the above]
 Role: ${irc.roleTitle}
 Mandatory skills: ${irc.mandatorySkills}
@@ -127,8 +125,8 @@ Return a JSON array only. Rules:
 - whyRecommend is exactly one sentence naming the specific evidence behind the score — never invent stronger evidence than what's actually in the candidate's record.
 - whyNot lists one or more short, genuine gaps or risks — every candidate needs at least one, including strong matches.
 - Set conflict to true and give a one-sentence conflictNote only when the candidate's availability genuinely can't meet when this role needs someone to start; otherwise conflict is false and conflictNote is left out entirely.
-- Include every candidate from the pool above unless the primary ask above names a mandatory criterion this candidate fails — in that case, leave them out of the array rather than scoring them.
-- If a mandatory criterion leaves nobody eligible, return an empty array — don't loosen the criteria and don't substitute a "closest fit" candidate instead.
+- Include every candidate from the pool above — score low matches honestly rather than excluding them.
+- If nobody genuinely fits, still return all candidates scored honestly with low matchPct values.
 - The full response must begin with the opening [ and end with the closing ] — nothing else outside those brackets.
 - Never truncate the list with ... or shorthand, never use // comments, never add commentary before or after the array.
 Required shape per element: { "employeeId": int, "matchPct": 0-100 int, "whyRecommend": "one sentence citing real evidence", "whyNot": ["one or more genuine gaps"], "conflict": bool, "conflictNote": "one sentence, left out entirely when conflict is false" }`;
@@ -141,13 +139,20 @@ Required shape per element: { "employeeId": int, "matchPct": 0-100 int, "whyReco
     const apiKey  = this.config.get<string>('llmApiKey');
     const model   = this.config.get<string>('llmModel') ?? 'qwen3.5:9b';
 
-    const res = await fetch(`${baseUrl}/api/generate`, {
+    // /api/chat + think:false prevents Qwen3's thinking tokens from consuming the full token budget and leaving response empty
+    const res = await fetch(`${baseUrl}/api/chat`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
       },
-      body: JSON.stringify({ model, prompt, stream: false, options: { temperature: 0, seed: LLM_SEED } }),
+      body: JSON.stringify({
+        model,
+        messages: [{ role: 'user', content: prompt }],
+        stream: false,
+        think: false,
+        options: { temperature: 0, seed: LLM_SEED },
+      }),
     });
 
     if (!res.ok) {
@@ -155,8 +160,8 @@ Required shape per element: { "employeeId": int, "matchPct": 0-100 int, "whyReco
       throw new Error(`LLM API ${res.status}: ${res.statusText}`);
     }
 
-    const data = await res.json() as { response: string };
-    return data.response ?? '';
+    const data = await res.json() as { message: { content: string } };
+    return data.message?.content ?? '';
   }
 
   // ─── Parse + one retry on validation failure ──────────────────────────────
@@ -179,7 +184,8 @@ Required shape per element: { "employeeId": int, "matchPct": 0-100 int, "whyReco
   // Extract + sanitise the JSON array from LLM output
   private extractJson(text: string): unknown {
     const sanitised = text
-      .replace(/\/\/[^\n]*/g, '')          // strip JS // comments (invalid JSON)
+      .replace(/<think>[\s\S]*?<\/think>/gi, '') // strip Qwen3 thinking blocks if think:false is ignored
+      .replace(/\/\/[^\n]*/g, '')                // strip JS // comments (invalid JSON)
       .replace(/\/\*[\s\S]*?\*\//g, '')    // strip /* block comments */
       .replace(/\{\s*\.{2,}\s*\}/g, '')        // remove {...} placeholder objects
       .replace(/,\s*\.{3,}\s*(?=[\]},])/g, '')  // remove trailing , ... before ] or }

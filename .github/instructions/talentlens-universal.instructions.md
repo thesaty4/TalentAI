@@ -22,7 +22,7 @@ If any answer is "no", redesign first.
 | Type | Convention | Example |
 |------|-----------|---------|
 | NestJS module | `kebab-case.module.ts` | `pipeline.module.ts` |
-| NestJS service | `kebab-case.service.ts` | `llama.service.ts` |
+| NestJS service | `kebab-case.service.ts` | `llm.service.ts` |
 | NestJS controller | `kebab-case.controller.ts` | `pipeline.controller.ts` |
 | DTO | `kebab-case.dto.ts` | `update-stage.dto.ts` |
 | React component | `PascalCase.tsx` | `StageChip.tsx` |
