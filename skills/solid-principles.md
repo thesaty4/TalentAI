@@ -110,8 +110,8 @@ interface RankingStrategy {
 
 // Extend by adding new classes, not editing existing ones
 @Injectable()
-export class LlamaRankingStrategy implements RankingStrategy {
-  rank(candidates: Employee[], irc: Irc) { /* Llama call */ }
+export class LlmRankingStrategy implements RankingStrategy {
+  rank(candidates: Employee[], irc: Irc) { /* LLM call */ }
 }
 
 @Injectable()
@@ -123,12 +123,12 @@ export class HeuristicRankingStrategy implements RankingStrategy {
 @Injectable()
 export class SearchService {
   constructor(
-    private readonly llama: LlamaRankingStrategy,
+    private readonly llm: LlmRankingStrategy,
     private readonly heuristic: HeuristicRankingStrategy,
   ) {}
 
   rank(candidates: Employee[], irc: Irc, useAi: boolean) {
-    const strategy: RankingStrategy = useAi ? this.llama : this.heuristic;
+    const strategy: RankingStrategy = useAi ? this.llm : this.heuristic;
     return strategy.rank(candidates, irc);
   }
 }

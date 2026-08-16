@@ -41,7 +41,7 @@ function buildPaginationMeta(total: number, page: number, limit: number) {
 | Type | Convention | Example |
 |------|-----------|---------|
 | NestJS module file | `kebab-case.module.ts` | `pipeline.module.ts` |
-| NestJS service | `kebab-case.service.ts` | `llama.service.ts` |
+| NestJS service | `kebab-case.service.ts` | `llm.service.ts` |
 | NestJS controller | `kebab-case.controller.ts` | `candidates.controller.ts` |
 | DTO | `kebab-case.dto.ts` | `add-to-pipeline.dto.ts` |
 | Prisma schema | `schema.prisma` | — |

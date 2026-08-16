@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PoolCandidate, RankedItem } from './llama.service';
+import { PoolCandidate, RankedItem } from './llm.service';
 
 interface IrcInfo {
   mandatorySkills: string;

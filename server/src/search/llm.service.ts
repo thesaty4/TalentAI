@@ -17,10 +17,13 @@ export interface PoolCandidate {
   projectHistory:    { projectName: string; duration?: string | null; description: string }[];
 }
 
+// Type for IRC with its related Project data
+export type IrcWithProject = Irc & { project: Pick<Project, 'name' | 'startDate'> };
+
 // ─── Zod output schema ────────────────────────────────────────────────────────
 
 const RankedItemSchema = z.object({
-  // coerce: handles string "5" from Llama instead of int 5
+  // coerce: handles string "5" from LLM instead of int 5
   employeeId:   z.coerce.number().int().catch(0),
   matchPct:     z.coerce.number().int().min(0).max(100).catch(50),
   // .catch('') converts non-strings; .transform fills empty/whitespace with a safe default
@@ -30,19 +33,17 @@ const RankedItemSchema = z.object({
   conflictNote: z.string().optional().catch(undefined),
 });
 
-export const LlamaResponseSchema = z.array(RankedItemSchema);
+export const LlmResponseSchema = z.array(RankedItemSchema);
 export type RankedItem = z.infer<typeof RankedItemSchema>;
 
 // ─── Service ──────────────────────────────────────────────────────────────────
 
-type IrcWithProject = Irc & { project: Pick<Project, 'name' | 'startDate'> };
-
 // temperature=0 + fixed seed = greedy decoding, same input always produces same ranking
-const LLAMA_SEED = Number(process.env.LLAMA_SEED ?? 42);
+const LLM_SEED = Number(process.env.LLM_SEED ?? 42);
 
 @Injectable()
-export class LlamaService {
-  private readonly logger = new Logger(LlamaService.name);
+export class LlmService {
+  private readonly logger = new Logger(LlmService.name);
 
   constructor(private readonly config: ConfigService) {}
 
@@ -58,11 +59,11 @@ export class LlamaService {
     // Console: one-liner with the actual query driving the search
     this.logger.log(`Ranking ${pool.length} candidates for ${irc.ircCode} | effectiveQuery: "${effectiveQuery.slice(0, 120)}"`);
 
-    // File: full prompt so you can inspect exactly what Llama received
-    writeSearchLog({ phase: 'llama-prompt', ircCode: irc.ircCode, promptLength: prompt.length, prompt });
+    // File: full prompt so you can inspect exactly what the LLM received
+    writeSearchLog({ phase: 'llm-prompt', ircCode: irc.ircCode, promptLength: prompt.length, prompt });
 
-    const text   = await this.callLlama(prompt);
-    const result = await this.parseWithRetry(text, () => this.callLlama(prompt));
+    const text   = await this.callLlm(prompt);
+    const result = await this.parseWithRetry(text, () => this.callLlm(prompt));
 
     this.logger.log(`Ranking complete — ${result.length} results | top: ${result.slice(0, 3).map(r => `id=${r.employeeId}(${r.matchPct}%)`).join(', ')}`);
     return result;
@@ -133,12 +134,12 @@ Return a JSON array only. Rules:
 Required shape per element: { "employeeId": int, "matchPct": 0-100 int, "whyRecommend": "one sentence citing real evidence", "whyNot": ["one or more genuine gaps"], "conflict": bool, "conflictNote": "one sentence, left out entirely when conflict is false" }`;
   }
 
-  // ─── Llama API call (Ollama REST contract) ────────────────────────────────
+  // ─── LLM API call (Ollama REST contract) ─────────────────────────────────
 
-  private async callLlama(prompt: string): Promise<string> {
-    const baseUrl = this.config.get<string>('llamaBaseUrl')!;
-    const apiKey  = this.config.get<string>('llamaApiKey');
-    const model   = this.config.get<string>('llamaModel') ?? 'llama3';
+  private async callLlm(prompt: string): Promise<string> {
+    const baseUrl = this.config.get<string>('llmBaseUrl')!;
+    const apiKey  = this.config.get<string>('llmApiKey');
+    const model   = this.config.get<string>('llmModel') ?? 'qwen3.5:9b';
 
     const res = await fetch(`${baseUrl}/api/generate`, {
       method: 'POST',
@@ -146,12 +147,12 @@ Required shape per element: { "employeeId": int, "matchPct": 0-100 int, "whyReco
         'Content-Type': 'application/json',
         ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
       },
-      body: JSON.stringify({ model, prompt, stream: false, options: { temperature: 0, seed: LLAMA_SEED } }),
+      body: JSON.stringify({ model, prompt, stream: false, options: { temperature: 0, seed: LLM_SEED } }),
     });
 
     if (!res.ok) {
-      this.logger.error(`Llama API error: ${res.status} ${res.statusText}`);
-      throw new Error(`Llama API ${res.status}: ${res.statusText}`);
+      this.logger.error(`LLM API error: ${res.status} ${res.statusText}`);
+      throw new Error(`LLM API ${res.status}: ${res.statusText}`);
     }
 
     const data = await res.json() as { response: string };
@@ -168,14 +169,14 @@ Required shape per element: { "employeeId": int, "matchPct": 0-100 int, "whyReco
     try {
       parsed = this.extractJson(text);
     } catch (e) {
-      this.logger.warn(`Llama response was not valid JSON — retrying. Raw output:\n${text}\nError: ${(e as Error).message}`);
+      this.logger.warn(`LLM response was not valid JSON — retrying. Raw output:\n${text}\nError: ${(e as Error).message}`);
       const retryText = await retry();
       parsed = this.extractJson(retryText); // throws if still bad — SearchService falls back
     }
-    return LlamaResponseSchema.parse(parsed);
+    return LlmResponseSchema.parse(parsed);
   }
 
-  // Extract + sanitise the JSON array from Llama output
+  // Extract + sanitise the JSON array from LLM output
   private extractJson(text: string): unknown {
     const sanitised = text
       .replace(/\/\/[^\n]*/g, '')          // strip JS // comments (invalid JSON)

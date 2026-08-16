@@ -20,6 +20,8 @@ out/
 server/.env
 client/.env
 
+server/tsconfig.build.tsbuildinfo
+
 # Logs
 logs/
 *.log

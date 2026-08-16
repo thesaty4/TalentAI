@@ -5,10 +5,11 @@ import { JwtPayload } from '../auth/strategies/jwt.strategy';
 import { MAX_RANKING_CANDIDATES } from '../common/constants/search.constants';
 import { PrismaService } from '../prisma/prisma.service';
 import { SearchDto } from './dto/search.dto';
-import { LlamaService, PoolCandidate, RankedItem } from './llama.service';
+import { LlmService, PoolCandidate, RankedItem, IrcWithProject } from './llm.service';
 import { HeuristicService } from './heuristic.service';
 import { writeSearchLog } from '../common/utils/search-logger.util';
 
+// Type for Employee with related data from Prisma
 type EmployeeWithRelations = Prisma.EmployeeGetPayload<{
   include: {
     skills: { include: { skill: true } };
@@ -23,7 +24,7 @@ export class SearchService {
   constructor(
     private readonly prisma:     PrismaService,
     private readonly config:     ConfigService,
-    private readonly llama:     LlamaService,
+    private readonly llm:        LlmService,
     private readonly heuristic:  HeuristicService,
   ) {}
 
@@ -43,19 +44,19 @@ export class SearchService {
     );
     if (pool.length === 0) return [];
 
-    // Step 3: rank — Llama3 with heuristic fallback on any failure
+    // Step 3: rank — LLM with heuristic fallback on any failure
     let ranked: RankedItem[];
     try {
       // Use heuristic directly when RANKING_PROVIDER=heuristic
       if (this.config.get<string>('rankingProvider') === 'heuristic') {
         throw new Error('heuristic-only mode');
       }
-      ranked = await this.llama.rank(irc, pool, dto.query, dto.jdText);
+      ranked = await this.llm.rank(irc, pool, dto.query, dto.jdText);
       // Filter hallucinated employeeIds not present in our pool
       const poolIds = new Set(pool.map(c => c.employeeId));
       ranked = ranked.filter(r => poolIds.has(r.employeeId));
     } catch (err) {
-      this.logger.warn(`Llama failed — heuristic fallback: ${(err as Error).message}`);
+      this.logger.warn(`LLM failed — heuristic fallback: ${(err as Error).message}`);
       ranked = this.heuristic.rank(irc, pool);
     }
 
@@ -137,14 +138,14 @@ export class SearchService {
       return entries.map(pe => this.toPoolCandidate(pe.employee));
     }
 
-    // R15: exclude employees Rejected for this IRC — everyone else goes to Llama
+    // R15: exclude employees Rejected for this IRC — everyone else goes to LLM
     const rejectedIds = await this.prisma.pipelineCandidate
       .findMany({ where: { ircId, stage: 'Rejected' }, select: { employeeId: true } })
       .then(rows => rows.map(r => r.employeeId));
 
     const where: Prisma.EmployeeWhereInput = {
       ...(rejectedIds.length > 0 && { id: { notIn: rejectedIds } }),
-      // No mandatory-skill pre-filter: Llama ranks by the manager's query, not IRC skills
+      // No mandatory-skill pre-filter: LLM ranks by the manager's query, not IRC skills
     };
 
     const employees = await this.prisma.employee.findMany({

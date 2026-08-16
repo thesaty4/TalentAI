@@ -15,7 +15,7 @@
 | Validation | `class-validator` + `class-transformer` (global `ValidationPipe`) |
 | API docs | Swagger/OpenAPI via `@nestjs/swagger` |
 | Health check | `@nestjs/terminus` |
-| AI | Llama3 via Ollama-compatible HTTP APIs |
+| AI | LLM (Qwen 3.5 / any Ollama-compatible model) via HTTP APIs |
 | File upload | `multer` (NestJS built-in wrapper) |
 | Config | `@nestjs/config` with Joi schema validation |
 | Password hashing | `bcryptjs` |
@@ -44,7 +44,7 @@ Controller  →  Service  →  PrismaService
 | `PrismaModule` | `PrismaService` | Global module — available everywhere without re-importing |
 | `ProjectsModule` | — | Scoped by manager vs HR via `RolesGuard` |
 | `IrcsModule` | — | Sub-resource of projects |
-| `SearchModule` | — | **Four services, not one:** `SearchService` (orchestrator), `RetrievalService` (semantic retrieval), `LlamaService` (AI ranking), `HeuristicService` (fallback) |
+| `SearchModule` | — | **Three services:** `SearchService` (orchestrator), `LlmService` (AI ranking), `HeuristicService` (fallback) |
 | `PipelineModule` | — | |
 | `PoolModule` | — | |
 | `EmployeesModule` | — | |
@@ -240,27 +240,24 @@ This module has **four services** with distinct responsibilities — do not coll
 
 | File | Owns | Does NOT own |
 |------|------|-------------|
-| `search.service.ts` | Orchestration flow (steps below), business rules, provider gating, fallback routing | Prompt building, embedding calls, model parsing |
-| `retrieval.service.ts` | Effective query composition, query embedding, hybrid retrieval (SQL filters + vector ranking) | Business-rule decisions, response shaping |
-| `llama.service.ts` | Prompt construction, Llama API call, Zod validation + one retry | Business logic, DB queries |
-| `heuristic.service.ts` | Skill-overlap % scoring + generic why/why-not text | Llama calls, DB queries |
+| `search.service.ts` | Orchestration flow (steps below), business rules, provider gating, fallback routing | Prompt building, model parsing |
+| `llm.service.ts` | Prompt construction, LLM API call, Zod validation + one retry | Business logic, DB queries |
+| `heuristic.service.ts` | Skill-overlap % scoring + generic why/why-not text | LLM calls, DB queries |
 
 ### Request flow (every `POST /search` call)
 
 1. **Validate** — `SearchDto` via global `ValidationPipe` (ircId, query?, scope, jdText?).
 2. **Load context** — `SearchService` fetches IRC + parent project from Prisma.
-3. **Pre-filter pool** — mandatory-skill overlap check; keeps ≤ `MAX_RANKING_CANDIDATES` (35) candidates.
-4. **Build effective query** — normalize and combine manager query and JD text in `retrieval.service.ts`.
-5. **Retrieve semantic evidence** — `RetrievalService` embeds query and returns vector-ranked project rows with hard SQL filters.
-6. **Rank**:
-  - Happy path → `LlamaService.rank(irc, pool, query, jdText)`.
-  - Failure path (retrieval/model/parse) → `HeuristicService.rank(irc, pool)`.
-7. **Re-hydrate** — replace ALL display fields (`fullName`, `skills`, `location`, `businessUnit`, etc.) with DB data keyed by `employeeId`. Trust model only for `matchPct`, `whyRecommend`, `whyNot`, `conflict`, `conflictNote`.
-8. **Duplicate check** — query `pipeline_candidates` to flag any employee already active in a *different* open IRC.
-9. **Log** — write `search_logs` row (user, irc, query text, jd filename if any, timestamp).
-10. **Return** — sorted by `matchPct` descending.
+3. **Pre-filter pool** — mandatory-skill overlap check; keeps ≤ `MAX_RANKING_CANDIDATES` candidates.
+4. **Rank**:
+  - Happy path → `LlmService.rank(irc, pool, query, jdText)`.
+  - Failure path (model/parse) → `HeuristicService.rank(irc, pool)`.
+5. **Re-hydrate** — replace ALL display fields (`fullName`, `skills`, `location`, `businessUnit`, etc.) with DB data keyed by `employeeId`. Trust model only for `matchPct`, `whyRecommend`, `whyNot`, `conflict`, `conflictNote`.
+6. **Duplicate check** — query `pipeline_candidates` to flag any employee already active in a *different* open IRC.
+7. **Log** — write `search_logs` row (user, irc, query text, jd filename if any, timestamp).
+8. **Return** — sorted by `matchPct` descending.
 
-### Llama3 prompt structure (`llama.service.ts`)
+### LLM prompt structure (`llm.service.ts`)
 
 ```
 SYSTEM: You are an internal staffing analyst. Score candidates by real project evidence,
@@ -278,14 +275,14 @@ USER:
    availableDate, joiningNotice, projectHistory[{projectName, duration, description}]>
 ```
 
-### Llama API call contract
+### LLM API call contract
 
-- `POST ${LLAMA_BASE_URL}/api/generate`
-- Headers: `Authorization: Bearer ${LLAMA_API_KEY}` (when configured), `Content-Type: application/json`
-- Body: `{ model: ${LLAMA_MODEL}, prompt: <text>, stream: false }`
+- `POST ${LLM_BASE_URL}/api/generate`
+- Headers: `Authorization: Bearer ${LLM_API_KEY}` (when configured), `Content-Type: application/json`
+- Body: `{ model: ${LLM_MODEL}, prompt: <text>, stream: false, options: { temperature: 0 } }`
 - Parse output from response field `response`
 
-### Zod validation schema (output from Llama)
+### Zod validation schema (output from LLM)
 
 ```typescript
 const RankedItemSchema = z.object({
@@ -296,21 +293,12 @@ const RankedItemSchema = z.object({
   conflict:      z.boolean(),
   conflictNote:  z.string().optional(),
 });
-export const LlamaResponseSchema = z.array(RankedItemSchema);
+export const LlmResponseSchema = z.array(RankedItemSchema);
 ```
 
-### Retrieval flow (`retrieval.service.ts`)
+### Heuristic fallback
 
-- Builds `effectiveQuery` from manager query and JD text.
-- JD handling:
-  - supports PDF/DOCX extraction upstream in controller
-  - trims and normalizes whitespace/newlines
-  - caps text via `JD_TEXT_MAX_LENGTH`
-  - falls back to manager query if JD extraction is empty/unusable
-- Embedding endpoint:
-  - `POST ${LLAMA_BASE_URL}/api/embeddings`
-  - Body: `{ model: ${LLAMA_EMBED_MODEL}, prompt: <effectiveQuery> }`
-- Hybrid retrieval SQL:
+Used when LLM ranking errors/time out/parse-fail. Pure function — no async, no external calls.
   - hard filters in `WHERE` (scope/rejected/skills)
   - vector cosine ordering on `EmployeeProject.embedding`
 

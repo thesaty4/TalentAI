@@ -26,7 +26,7 @@ Three services with **distinct, non-overlapping responsibilities**. Never merge 
 3. Pre-filter: keep employees with at least 1 mandatory-skill match; cap at `MAX_RANKING_CANDIDATES` by overlap count.
 4. Call ranking:
    - If `RANKING_PROVIDER=heuristic` → skip LLM, use heuristic directly.
-   - Otherwise call `LlamaService.rank(irc, pool, query, jdText)`.
+   - Otherwise call `LlmService.rank(irc, pool, query, jdText)`.
    - On any LLM failure (network, parse, timeout) → silently fall back to `HeuristicService.rank()`.
 5. **Re-hydrate** every result from DB by `employeeId` — replace ALL display fields.
 6. Duplicate-check: flag employees active in a *different* open IRC (R5).
@@ -54,7 +54,7 @@ return { ...item, fullName: emp.fullName, skills: emp.skills.map(s => s.name) };
 
 ---
 
-## LLM prompt structure — query is FIRST (`llama.service.ts`)
+## LLM prompt structure — query is FIRST (`llm.service.ts`)
 
 The manager's query is the **primary ranking signal**. IRC JD fields are secondary context used only for refinement. This order must never be reversed.
 
@@ -87,15 +87,15 @@ USER:
 ```
 
 **Ollama API contract:**
-- `POST ${LLAMA_BASE_URL}/api/generate`
-- Headers: `Authorization: Bearer ${LLAMA_API_KEY}` (only when key is set), `Content-Type: application/json`
-- Body: `{ model: "${LLAMA_MODEL}", prompt: "<text>", stream: false, options: { temperature: 0 } }`
+- `POST ${LLM_BASE_URL}/api/generate`
+- Headers: `Authorization: Bearer ${LLM_API_KEY}` (only when key is set), `Content-Type: application/json`
+- Body: `{ model: "${LLM_MODEL}", prompt: "<text>", stream: false, options: { temperature: 0 } }`
 - Parse from response field `response`
-- Model configured via `LLAMA_MODEL` env var (e.g., `qwen3.5:9b`, `llama3`, `mistral`, etc.)
+- Model configured via `LLM_MODEL` env var (e.g., `qwen3.5:9b`, `llama3`, `mistral`, etc.)
 
 ---
 
-## `effectiveQuery` construction (`llama.service.ts`)
+## `effectiveQuery` construction (`llm.service.ts`)
 
 Build `effectiveQuery` before inserting into the prompt:
 
@@ -145,7 +145,7 @@ conflict  = availableDate exists AND availableDate > project.startDate
 ## Environment config
 
 Validate all Ollama env vars in `configuration.ts`:
-- `LLAMA_BASE_URL` — required (default: `http://localhost:11434`)
-- `LLAMA_API_KEY` — optional (omit header when not set)
-- `LLAMA_MODEL` — required (default: `qwen3.5:9b`; supports any Ollama-compatible model)
-- `RANKING_PROVIDER` — `llama | heuristic` (default: `llama`)
+- `LLM_BASE_URL` — required (default: `http://localhost:11434`)
+- `LLM_API_KEY` — optional (omit header when not set)
+- `LLM_MODEL` — required (default: `qwen3.5:9b`; supports any Ollama-compatible model)
+- `RANKING_PROVIDER` — `llm | heuristic` (default: `llm`)

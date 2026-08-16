@@ -77,11 +77,11 @@ export default () => ({
   port: parseInt(process.env.PORT ?? '3001', 10),
   databaseUrl: process.env.DATABASE_URL,
   jwtSecret: process.env.JWT_SECRET,
-  llamaBaseUrl: process.env.LLAMA_BASE_URL ?? 'http://localhost:11434',
-  llamaApiKey: process.env.LLAMA_API_KEY,
-  llamaModel: process.env.LLAMA_MODEL ?? 'qwen3.5:9b',
-  llamaEmbedModel: process.env.LLAMA_EMBED_MODEL ?? 'nomic-embed-text',
-  rankingProvider: process.env.RANKING_PROVIDER ?? 'llama',
+  llmBaseUrl: process.env.LLM_BASE_URL ?? 'http://localhost:11434',
+  llmApiKey: process.env.LLM_API_KEY,
+  llmModel: process.env.LLM_MODEL ?? 'qwen3.5:9b',
+  llmEmbedModel: process.env.LLM_EMBED_MODEL ?? 'nomic-embed-text',
+  rankingProvider: process.env.RANKING_PROVIDER ?? 'llm',
   clientUrl: process.env.CLIENT_URL ?? 'http://localhost:5173',
 });
 ```
@@ -113,11 +113,11 @@ Required env vars validated at startup (Joi): `DATABASE_URL`, `JWT_SECRET`.
 ```
 DATABASE_URL=postgres://postgres:password@localhost:5432/talentlens
 JWT_SECRET=change_me_32_chars_minimum
-LLAMA_BASE_URL=http://localhost:11434
-LLAMA_API_KEY=
-LLAMA_MODEL=qwen3.5:9b
-LLAMA_EMBED_MODEL=nomic-embed-text
-RANKING_PROVIDER=llama
+LLM_BASE_URL=http://localhost:11434
+LLM_API_KEY=
+LLM_MODEL=qwen3.5:9b
+LLM_EMBED_MODEL=nomic-embed-text
+RANKING_PROVIDER=llm
 PORT=3001
 CLIENT_URL=http://localhost:5173
 VITE_API_URL=http://localhost:3001
@@ -131,11 +131,11 @@ Before running AI search features, ensure Ollama is installed and the configured
 # Install Ollama (if not already installed)
 # Visit https://ollama.com/download
 
-# Pull the required model (default: qwen3.5:9b, configurable via LLAMA_MODEL)
+# Pull the required model (default: qwen3.5:9b, configurable via LLM_MODEL)
 ollama pull qwen3.5:9b
 
 # Or use any other Ollama-compatible model
-# ollama pull llama3
+# ollama pull llama3.2
 # ollama pull mistral
 
 # Verify Ollama is running

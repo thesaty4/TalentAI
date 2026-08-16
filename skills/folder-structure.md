@@ -68,7 +68,7 @@ server/
 │   │   ├── search.module.ts
 │   │   ├── search.controller.ts     # POST /search · POST /search/upload-jd
 │   │   ├── search.service.ts        # orchestrates: pre-filter → rank → re-hydrate → duplicate-check → log
-│   │   ├── llama.service.ts         # effectiveQuery + prompt (query-first) + LLM API + Zod validation
+│   │   ├── llm.service.ts           # effectiveQuery + prompt (query-first) + LLM API + Zod validation
 │   │   ├── heuristic.service.ts     # synchronous skill-overlap fallback — no I/O, no async
 │   │   └── dto/
 │   │       ├── search.dto.ts        # ircId, query?, scope, jdText?

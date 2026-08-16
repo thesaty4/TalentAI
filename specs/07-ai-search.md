@@ -67,22 +67,22 @@ pipelineCandidateId: number | null
 2. Build candidate pool:
    - `scope=applied`: employees in this IRC's active pipeline only (R10).
    - `scope=all`: pre-filter by mandatory-skill overlap; cap at `MAX_RANKING_CANDIDATES` (R15 excludes Rejected).
-3. Call `LlamaService.rank(irc, pool, query, jdText)`.
+3. Call `LlmService.rank(irc, pool, query, jdText)`.
    - On any failure → call `HeuristicService.rank(irc, pool)` silently.
 4. Re-hydrate every result from DB — ALL display fields replaced.
 5. Duplicate-check (R5) and `alreadyInPipeline` check (R4).
 6. Log to `search_logs`.
 7. Return sorted by `matchPct` desc (R9).
 
-### `llama.service.ts` — prompt + API + Zod only
+### `llm.service.ts` — prompt + API + Zod only
 
 1. Build `effectiveQuery` from query + optional jdText (see instructions for priority rules).
 2. Construct the prompt with manager query **first**, IRC context **second** (see instructions).
-3. `POST ${LLAMA_BASE_URL}/api/generate` with `{ model: "${LLAMA_MODEL}", prompt, stream: false, options: { temperature: 0 } }`.
+3. `POST ${LLM_BASE_URL}/api/generate` with `{ model: "${LLM_MODEL}", prompt, stream: false, options: { temperature: 0 } }`.
 4. Parse `response` field and validate with Zod schema.
 5. Retry once on parse failure, then throw typed error.
 
-Model is configured via `LLAMA_MODEL` environment variable and supports any Ollama-compatible LLM.
+Model is configured via `LLM_MODEL` environment variable and supports any Ollama-compatible LLM.
 
 ### `heuristic.service.ts` — synchronous fallback, no I/O
 
@@ -114,7 +114,7 @@ export const JD_TEXT_MAX_LENGTH     = 4000;
 ```
 
 Config must expose and validate:
-- `LLAMA_BASE_URL`, `LLAMA_API_KEY` (optional), `LLAMA_MODEL`, `RANKING_PROVIDER`
+- `LLM_BASE_URL`, `LLM_API_KEY` (optional), `LLM_MODEL`, `RANKING_PROVIDER`
 
 ---
 

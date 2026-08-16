@@ -26,7 +26,7 @@ Never skip a step — each spec depends on the previous one being in place.
 | 04 | [`specs/04-projects-ircs.md`](./04-projects-ircs.md) | Projects + IRCs modules (read-only reference data, role-scoped) | ⬜ |
 | 05 | [`specs/05-pool.md`](./05-pool.md) | Resource pool endpoint (paginated, filterable, sortable) + Employee profile | ⬜ |
 | 06 | [`specs/06-pipeline.md`](./06-pipeline.md) | Pipeline module (stage moves, shortlist, not-fit, feedback rounds) | ⬜ |
-| 07 | [`specs/07-ai-search.md`](./07-ai-search.md) | Search module: LlamaService (LLM-based) + HeuristicService + SearchService + JD upload | ⬜ |
+| 07 | [`specs/07-ai-search.md`](./07-ai-search.md) | Search module: LlmService (LLM-based) + HeuristicService + SearchService + JD upload | ⬜ |
 | 08 | [`specs/08-candidate.md`](./08-candidate.md) | Candidate-side endpoints (open IRCs, apply, my-pipeline, feedback, upcoming) | ⬜ |
 | 09 | [`specs/09-notifications.md`](./09-notifications.md) | Notifications module | ⬜ |
 
