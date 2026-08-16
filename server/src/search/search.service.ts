@@ -86,7 +86,8 @@ export class SearchService {
           whyRecommend:      r.whyRecommend,
           whyNot:            r.whyNot,
           conflict:          r.conflict,
-          conflictNote:      r.conflictNote ?? null,
+          // guard: never expose a note when conflict=false; supply fallback when conflict=true but model omitted it
+          conflictNote:      r.conflict ? (r.conflictNote ?? 'Availability conflict with project start date') : null,
           isDuplicate:       !!dup,
           duplicateNote:     dup ?? null,
           alreadyInPipeline: inThisPipeline.has(r.employeeId),
