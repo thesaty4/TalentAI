@@ -1,0 +1,1747 @@
+[
+  {
+    "employeeId": 1,
+    "employeeCode": "EMP1042",
+    "fullName": "Satya Mishra",
+    "roleTitle": "Senior Python Engineer",
+    "businessUnit": "Payments & FinTech",
+    "location": "Pune",
+    "experienceYears": 6,
+    "benchStatus": "Allocated",
+    "currentAllocation": "Internal Tools Migration (ends 30 Aug 2026)",
+    "availableDate": "2026-09-02",
+    "joiningNotice": "Needs 2 weeks notice",
+    "skills": [
+      "Python",
+      "Django",
+      "Payments APIs",
+      "REST APIs",
+      "PostgreSQL"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Fintech Payments Integration",
+        "duration": "8 months",
+        "description": "Spent 8 months building a payments integration for a fintech client, owning reconciliation and settlement flows."
+      }
+    ]
+  },
+  {
+    "employeeId": 2,
+    "employeeCode": "EMP1088",
+    "fullName": "Rohan Mehta",
+    "roleTitle": "Backend Engineer",
+    "businessUnit": "Healthcare & Insurance",
+    "location": "Bengaluru",
+    "experienceYears": 4,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Python",
+      "Node.js",
+      "PostgreSQL",
+      "Redis",
+      "REST APIs"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Claims Processing Platform",
+        "duration": "1.5 years",
+        "description": "Built a claims-processing backend service handling high transaction volume over 1.5 years."
+      }
+    ]
+  },
+  {
+    "employeeId": 3,
+    "employeeCode": "EMP1121",
+    "fullName": "Sara Lin",
+    "roleTitle": "Full-Stack Engineer",
+    "businessUnit": "Payments & FinTech",
+    "location": "Remote",
+    "experienceYears": 5,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "React",
+      "Node.js",
+      "Python",
+      "TypeScript",
+      "PostgreSQL"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Merchant Payments Dashboard",
+        "duration": "2 years",
+        "description": "Led the reporting module of a merchant-facing payments dashboard for two years, owning data visualisation and API integration."
+      }
+    ]
+  },
+  {
+    "employeeId": 4,
+    "employeeCode": "EMP1155",
+    "fullName": "Kabir Anand",
+    "roleTitle": "Platform Engineer",
+    "businessUnit": "Payments & FinTech",
+    "location": "Noida",
+    "experienceYears": 7,
+    "benchStatus": "Allocated",
+    "currentAllocation": "Logistics Tracker API (ends 10 Sep 2026)",
+    "availableDate": "2026-09-10",
+    "joiningNotice": "Needs 2 weeks notice",
+    "skills": [
+      "Python",
+      "Kubernetes",
+      "AWS",
+      "Terraform",
+      "Docker",
+      "Helm"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "High-Volume Transaction Platform",
+        "duration": "3 years",
+        "description": "Infra lead on a high-volume transaction platform for 3 years — owned SRE, on-call runbooks, and 99.99% uptime SLAs."
+      }
+    ]
+  },
+  {
+    "employeeId": 5,
+    "employeeCode": "EMP1190",
+    "fullName": "Meena Pillai",
+    "roleTitle": "QA Automation Engineer",
+    "businessUnit": "Payments & FinTech",
+    "location": "Chennai",
+    "experienceYears": 3,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Python",
+      "Selenium",
+      "CI/CD",
+      "Pytest",
+      "REST APIs"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Payment Reconciliation QA",
+        "duration": "1 year",
+        "description": "Tested payment reconciliation flows at a previous employer for 1 year — built regression suites covering settlement edge cases."
+      }
+    ]
+  },
+  {
+    "employeeId": 6,
+    "employeeCode": "EMP1204",
+    "fullName": "Devika Nair",
+    "roleTitle": "Backend Engineer",
+    "businessUnit": "Healthcare & Insurance",
+    "location": "Hyderabad",
+    "experienceYears": 5,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Java",
+      "Spring",
+      "Spring Boot",
+      "Python",
+      "MySQL"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Insurance Policy Management Portal",
+        "duration": "2 years",
+        "description": "Built REST APIs for an insurance policy management portal — no direct payments project history on record."
+      }
+    ]
+  },
+  {
+    "employeeId": 7,
+    "employeeCode": "EMP1233",
+    "fullName": "Farah Iqbal",
+    "roleTitle": "Data Engineer",
+    "businessUnit": "Retail & eCommerce",
+    "location": "Bengaluru",
+    "experienceYears": 6,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Python",
+      "Spark",
+      "Airflow",
+      "dbt",
+      "BigQuery",
+      "Pandas"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Retail Analytics Pipeline",
+        "duration": "2.5 years",
+        "description": "Designed and owned ETL pipelines for a retail analytics platform — ingested 50M+ daily events into BigQuery with sub-hour latency."
+      }
+    ]
+  },
+  {
+    "employeeId": 8,
+    "employeeCode": "EMP1267",
+    "fullName": "Tomás Silva",
+    "roleTitle": "Mobile Engineer",
+    "businessUnit": "Payments & FinTech",
+    "location": "Remote",
+    "experienceYears": 4,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Kotlin",
+      "Swift",
+      "Python",
+      "React Native",
+      "REST APIs"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Consumer Payments Mobile App",
+        "duration": "1.5 years",
+        "description": "Built a consumer payments mobile app for 1.5 years — owned the checkout flow, wallet top-up, and PCI-DSS compliance layer."
+      }
+    ]
+  },
+  {
+    "employeeId": 9,
+    "employeeCode": "EMP1301",
+    "fullName": "Aditya Sharma",
+    "roleTitle": "Backend Engineer",
+    "businessUnit": "Payments & FinTech",
+    "location": "Pune",
+    "experienceYears": 5,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Python",
+      "Django",
+      "REST APIs",
+      "PostgreSQL",
+      "Redis"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Loan Origination Platform",
+        "duration": "1.5 years",
+        "description": "Led backend development for a loan origination platform, handling document verification APIs and underwriting decision engine."
+      }
+    ]
+  },
+  {
+    "employeeId": 10,
+    "employeeCode": "EMP1302",
+    "fullName": "Priya Nair",
+    "roleTitle": "Frontend Engineer",
+    "businessUnit": "Digital Platform",
+    "location": "Bengaluru",
+    "experienceYears": 3,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "React",
+      "TypeScript",
+      "Next.js",
+      "GraphQL"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Investment Tracker Dashboard",
+        "duration": "1 year",
+        "description": "Built the customer-facing dashboard for an investment tracking app — complex React state management for real-time portfolio updates."
+      }
+    ]
+  },
+  {
+    "employeeId": 11,
+    "employeeCode": "EMP1303",
+    "fullName": "Rahul Gupta",
+    "roleTitle": "DevOps Engineer",
+    "businessUnit": "Logistics & Supply Chain",
+    "location": "Noida",
+    "experienceYears": 6,
+    "benchStatus": "Allocated",
+    "currentAllocation": "Atlas Freight (ends 15 Sep 2026)",
+    "availableDate": "2026-09-15",
+    "joiningNotice": "Needs 2 weeks notice",
+    "skills": [
+      "Kubernetes",
+      "AWS",
+      "Terraform",
+      "Docker",
+      "CI/CD",
+      "Ansible"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Freight Tracking Infrastructure",
+        "duration": "2 years",
+        "description": "Redesigned CI/CD pipelines and container orchestration for a freight-tracking platform, reducing deployment time by 70%."
+      }
+    ]
+  },
+  {
+    "employeeId": 12,
+    "employeeCode": "EMP1304",
+    "fullName": "Ananya Singh",
+    "roleTitle": "Full-Stack Engineer",
+    "businessUnit": "Payments & FinTech",
+    "location": "Hyderabad",
+    "experienceYears": 4,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "React",
+      "Node.js",
+      "Python",
+      "PostgreSQL",
+      "Docker"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Payment Gateway Integration",
+        "duration": "10 months",
+        "description": "Owned end-to-end development of a payment gateway integration including the merchant dashboard and webhook processing layer."
+      }
+    ]
+  },
+  {
+    "employeeId": 13,
+    "employeeCode": "EMP1305",
+    "fullName": "Vikram Patel",
+    "roleTitle": "Backend Engineer",
+    "businessUnit": "Healthcare & Insurance",
+    "location": "Mumbai",
+    "experienceYears": 7,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Java",
+      "Spring Boot",
+      "Kafka",
+      "PostgreSQL",
+      "Microservices"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Claims Settlement Engine",
+        "duration": "3 years",
+        "description": "Architected and led a claims settlement microservices engine — processed 200K daily claims with event-driven Kafka pipelines."
+      }
+    ]
+  },
+  {
+    "employeeId": 14,
+    "employeeCode": "EMP1306",
+    "fullName": "Neha Agarwal",
+    "roleTitle": "QA Automation Engineer",
+    "businessUnit": "Healthcare & Insurance",
+    "location": "Chennai",
+    "experienceYears": 4,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Python",
+      "Selenium",
+      "TestNG",
+      "JMeter",
+      "CI/CD"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "EHR System Testing",
+        "duration": "1.5 years",
+        "description": "Led QA automation for an EHR system — built a 500+ test suite covering HIPAA-sensitive data flows."
+      }
+    ]
+  },
+  {
+    "employeeId": 15,
+    "employeeCode": "EMP1307",
+    "fullName": "Arjun Kumar",
+    "roleTitle": "Data Engineer",
+    "businessUnit": "Payments & FinTech",
+    "location": "Bengaluru",
+    "experienceYears": 5,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Python",
+      "Spark",
+      "Airflow",
+      "AWS",
+      "PostgreSQL"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Transaction Risk Analytics",
+        "duration": "2 years",
+        "description": "Built real-time transaction risk-scoring pipelines using Spark Streaming — flagged fraud patterns across 10M+ daily transactions."
+      }
+    ]
+  },
+  {
+    "employeeId": 16,
+    "employeeCode": "EMP1308",
+    "fullName": "Pooja Rao",
+    "roleTitle": "Backend Engineer",
+    "businessUnit": "Digital Platform",
+    "location": "Remote",
+    "experienceYears": 4,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Go",
+      "gRPC",
+      "PostgreSQL",
+      "Docker",
+      "Kubernetes"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "API Gateway Service",
+        "duration": "1.5 years",
+        "description": "Designed and built a high-throughput gRPC-based API gateway handling 50K RPS for a consumer fintech app."
+      }
+    ]
+  },
+  {
+    "employeeId": 17,
+    "employeeCode": "EMP1309",
+    "fullName": "Suresh Iyer",
+    "roleTitle": "Platform Engineer",
+    "businessUnit": "Retail & eCommerce",
+    "location": "Pune",
+    "experienceYears": 8,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "AWS",
+      "Terraform",
+      "Kubernetes",
+      "ArgoCD",
+      "Helm"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Retail Platform Migration",
+        "duration": "2.5 years",
+        "description": "Led cloud migration of a monolithic retail platform to AWS microservices — achieved 40% infra cost reduction."
+      }
+    ]
+  },
+  {
+    "employeeId": 18,
+    "employeeCode": "EMP1310",
+    "fullName": "Deepa Krishnan",
+    "roleTitle": "Full-Stack Engineer",
+    "businessUnit": "Healthcare & Insurance",
+    "location": "Hyderabad",
+    "experienceYears": 6,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "React",
+      "Java",
+      "Spring Boot",
+      "MySQL",
+      "Docker"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Patient Portal",
+        "duration": "2 years",
+        "description": "Built a patient-facing portal for appointment scheduling and lab results — integrated with FHIR APIs."
+      }
+    ]
+  },
+  {
+    "employeeId": 19,
+    "employeeCode": "EMP1311",
+    "fullName": "Manish Dubey",
+    "roleTitle": "Mobile Engineer",
+    "businessUnit": "Retail & eCommerce",
+    "location": "Noida",
+    "experienceYears": 3,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Kotlin",
+      "Android",
+      "React Native",
+      "REST APIs"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Retail Loyalty App",
+        "duration": "1 year",
+        "description": "Built the Android loyalty app — implemented gamification, push notifications, and in-app payments integration."
+      }
+    ]
+  },
+  {
+    "employeeId": 20,
+    "employeeCode": "EMP1312",
+    "fullName": "Shalini Mehta",
+    "roleTitle": "Backend Engineer",
+    "businessUnit": "Payments & FinTech",
+    "location": "Bengaluru",
+    "experienceYears": 5,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Python",
+      "FastAPI",
+      "PostgreSQL",
+      "Redis",
+      "Payments APIs"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "UPI Integration Platform",
+        "duration": "2 years",
+        "description": "Built the UPI integration layer handling 5M daily transactions — owned settlement reconciliation and dispute resolution APIs."
+      }
+    ]
+  },
+  {
+    "employeeId": 21,
+    "employeeCode": "EMP1313",
+    "fullName": "Kiran Reddy",
+    "roleTitle": "DevOps Engineer",
+    "businessUnit": "Digital Platform",
+    "location": "Hyderabad",
+    "experienceYears": 5,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "GCP",
+      "Kubernetes",
+      "Docker",
+      "Jenkins",
+      "Terraform"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "SaaS Platform DevOps",
+        "duration": "2 years",
+        "description": "Owned the entire DevOps lifecycle for a multi-tenant SaaS platform — zero-downtime deployments with blue-green on GKE."
+      }
+    ]
+  },
+  {
+    "employeeId": 22,
+    "employeeCode": "EMP1314",
+    "fullName": "Lakshmi Prasad",
+    "roleTitle": "Data Engineer",
+    "businessUnit": "Retail & eCommerce",
+    "location": "Chennai",
+    "experienceYears": 4,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Python",
+      "dbt",
+      "Airflow",
+      "BigQuery",
+      "Pandas"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "E-Commerce Analytics Warehouse",
+        "duration": "1.5 years",
+        "description": "Built the data warehouse and dbt transformation layer for an e-commerce platform — powered merchandising and pricing dashboards."
+      }
+    ]
+  },
+  {
+    "employeeId": 23,
+    "employeeCode": "EMP1315",
+    "fullName": "Nikhil Joshi",
+    "roleTitle": "Backend Engineer",
+    "businessUnit": "Digital Platform",
+    "location": "Pune",
+    "experienceYears": 4,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Node.js",
+      "TypeScript",
+      "PostgreSQL",
+      "Kafka",
+      "Docker"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Notification Delivery Platform",
+        "duration": "1 year",
+        "description": "Built a multi-channel notification delivery platform (email, SMS, push) processing 2M events/day with Kafka and Node.js workers."
+      }
+    ]
+  },
+  {
+    "employeeId": 24,
+    "employeeCode": "EMP1316",
+    "fullName": "Divya Chatterjee",
+    "roleTitle": "Frontend Engineer",
+    "businessUnit": "Healthcare & Insurance",
+    "location": "Kolkata",
+    "experienceYears": 4,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Angular",
+      "TypeScript",
+      "REST APIs",
+      "Jest"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Insurance Customer Portal",
+        "duration": "1.5 years",
+        "description": "Built the customer-facing Angular portal for policy management — handled complex multi-step claims submission flows."
+      }
+    ]
+  },
+  {
+    "employeeId": 25,
+    "employeeCode": "EMP1317",
+    "fullName": "Rohit Varma",
+    "roleTitle": "Backend Engineer",
+    "businessUnit": "Payments & FinTech",
+    "location": "Bengaluru",
+    "experienceYears": 6,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Python",
+      "Django",
+      "PostgreSQL",
+      "Kafka",
+      "REST APIs"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Merchant Onboarding API",
+        "duration": "2 years",
+        "description": "Designed the merchant onboarding API service — KYC verification, bank account validation, and payout configuration for 10K+ merchants."
+      }
+    ]
+  },
+  {
+    "employeeId": 26,
+    "employeeCode": "EMP1318",
+    "fullName": "Sunita Tiwari",
+    "roleTitle": "QA Automation Engineer",
+    "businessUnit": "Logistics & Supply Chain",
+    "location": "Noida",
+    "experienceYears": 5,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Java",
+      "TestNG",
+      "Selenium",
+      "REST APIs",
+      "CI/CD"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Logistics Platform QA",
+        "duration": "2 years",
+        "description": "Led QA for a logistics tracking platform — end-to-end automation covering order lifecycle and third-party carrier integrations."
+      }
+    ]
+  },
+  {
+    "employeeId": 27,
+    "employeeCode": "EMP1319",
+    "fullName": "Amit Pandey",
+    "roleTitle": "Backend Engineer",
+    "businessUnit": "Digital Platform",
+    "location": "Mumbai",
+    "experienceYears": 3,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Python",
+      "Flask",
+      "REST APIs",
+      "MySQL",
+      "Docker"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Internal HR Tool APIs",
+        "duration": "1 year",
+        "description": "Built the backend APIs for an internal HR tool covering employee self-service, leave management, and payroll integration."
+      }
+    ]
+  },
+  {
+    "employeeId": 28,
+    "employeeCode": "EMP1320",
+    "fullName": "Kavitha Nambiar",
+    "roleTitle": "Solutions Architect",
+    "businessUnit": "Payments & FinTech",
+    "location": "Bengaluru",
+    "experienceYears": 10,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "AWS",
+      "Microservices",
+      "Kafka",
+      "PostgreSQL",
+      "Python",
+      "Node.js"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Core Banking Modernisation",
+        "duration": "3 years",
+        "description": "Led solution architecture for core banking modernisation — defined microservices boundaries, API contracts, and event-driven architecture for 5M accounts."
+      }
+    ]
+  },
+  {
+    "employeeId": 29,
+    "employeeCode": "EMP1321",
+    "fullName": "Saurabh Singh",
+    "roleTitle": "Backend Engineer",
+    "businessUnit": "Healthcare & Insurance",
+    "location": "Gurugram",
+    "experienceYears": 5,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Java",
+      "Spring Boot",
+      "Kubernetes",
+      "MySQL",
+      "REST APIs"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Medical Records API",
+        "duration": "2 years",
+        "description": "Built secure RESTful APIs for a medical records exchange platform, handling HL7 FHIR compliance and patient consent flows."
+      }
+    ]
+  },
+  {
+    "employeeId": 30,
+    "employeeCode": "EMP1322",
+    "fullName": "Pallavi Desai",
+    "roleTitle": "Frontend Engineer",
+    "businessUnit": "Digital Platform",
+    "location": "Pune",
+    "experienceYears": 3,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Vue.js",
+      "TypeScript",
+      "REST APIs",
+      "Cypress"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Internal Operations Dashboard",
+        "duration": "10 months",
+        "description": "Built the internal operations dashboard for monitoring SLA breaches and ticket escalations — real-time data via WebSockets."
+      }
+    ]
+  },
+  {
+    "employeeId": 31,
+    "employeeCode": "EMP1323",
+    "fullName": "Rajesh Kumar",
+    "roleTitle": "Backend Engineer",
+    "businessUnit": "Logistics & Supply Chain",
+    "location": "Chennai",
+    "experienceYears": 7,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Python",
+      "Django",
+      "PostgreSQL",
+      "REST APIs"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Supply Chain Visibility Platform",
+        "duration": "3 years",
+        "description": "Built the backend for a supply chain visibility platform — route optimisation APIs and real-time ETD prediction."
+      }
+    ]
+  },
+  {
+    "employeeId": 32,
+    "employeeCode": "EMP1324",
+    "fullName": "Swati Mishra",
+    "roleTitle": "Full-Stack Engineer",
+    "businessUnit": "Digital Platform",
+    "location": "Noida",
+    "experienceYears": 4,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "React",
+      "Node.js",
+      "MongoDB",
+      "TypeScript",
+      "Docker"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Content Management Platform",
+        "duration": "1.5 years",
+        "description": "Full-stack development of a headless CMS platform — React editor, Node.js APIs, MongoDB document store."
+      }
+    ]
+  },
+  {
+    "employeeId": 33,
+    "employeeCode": "EMP1325",
+    "fullName": "Gaurav Sharma",
+    "roleTitle": "DevOps Engineer",
+    "businessUnit": "Payments & FinTech",
+    "location": "Bengaluru",
+    "experienceYears": 4,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Docker",
+      "CI/CD",
+      "GitHub Actions",
+      "AWS",
+      "Kubernetes"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Payment Service CI/CD",
+        "duration": "1.5 years",
+        "description": "Standardised CI/CD pipelines across 15 microservices in a payments platform — 3x faster release cycles."
+      }
+    ]
+  },
+  {
+    "employeeId": 34,
+    "employeeCode": "EMP1326",
+    "fullName": "Asha Iyer",
+    "roleTitle": "Data Engineer",
+    "businessUnit": "Healthcare & Insurance",
+    "location": "Chennai",
+    "experienceYears": 5,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Python",
+      "Spark",
+      "PostgreSQL",
+      "dbt",
+      "Airflow"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Claims Analytics Pipeline",
+        "duration": "2 years",
+        "description": "Built a claims analytics pipeline that identified billing anomalies — surfaced $2M in potential over-billing for the client."
+      }
+    ]
+  },
+  {
+    "employeeId": 35,
+    "employeeCode": "EMP1327",
+    "fullName": "Harsh Gupta",
+    "roleTitle": "Backend Engineer",
+    "businessUnit": "Digital Platform",
+    "location": "Bengaluru",
+    "experienceYears": 5,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Go",
+      "gRPC",
+      "Redis",
+      "Kubernetes",
+      "Docker"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Real-Time Bidding Engine",
+        "duration": "2 years",
+        "description": "Built a real-time bidding engine in Go — sub-10ms latency at 500K QPS using Redis for inventory caching."
+      }
+    ]
+  },
+  {
+    "employeeId": 36,
+    "employeeCode": "EMP1328",
+    "fullName": "Nandini Shetty",
+    "roleTitle": "QA Automation Engineer",
+    "businessUnit": "Digital Platform",
+    "location": "Bengaluru",
+    "experienceYears": 3,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Cypress",
+      "JavaScript",
+      "REST APIs",
+      "Jest",
+      "CI/CD"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "E-Commerce QA Automation",
+        "duration": "1.5 years",
+        "description": "Built Cypress E2E test suites for a React e-commerce platform — reduced regression cycle from 3 days to 2 hours."
+      }
+    ]
+  },
+  {
+    "employeeId": 37,
+    "employeeCode": "EMP1329",
+    "fullName": "Sameer Ahuja",
+    "roleTitle": "Mobile Engineer",
+    "businessUnit": "Digital Platform",
+    "location": "Delhi",
+    "experienceYears": 4,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Flutter",
+      "Dart",
+      "REST APIs",
+      "Android"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Food Delivery App",
+        "duration": "1.5 years",
+        "description": "Built cross-platform Flutter food delivery app — real-time order tracking, in-app payments, and driver routing."
+      }
+    ]
+  },
+  {
+    "employeeId": 38,
+    "employeeCode": "EMP1330",
+    "fullName": "Priyanka Bhatt",
+    "roleTitle": "Backend Engineer",
+    "businessUnit": "Payments & FinTech",
+    "location": "Pune",
+    "experienceYears": 6,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Python",
+      "FastAPI",
+      "AWS",
+      "Payments APIs",
+      "Kafka"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Cross-Border Payments API",
+        "duration": "2.5 years",
+        "description": "Built cross-border payments API handling FX conversion, SWIFT integration, and compliance checks for 20+ currencies."
+      }
+    ]
+  },
+  {
+    "employeeId": 39,
+    "employeeCode": "EMP1331",
+    "fullName": "Arun Narayan",
+    "roleTitle": "Platform Engineer",
+    "businessUnit": "Digital Platform",
+    "location": "Hyderabad",
+    "experienceYears": 7,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Kubernetes",
+      "Helm",
+      "AWS",
+      "Terraform",
+      "ArgoCD"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Multi-Region Platform",
+        "duration": "3 years",
+        "description": "Owned multi-region Kubernetes cluster setup with ArgoCD GitOps — 99.999% uptime across 4 regions."
+      }
+    ]
+  },
+  {
+    "employeeId": 40,
+    "employeeCode": "EMP1332",
+    "fullName": "Sneha Patil",
+    "roleTitle": "Frontend Engineer",
+    "businessUnit": "Payments & FinTech",
+    "location": "Pune",
+    "experienceYears": 4,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "React",
+      "TypeScript",
+      "REST APIs",
+      "Jest"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Trading Platform UI",
+        "duration": "1.5 years",
+        "description": "Built the trading platform UI — real-time price feeds via WebSockets, complex order management forms, and P&L charts."
+      }
+    ]
+  },
+  {
+    "employeeId": 41,
+    "employeeCode": "EMP1333",
+    "fullName": "Varun Sharma",
+    "roleTitle": "Backend Engineer",
+    "businessUnit": "Payments & FinTech",
+    "location": "Bengaluru",
+    "experienceYears": 5,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Python",
+      "Payments APIs",
+      "Django",
+      "Kafka",
+      "PostgreSQL"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Issuer Processing System",
+        "duration": "2 years",
+        "description": "Built the card issuer processing system — authorization, clearing, and settlement for Visa and Mastercard transactions."
+      }
+    ]
+  },
+  {
+    "employeeId": 42,
+    "employeeCode": "EMP1334",
+    "fullName": "Ritu Singh",
+    "roleTitle": "Backend Engineer",
+    "businessUnit": "Healthcare & Insurance",
+    "location": "Remote",
+    "experienceYears": 5,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "C#",
+      ".NET",
+      "REST APIs",
+      "Docker"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Insurance Claims API",
+        "duration": "2 years",
+        "description": "Built .NET microservices for claims adjudication — integrated with 3 legacy systems via adapter pattern."
+      }
+    ]
+  },
+  {
+    "employeeId": 43,
+    "employeeCode": "EMP1335",
+    "fullName": "Ajay Trivedi",
+    "roleTitle": "Backend Engineer",
+    "businessUnit": "Digital Platform",
+    "location": "Gurugram",
+    "experienceYears": 4,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Node.js",
+      "Express.js",
+      "MongoDB",
+      "Redis",
+      "Docker"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "B2B SaaS API Platform",
+        "duration": "1.5 years",
+        "description": "Built multi-tenant B2B SaaS APIs — JWT-based tenant isolation, rate limiting, and usage metering."
+      }
+    ]
+  },
+  {
+    "employeeId": 44,
+    "employeeCode": "EMP1336",
+    "fullName": "Maya Krishnamurthy",
+    "roleTitle": "Data Engineer",
+    "businessUnit": "Digital Platform",
+    "location": "Bengaluru",
+    "experienceYears": 6,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Python",
+      "Airflow",
+      "Spark",
+      "GCP",
+      "BigQuery"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Marketing Attribution Pipeline",
+        "duration": "2.5 years",
+        "description": "Designed multi-touch marketing attribution pipeline on GCP — ingested 1B+ user events, powered campaign ROI dashboards."
+      }
+    ]
+  },
+  {
+    "employeeId": 45,
+    "employeeCode": "EMP1337",
+    "fullName": "Kartik Mehrotra",
+    "roleTitle": "Backend Engineer",
+    "businessUnit": "Payments & FinTech",
+    "location": "Pune",
+    "experienceYears": 5,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Python",
+      "Django",
+      "REST APIs",
+      "Reconciliation",
+      "PostgreSQL"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Payout Reconciliation System",
+        "duration": "2 years",
+        "description": "Built the payout reconciliation system — automated daily ledger matching across 50+ payment instruments with exception handling."
+      }
+    ]
+  },
+  {
+    "employeeId": 46,
+    "employeeCode": "EMP1338",
+    "fullName": "Deepika Rajan",
+    "roleTitle": "Frontend Engineer",
+    "businessUnit": "Healthcare & Insurance",
+    "location": "Chennai",
+    "experienceYears": 3,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "React",
+      "Next.js",
+      "TypeScript",
+      "REST APIs"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Telemedicine Patient App",
+        "duration": "1 year",
+        "description": "Built the patient-facing telemedicine app — video consultation scheduling, prescription download, and insurance verification UI."
+      }
+    ]
+  },
+  {
+    "employeeId": 47,
+    "employeeCode": "EMP1339",
+    "fullName": "Vivek Nair",
+    "roleTitle": "Backend Engineer",
+    "businessUnit": "Payments & FinTech",
+    "location": "Bengaluru",
+    "experienceYears": 6,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Java",
+      "Spring Boot",
+      "Kafka",
+      "Payments APIs",
+      "PostgreSQL"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Payment Switch System",
+        "duration": "3 years",
+        "description": "Built the payment switching layer handling ISO 8583 message routing across banks — 10M daily transactions at 99.9% success rate."
+      }
+    ]
+  },
+  {
+    "employeeId": 48,
+    "employeeCode": "EMP1340",
+    "fullName": "Aditi Saxena",
+    "roleTitle": "Full-Stack Engineer",
+    "businessUnit": "Retail & eCommerce",
+    "location": "Noida",
+    "experienceYears": 4,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "React",
+      "Python",
+      "FastAPI",
+      "PostgreSQL",
+      "Docker"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Inventory Management System",
+        "duration": "1.5 years",
+        "description": "Built inventory management system with real-time stock tracking — supplier portal, reorder automation, and warehouse integration."
+      }
+    ]
+  },
+  {
+    "employeeId": 49,
+    "employeeCode": "EMP1341",
+    "fullName": "Balaji Venkataraman",
+    "roleTitle": "Platform Engineer",
+    "businessUnit": "Digital Platform",
+    "location": "Chennai",
+    "experienceYears": 8,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "AWS",
+      "Terraform",
+      "Kubernetes"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Serverless Data Platform",
+        "duration": "3 years",
+        "description": "Architected a serverless data platform on AWS using Lambda, Step Functions, and CDK — 60% cost reduction vs. self-managed clusters."
+      }
+    ]
+  },
+  {
+    "employeeId": 50,
+    "employeeCode": "EMP1342",
+    "fullName": "Ravi Shankar",
+    "roleTitle": "Backend Engineer",
+    "businessUnit": "Digital Platform",
+    "location": "Hyderabad",
+    "experienceYears": 5,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Python",
+      "FastAPI",
+      "PostgreSQL",
+      "REST APIs",
+      "Redis"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Recommendation Engine API",
+        "duration": "2 years",
+        "description": "Built content recommendation engine API using collaborative filtering — served 20M users, 95th percentile latency under 100ms."
+      }
+    ]
+  },
+  {
+    "employeeId": 51,
+    "employeeCode": "EMP1343",
+    "fullName": "Meghna Pillai",
+    "roleTitle": "QA Automation Engineer",
+    "businessUnit": "Payments & FinTech",
+    "location": "Trivandrum",
+    "experienceYears": 4,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Selenium",
+      "Python",
+      "REST APIs",
+      "Pytest",
+      "JMeter"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Digital Wallet QA",
+        "duration": "1.5 years",
+        "description": "Owned QA for a digital wallet — load-tested payment APIs at 3x peak traffic, uncovered critical race condition in top-up flow."
+      }
+    ]
+  },
+  {
+    "employeeId": 52,
+    "employeeCode": "EMP1344",
+    "fullName": "Siddharth Chopra",
+    "roleTitle": "Backend Engineer",
+    "businessUnit": "Digital Platform",
+    "location": "Mumbai",
+    "experienceYears": 4,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Node.js",
+      "MongoDB",
+      "TypeScript",
+      "GraphQL",
+      "Docker"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Social Commerce API",
+        "duration": "1.5 years",
+        "description": "Built GraphQL APIs for a social commerce platform — product catalogue, cart, and order management for 500K sellers."
+      }
+    ]
+  },
+  {
+    "employeeId": 53,
+    "employeeCode": "EMP1345",
+    "fullName": "Ishaan Ahmed",
+    "roleTitle": "DevOps Engineer",
+    "businessUnit": "Healthcare & Insurance",
+    "location": "Gurugram",
+    "experienceYears": 5,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Azure",
+      "Kubernetes",
+      "Docker",
+      "Terraform",
+      "GitHub Actions"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Healthcare Platform DevOps",
+        "duration": "2 years",
+        "description": "Set up Azure AKS clusters and CI/CD pipelines for a healthcare platform — HIPAA-compliant infrastructure with audit logging."
+      }
+    ]
+  },
+  {
+    "employeeId": 54,
+    "employeeCode": "EMP1346",
+    "fullName": "Nisha Malhotra",
+    "roleTitle": "Full-Stack Engineer",
+    "businessUnit": "Payments & FinTech",
+    "location": "Bengaluru",
+    "experienceYears": 5,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "React",
+      "Node.js",
+      "AWS",
+      "PostgreSQL",
+      "Payments APIs"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Payment Operations Console",
+        "duration": "2 years",
+        "description": "Built the payment operations console for a fintech company — transaction search, chargeback management, and settlement reporting."
+      }
+    ]
+  },
+  {
+    "employeeId": 55,
+    "employeeCode": "EMP1347",
+    "fullName": "Aakash Bhattacharya",
+    "roleTitle": "Backend Engineer",
+    "businessUnit": "Digital Platform",
+    "location": "Kolkata",
+    "experienceYears": 6,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Python",
+      "Microservices",
+      "Kafka",
+      "PostgreSQL",
+      "Docker"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Event-Driven Notification System",
+        "duration": "2.5 years",
+        "description": "Designed event-driven notification microservices — fan-out architecture serving 5M users across email, SMS, and push with at-least-once delivery."
+      }
+    ]
+  },
+  {
+    "employeeId": 56,
+    "employeeCode": "EMP1348",
+    "fullName": "Tanvi Kulkarni",
+    "roleTitle": "Frontend Engineer",
+    "businessUnit": "Retail & eCommerce",
+    "location": "Pune",
+    "experienceYears": 3,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "React",
+      "TypeScript",
+      "REST APIs",
+      "Jest"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Retail POS Interface",
+        "duration": "1 year",
+        "description": "Built the React-based POS interface for retail stores — offline-first with sync-on-connect and barcode scanner integration."
+      }
+    ]
+  },
+  {
+    "employeeId": 57,
+    "employeeCode": "EMP1349",
+    "fullName": "Harish Gopinath",
+    "roleTitle": "Backend Engineer",
+    "businessUnit": "Payments & FinTech",
+    "location": "Bengaluru",
+    "experienceYears": 7,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Java",
+      "Spring Boot",
+      "Kafka",
+      "Payments APIs"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "NPCI Integration Layer",
+        "duration": "3 years",
+        "description": "Built the NPCI integration layer for IMPS, NEFT, and RTGS — handled 2M daily transactions, RBI regulatory reporting."
+      }
+    ]
+  },
+  {
+    "employeeId": 58,
+    "employeeCode": "EMP1350",
+    "fullName": "Shruti Kapoor",
+    "roleTitle": "Data Engineer",
+    "businessUnit": "Payments & FinTech",
+    "location": "Gurugram",
+    "experienceYears": 4,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Python",
+      "BigQuery",
+      "dbt",
+      "Airflow",
+      "Kafka"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Fraud Detection Pipeline",
+        "duration": "1.5 years",
+        "description": "Built real-time fraud detection pipeline ingesting transaction events from Kafka — feature engineering for ML model serving."
+      }
+    ]
+  },
+  {
+    "employeeId": 59,
+    "employeeCode": "EMP1351",
+    "fullName": "Ritesh Soni",
+    "roleTitle": "Backend Engineer",
+    "businessUnit": "Digital Platform",
+    "location": "Remote",
+    "experienceYears": 5,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Go",
+      "gRPC",
+      "PostgreSQL",
+      "Redis",
+      "Docker"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Game Server Backend",
+        "duration": "2 years",
+        "description": "Built low-latency game server backend in Go — matchmaking, leaderboards, and in-game purchase processing."
+      }
+    ]
+  },
+  {
+    "employeeId": 60,
+    "employeeCode": "EMP1352",
+    "fullName": "Pallavi Sawant",
+    "roleTitle": "QA Automation Engineer",
+    "businessUnit": "Payments & FinTech",
+    "location": "Pune",
+    "experienceYears": 4,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Java",
+      "TestNG",
+      "REST APIs",
+      "Selenium",
+      "Payments APIs"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Payments API Test Suite",
+        "duration": "2 years",
+        "description": "Built comprehensive API test suite for a payments gateway — contract testing, negative path coverage, and PCI-DSS compliance checks."
+      }
+    ]
+  },
+  {
+    "employeeId": 61,
+    "employeeCode": "EMP1353",
+    "fullName": "Nitin Bhatia",
+    "roleTitle": "Mobile Engineer",
+    "businessUnit": "Payments & FinTech",
+    "location": "Noida",
+    "experienceYears": 4,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Android",
+      "Kotlin",
+      "REST APIs",
+      "Payments APIs"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Mobile Banking App",
+        "duration": "1.5 years",
+        "description": "Built Android mobile banking app — account management, IMPS transfers, UPI payments, and biometric authentication."
+      }
+    ]
+  },
+  {
+    "employeeId": 62,
+    "employeeCode": "EMP1354",
+    "fullName": "Prashant Kaul",
+    "roleTitle": "Backend Engineer",
+    "businessUnit": "Healthcare & Insurance",
+    "location": "Bengaluru",
+    "experienceYears": 3,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Python",
+      "Django",
+      "REST APIs",
+      "MySQL",
+      "Docker"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Pharmacy Management System",
+        "duration": "1 year",
+        "description": "Built backend APIs for a pharmacy management system — inventory tracking, prescription verification, and supplier integration."
+      }
+    ]
+  },
+  {
+    "employeeId": 63,
+    "employeeCode": "EMP1355",
+    "fullName": "Vandana Yadav",
+    "roleTitle": "Full-Stack Engineer",
+    "businessUnit": "Logistics & Supply Chain",
+    "location": "Hyderabad",
+    "experienceYears": 5,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "React",
+      "Java",
+      "Spring Boot",
+      "PostgreSQL",
+      "Docker"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Last-Mile Delivery Platform",
+        "duration": "2 years",
+        "description": "Built last-mile delivery management platform — driver assignment, route optimisation, and real-time tracking for 100K daily deliveries."
+      }
+    ]
+  },
+  {
+    "employeeId": 64,
+    "employeeCode": "EMP1356",
+    "fullName": "Mohit Ahluwalia",
+    "roleTitle": "DevOps Engineer",
+    "businessUnit": "Payments & FinTech",
+    "location": "Gurugram",
+    "experienceYears": 6,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "AWS",
+      "Ansible",
+      "CI/CD",
+      "Terraform",
+      "Kubernetes"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Payment Platform Infra",
+        "duration": "2.5 years",
+        "description": "Owned AWS infrastructure for a payment platform — PCI-DSS zone isolation, HSM integration, and automated compliance auditing."
+      }
+    ]
+  },
+  {
+    "employeeId": 65,
+    "employeeCode": "EMP1357",
+    "fullName": "Leela Krishnan",
+    "roleTitle": "Backend Engineer",
+    "businessUnit": "Payments & FinTech",
+    "location": "Chennai",
+    "experienceYears": 4,
+    "benchStatus": "Bench",
+    "currentAllocation": "Bench — available now",
+    "availableDate": null,
+    "joiningNotice": "No constraint",
+    "skills": [
+      "Python",
+      "FastAPI",
+      "PostgreSQL",
+      "Settlement Systems",
+      "Kafka"
+    ],
+    "projectHistory": [
+      {
+        "projectName": "Settlement Automation Platform",
+        "duration": "1.5 years",
+        "description": "Built settlement automation platform — multi-bank settlement batch processing, exception handling, and regulatory reporting APIs."
+      }
+    ]
+  }
+]

@@ -2,11 +2,12 @@ import { BadRequestException, Injectable, Logger, NotFoundException } from '@nes
 import { ConfigService } from '@nestjs/config';
 import { Prisma } from '@prisma/client';
 import { JwtPayload } from '../auth/strategies/jwt.strategy';
-import { MAX_RANKING_CANDIDATES } from '../common/constants/search.constants';
+import { JD_TEXT_MAX_LENGTH, MIN_VECTOR_RESULTS, VECTOR_PRE_FILTER_LIMIT } from '../common/constants/search.constants';
 import { PrismaService } from '../prisma/prisma.service';
 import { SearchDto } from './dto/search.dto';
 import { LlmService, PoolCandidate, RankedItem, IrcWithProject } from './llm.service';
 import { HeuristicService } from './heuristic.service';
+import { EmbeddingService } from './embedding.service';
 import { writeSearchLog } from '../common/utils/search-logger.util';
 
 // Type for Employee with related data from Prisma
@@ -26,6 +27,7 @@ export class SearchService {
     private readonly config:     ConfigService,
     private readonly llm:        LlmService,
     private readonly heuristic:  HeuristicService,
+    private readonly embedding:  EmbeddingService,
   ) {}
 
   async search(user: JwtPayload, dto: SearchDto, jdFilename?: string) {
@@ -128,6 +130,11 @@ export class SearchService {
   // ─── Pool builder ──────────────────────────────────────────────────────────
 
   private async buildPool(dto: SearchDto, ircId: number): Promise<PoolCandidate[]> {
+    const basePool = await this.buildBasePool(dto, ircId);
+    return this.applyVectorPreFilter(basePool, dto);
+  }
+
+  private async buildBasePool(dto: SearchDto, ircId: number): Promise<PoolCandidate[]> {
     // R10: 'applied' scope = only employees already in this IRC's active pipeline
     if (dto.scope === 'applied') {
       const entries = await this.prisma.pipelineCandidate.findMany({
@@ -155,6 +162,32 @@ export class SearchService {
     });
 
     return employees.map(e => this.toPoolCandidate(e));
+  }
+
+  private async applyVectorPreFilter(pool: PoolCandidate[], dto: SearchDto): Promise<PoolCandidate[]> {
+    const provider = this.config.get<string>('embeddingProvider') ?? 'none';
+    if (provider === 'none' || pool.length <= VECTOR_PRE_FILTER_LIMIT) return pool;
+
+    const queryText = [dto.query, dto.jdText?.slice(0, JD_TEXT_MAX_LENGTH)]
+      .filter(Boolean).join(' ').trim();
+    if (!queryText) return pool;
+
+    try {
+      const similarIds = await this.embedding.findSimilar(queryText, VECTOR_PRE_FILTER_LIMIT);
+      const poolMap    = new Map(pool.map(c => [c.employeeId, c]));
+      const filtered   = similarIds.filter(id => poolMap.has(id)).map(id => poolMap.get(id)!);
+
+      if (filtered.length < MIN_VECTOR_RESULTS) {
+        this.logger.warn(`Vector pre-filter yielded ${filtered.length} candidates — below MIN_VECTOR_RESULTS; using full pool`);
+        return pool;
+      }
+
+      this.logger.log(`Vector pre-filter: ${pool.length} → ${filtered.length} candidates`);
+      return filtered;
+    } catch (err) {
+      this.logger.warn(`Vector pre-filter failed — using full pool: ${(err as Error).message}`);
+      return pool;
+    }
   }
 
   private toPoolCandidate(e: EmployeeWithRelations): PoolCandidate {

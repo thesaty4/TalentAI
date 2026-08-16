@@ -47,6 +47,8 @@ model Employee {
   availableDate     DateTime?
   joiningNotice     String?
   createdAt         DateTime  @default(now())
+  // pgvector RAG pre-filter — written only by EmbeddingService; null until first embed run
+  embedding         Unsupported("vector(768)")?
 
   user               User?
   skills             EmployeeSkill[]

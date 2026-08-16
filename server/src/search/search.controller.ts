@@ -19,6 +19,7 @@ import { memoryStorage } from 'multer';
 import { JwtPayload } from '../auth/strategies/jwt.strategy';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
+import { EmbeddingService } from './embedding.service';
 import { SearchDto } from './dto/search.dto';
 import { SearchService } from './search.service';
 
@@ -36,7 +37,10 @@ const DOCX_MIME = 'application/vnd.openxmlformats-officedocument.wordprocessingm
 @Roles(Role.manager, Role.hr)
 @Controller('search')
 export class SearchController {
-  constructor(private readonly searchService: SearchService) {}
+  constructor(
+    private readonly searchService:    SearchService,
+    private readonly embeddingService: EmbeddingService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'AI-ranked candidate matches for an open IRC' })
@@ -79,5 +83,12 @@ export class SearchController {
       : (await mammoth.extractRawText({ buffer: file.buffer })).value;
 
     return this.searchService.search(user, { ...dto, jdText }, file.originalname);
+  }
+
+  @Post('embed-all')
+  @Roles(Role.hr)
+  @ApiOperation({ summary: 'Bulk re-embed all employee profiles for pgvector RAG pre-filter' })
+  embedAll() {
+    return this.embeddingService.embedAll();
   }
 }

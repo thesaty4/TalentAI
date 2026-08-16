@@ -64,12 +64,13 @@ server/
 │   │   ├── ircs.controller.ts
 │   │   └── ircs.service.ts
 │   │
-│   ├── search/                      # AI ranking — three services, no embedding pipeline
+│   ├── search/                      # AI ranking — three services (Phase 2 adds embedding.service.ts)
 │   │   ├── search.module.ts
-│   │   ├── search.controller.ts     # POST /search · POST /search/upload-jd
-│   │   ├── search.service.ts        # orchestrates: pre-filter → rank → re-hydrate → duplicate-check → log
+│   │   ├── search.controller.ts     # POST /search · POST /search/upload-jd · POST /search/embed-all (Phase 2)
+│   │   ├── search.service.ts        # orchestrates: pre-filter → (vector pre-filter Phase 2) → rank → re-hydrate → duplicate-check → log
 │   │   ├── llm.service.ts           # effectiveQuery + prompt (query-first) + LLM API + Zod validation
 │   │   ├── heuristic.service.ts     # synchronous skill-overlap fallback — no I/O, no async
+│   │   ├── embedding.service.ts     # Phase 2: profile embedding, pgvector storage, findSimilar query
 │   │   └── dto/
 │   │       ├── search.dto.ts        # ircId, query?, scope, jdText?
 │   │       └── search-result.dto.ts # employeeId, matchPct, whyRecommend, whyNot, conflict, alreadyInPipeline
