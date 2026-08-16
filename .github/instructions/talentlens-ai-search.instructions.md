@@ -1,6 +1,6 @@
 ---
 applyTo: "server/src/search/**"
-description: "TalentLens AI search module rules. Three-service split: SearchService (orchestration + business rules), LlamaService (query-first Llama3 ranking + Zod validation), HeuristicService (synchronous skill-overlap fallback). Manager query is always the PRIMARY ranking signal; IRC JD provides refinement context only. Strict re-hydration rule — never trust model for display fields. Heuristic fallback on any Llama failure."
+description: "TalentLens AI search module rules. Three-service split: SearchService (orchestration + business rules), LlamaService (query-first LLM ranking + Zod validation), HeuristicService (synchronous skill-overlap fallback). Manager query is always the PRIMARY ranking signal; IRC JD provides refinement context only. Strict re-hydration rule — never trust model for display fields. Heuristic fallback on any LLM failure."
 ---
 
 # TalentLens AI — Search Module Standards
@@ -13,9 +13,9 @@ Three services with **distinct, non-overlapping responsibilities**. Never merge 
 
 | File | Owns | Must NOT touch |
 |------|------|----------------|
-| `search.service.ts` | Orchestration + business rules: open-IRC enforcement, scope/rejected handling, pool pre-filter, Llama call, fallback control, re-hydration, duplicate checks, sorting, logging | Prompt building, model API calls, scoring algorithms |
+| `search.service.ts` | Orchestration + business rules: open-IRC enforcement, scope/rejected handling, pool pre-filter, LLM ranking call, fallback control, re-hydration, duplicate checks, sorting, logging | Prompt building, model API calls, scoring algorithms |
 | `llama.service.ts` | `effectiveQuery` composition, prompt construction, `/api/generate` call, Zod validation + one retry on parse failure | DB queries, business rules, HTTP context |
-| `heuristic.service.ts` | Synchronous skill-overlap scoring + generic why/why-not text. No async, no I/O. | Llama calls, DB queries |
+| `heuristic.service.ts` | Synchronous skill-overlap scoring + generic why/why-not text. No async, no I/O. | LLM calls, DB queries |
 
 ---
 
@@ -25,9 +25,9 @@ Three services with **distinct, non-overlapping responsibilities**. Never merge 
 2. Build candidate pool — apply scope constraint (R10) and rejected-candidate exclusions (R15).
 3. Pre-filter: keep employees with at least 1 mandatory-skill match; cap at `MAX_RANKING_CANDIDATES` by overlap count.
 4. Call ranking:
-   - If `RANKING_PROVIDER=heuristic` → skip Llama, use heuristic directly.
+   - If `RANKING_PROVIDER=heuristic` → skip LLM, use heuristic directly.
    - Otherwise call `LlamaService.rank(irc, pool, query, jdText)`.
-   - On any Llama failure (network, parse, timeout) → silently fall back to `HeuristicService.rank()`.
+   - On any LLM failure (network, parse, timeout) → silently fall back to `HeuristicService.rank()`.
 5. **Re-hydrate** every result from DB by `employeeId` — replace ALL display fields.
 6. Duplicate-check: flag employees active in a *different* open IRC (R5).
 7. Write `search_logs` row — every call, regardless of path.
@@ -49,12 +49,12 @@ Always re-hydrate from DB: `fullName`, `roleTitle`, `skills`, `location`, `busin
 const emp = await prisma.employee.findUniqueOrThrow({ where: { id: item.employeeId } });
 return { ...item, fullName: emp.fullName, skills: emp.skills.map(s => s.name) };
 
-// ❌ Never use display fields directly from the Llama response
+// ❌ Never use display fields directly from the LLM response
 ```
 
 ---
 
-## Llama prompt structure — query is FIRST (`llama.service.ts`)
+## LLM prompt structure — query is FIRST (`llama.service.ts`)
 
 The manager's query is the **primary ranking signal**. IRC JD fields are secondary context used only for refinement. This order must never be reversed.
 
@@ -86,11 +86,12 @@ USER:
     whyNot (string[], at least 1 item — R7), conflict (bool), conflictNote (string, omit if no conflict) }
 ```
 
-**LLM API contract:**
+**Ollama API contract:**
 - `POST ${LLAMA_BASE_URL}/api/generate`
 - Headers: `Authorization: Bearer ${LLAMA_API_KEY}` (only when key is set), `Content-Type: application/json`
-- Body: `{ model: "${LLAMA_MODEL}", prompt: "<text>", stream: false }`
+- Body: `{ model: "${LLAMA_MODEL}", prompt: "<text>", stream: false, options: { temperature: 0 } }`
 - Parse from response field `response`
+- Model configured via `LLAMA_MODEL` env var (e.g., `qwen3.5:9b`, `llama3`, `mistral`, etc.)
 
 ---
 
@@ -143,8 +144,8 @@ conflict  = availableDate exists AND availableDate > project.startDate
 
 ## Environment config
 
-Validate all Llama env vars in `configuration.ts`:
-- `LLAMA_BASE_URL` — required
+Validate all Ollama env vars in `configuration.ts`:
+- `LLAMA_BASE_URL` — required (default: `http://localhost:11434`)
 - `LLAMA_API_KEY` — optional (omit header when not set)
-- `LLAMA_MODEL` — required (e.g. `llama3`)
+- `LLAMA_MODEL` — required (default: `qwen3.5:9b`; supports any Ollama-compatible model)
 - `RANKING_PROVIDER` — `llama | heuristic` (default: `llama`)

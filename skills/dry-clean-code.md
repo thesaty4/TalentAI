@@ -145,7 +145,7 @@ Every list view must handle three states explicitly:
 
 ```typescript
 // ✅ — explains *why*, not what
-// Llama prompt context is capped; pre-filter to top 35 candidates by skill overlap
+// LLM prompt context is capped; pre-filter to top 35 candidates by skill overlap
 const preFiltered = applyHeuristicFilter(pool, irc, 35);
 
 // ❌ — restates the code

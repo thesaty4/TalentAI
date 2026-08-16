@@ -9,8 +9,8 @@
 
 ## What this spec builds
 
-`server/src/search/` — three services (orchestration, Llama3 ranking, heuristic fallback) + controller + DTOs.
-**No embedding pipeline.** The manager's query goes directly into the Llama3 prompt as the primary signal.
+`server/src/search/` — three services (orchestration, LLM-based ranking, heuristic fallback) + controller + DTOs.
+**No embedding pipeline.** The manager's query goes directly into the LLM prompt as the primary signal.
 
 ---
 
@@ -78,9 +78,11 @@ pipelineCandidateId: number | null
 
 1. Build `effectiveQuery` from query + optional jdText (see instructions for priority rules).
 2. Construct the prompt with manager query **first**, IRC context **second** (see instructions).
-3. `POST ${LLAMA_BASE_URL}/api/generate` with `{ model, prompt, stream: false }`.
+3. `POST ${LLAMA_BASE_URL}/api/generate` with `{ model: "${LLAMA_MODEL}", prompt, stream: false, options: { temperature: 0 } }`.
 4. Parse `response` field and validate with Zod schema.
 5. Retry once on parse failure, then throw typed error.
+
+Model is configured via `LLAMA_MODEL` environment variable and supports any Ollama-compatible LLM.
 
 ### `heuristic.service.ts` — synchronous fallback, no I/O
 
@@ -118,9 +120,9 @@ Config must expose and validate:
 
 ## Acceptance criteria
 
-- `POST /search { ircId:1, query:"engineers who worked on payments", scope:"all" }` → Llama3-ranked array with `whyRecommend` citing project history.
+- `POST /search { ircId:1, query:"engineers who worked on payments", scope:"all" }` → LLM-ranked array with `whyRecommend` citing project history.
 - Satya Mishra appears with `alreadyInPipeline: true`.
-- Invalid/missing Llama config → heuristic fallback, no 500 error.
+- Invalid/missing Ollama config → heuristic fallback, no 500 error.
 - Closed IRC → `400 Bad Request`.
 - `POST /search/upload-jd` with PDF → extracted text used as secondary JD context.
 - `scope:applied` returns only candidates already in this IRC's pipeline.

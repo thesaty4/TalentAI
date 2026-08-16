@@ -79,7 +79,7 @@ export default () => ({
   jwtSecret: process.env.JWT_SECRET,
   llamaBaseUrl: process.env.LLAMA_BASE_URL ?? 'http://localhost:11434',
   llamaApiKey: process.env.LLAMA_API_KEY,
-  llamaModel: process.env.LLAMA_MODEL ?? 'llama3',
+  llamaModel: process.env.LLAMA_MODEL ?? 'qwen3.5:9b',
   llamaEmbedModel: process.env.LLAMA_EMBED_MODEL ?? 'nomic-embed-text',
   rankingProvider: process.env.RANKING_PROVIDER ?? 'llama',
   clientUrl: process.env.CLIENT_URL ?? 'http://localhost:5173',
@@ -115,12 +115,31 @@ DATABASE_URL=postgres://postgres:password@localhost:5432/talentlens
 JWT_SECRET=change_me_32_chars_minimum
 LLAMA_BASE_URL=http://localhost:11434
 LLAMA_API_KEY=
-LLAMA_MODEL=llama3
+LLAMA_MODEL=qwen3.5:9b
 LLAMA_EMBED_MODEL=nomic-embed-text
 RANKING_PROVIDER=llama
 PORT=3001
 CLIENT_URL=http://localhost:5173
 VITE_API_URL=http://localhost:3001
+```
+
+### Ollama setup (required for AI search)
+
+Before running AI search features, ensure Ollama is installed and the configured model is available:
+
+```bash
+# Install Ollama (if not already installed)
+# Visit https://ollama.com/download
+
+# Pull the required model (default: qwen3.5:9b, configurable via LLAMA_MODEL)
+ollama pull qwen3.5:9b
+
+# Or use any other Ollama-compatible model
+# ollama pull llama3
+# ollama pull mistral
+
+# Verify Ollama is running
+curl http://localhost:11434/api/tags
 ```
 
 ---
