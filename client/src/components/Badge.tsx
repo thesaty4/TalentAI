@@ -2,7 +2,7 @@ import { STAGE_HEX } from '../lib/constants/pipeline.constants';
 
 // Stage pill: solid color text + same color at 12% opacity background
 export function StageChip({ stage }: { stage: string }) {
-  const hex = STAGE_HEX[stage] ?? '#8A8C8E';
+  const hex = STAGE_HEX[stage] ?? '#858A9B';
   return (
     <span style={{
       display: 'inline-block', borderRadius: 999, padding: '3px 10px',

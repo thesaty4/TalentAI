@@ -6,8 +6,8 @@ import { ErrorBanner, Spinner } from '../../components/Feedback';
 import { Pagination } from '../../components/Pagination';
 import { usePool } from './usePool';
 
-const C = { fg1: '#1B2430', fg2: '#333D4A', fg3: '#8891A0', border: '#E3E5E9',
-            headerBg: '#F5F6F8', accent: '#3B6E64', danger: '#C1502E' };
+const C = { fg1: '#181A24', fg2: '#484F6B', fg3: '#858A9B', border: '#C8CAD3',
+            headerBg: '#F2F3F6', accent: '#FF5F2D', danger: '#CF3708' };
 
 const GRID = '1.5fr 0.8fr 1fr 0.8fr 1fr 1.3fr 0.5fr';
 const COLS = ['Name', 'Exp', 'Skills', 'Location', 'IRC', 'Status', ''];
@@ -16,7 +16,7 @@ function avatar(name: string) {
   const init = name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
   return (
     <div style={{
-      width: 30, height: 30, borderRadius: '50%', background: '#003057',
+      width: 30, height: 30, borderRadius: '50%', background: '#00018B',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       fontSize: 11, fontWeight: 700, color: '#fff', flexShrink: 0,
     }}>{init}</div>
@@ -160,7 +160,7 @@ export function ResourcePoolPage() {
                 {emp.skills.slice(0, 3).map(s => (
                   <span key={s} style={{
                     borderRadius: 999, padding: '2px 7px', fontSize: 10, fontWeight: 600,
-                    background: '#F5F6F8', color: C.fg2, border: `1px solid ${C.border}`,
+                    background: '#F2F3F6', color: C.fg2, border: `1px solid ${C.border}`,
                   }}>{s}</span>
                 ))}
                 {emp.skills.length > 3 && <span style={{ fontSize: 10, color: C.fg3 }}>+{emp.skills.length - 3}</span>}
@@ -173,20 +173,20 @@ export function ResourcePoolPage() {
               <span style={{
                 display: 'inline-block', borderRadius: 999, padding: '3px 10px',
                 fontSize: 11, fontWeight: 700,
-                background: emp.benchStatus === 'Bench' ? 'rgba(59,110,100,0.12)' : 'rgba(136,145,160,0.15)',
-                color:      emp.benchStatus === 'Bench' ? '#3B6E64'               : '#8891A0',
+                background: emp.benchStatus === 'Bench' ? 'rgba(255,95,45,0.12)' : 'rgba(133,138,155,0.15)',
+                color:      emp.benchStatus === 'Bench' ? '#FF5F2D'               : '#858A9B',
               }}>{emp.benchStatus}</span>
               {/* Actions */}
               <div style={{ position: 'relative' }}>
                 <button onClick={() => setOpenMenu(openMenu === emp.id ? null : emp.id)} style={{
-                  width: 30, height: 30, borderRadius: 7, background: '#F5F6F8',
+                  width: 30, height: 30, borderRadius: 7, background: '#F2F3F6',
                   border: 'none', cursor: 'pointer', fontSize: 16, color: C.fg2,
                 }}>⋮</button>
                 {openMenu === emp.id && (
                   <div style={{
                     position: 'absolute', right: 0, top: 34, zIndex: 20, width: 160,
                     background: '#fff', border: `1px solid ${C.border}`, borderRadius: 10,
-                    boxShadow: '0 14px 32px rgba(0,38,58,0.10)', padding: '4px',
+                    boxShadow: '0 14px 32px rgba(24,26,36,0.10)', padding: '4px',
                   }}>
                     <button onClick={() => { navigate(`/employees/${emp.id}`); setOpenMenu(null); }} style={{
                       display: 'block', width: '100%', padding: '8px 12px', border: 'none',

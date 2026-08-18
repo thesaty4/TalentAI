@@ -5,14 +5,14 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        // Primary: teal bg
-        primary:   'bg-[#3B6E64] text-white hover:bg-[#2C4A44]',
+        // Primary: Impact Orange
+        primary:   'bg-[#FF5F2D] text-white hover:bg-[#CF3708]',
         // Secondary: white bg, subtle border
-        secondary: 'border border-[#E3E5E9] bg-white text-[#1B2430] hover:bg-[#F5F6F8]',
+        secondary: 'border border-[#C8CAD3] bg-white text-[#181A24] hover:bg-[#F2F3F6]',
         // Muted/tertiary: no border
-        ghost:     'bg-[#F5F6F8] text-[#1B2430] hover:bg-[#E7EFEC] border-none',
-        // Danger: rust-red
-        danger:    'bg-[#C1502E] text-white hover:bg-[#A83F22]',
+        ghost:     'bg-[#F2F3F6] text-[#181A24] hover:bg-[#C8CAD3] border-none',
+        // Danger: Deep Orange
+        danger:    'bg-[#CF3708] text-white hover:bg-[#A52D07]',
       },
       size: {
         sm: 'h-8 px-3 text-xs',

@@ -6,7 +6,7 @@ import { useAuth } from '../auth/useAuth';
 
 interface Props { title: string; onMenuClick: () => void; }
 
-const C = { accent: '#3B6E64', fg1: '#1B2430', fg3: '#8891A0', border: '#E3E5E9' };
+const C = { accent: '#FF5F2D', fg1: '#181A24', fg3: '#858A9B', border: '#C8CAD3' };
 
 function initials(name: string) {
   return name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
@@ -26,7 +26,7 @@ function useClickOutside(ref: React.RefObject<HTMLElement>, cb: () => void) {
 const DROPDOWN_STYLE: React.CSSProperties = {
   position: 'absolute', top: '100%', right: 0, marginTop: 8,
   width: 320, background: '#fff', border: `1px solid ${C.border}`,
-  borderRadius: 12, boxShadow: '0 14px 32px rgba(0,38,58,0.10), 0 4px 8px rgba(0,38,58,0.06)',
+  borderRadius: 12, boxShadow: '0 14px 32px rgba(24,26,36,0.10), 0 4px 8px rgba(24,26,36,0.06)',
   zIndex: 50, padding: 8,
 };
 
@@ -129,7 +129,7 @@ export function TopBar({ title, onMenuClick }: Props) {
           border: 'none', cursor: 'pointer', padding: '4px 6px', borderRadius: 8,
         }}>
           <div style={{
-            width: 32, height: 32, borderRadius: '50%', background: '#003057',
+            width: 32, height: 32, borderRadius: '50%', background: '#00018B',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 12, fontWeight: 700, color: '#fff', flexShrink: 0,
           }}>{initials(user?.name ?? '?')}</div>
@@ -141,7 +141,7 @@ export function TopBar({ title, onMenuClick }: Props) {
               <p style={{ fontSize: 14, fontWeight: 600, color: C.fg1 }}>{user?.name}</p>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
                 <span style={{
-                  background: '#F5F6F8', color: '#8891A0', fontSize: 10.5, fontWeight: 700,
+                  background: '#F2F3F6', color: '#858A9B', fontSize: 10.5, fontWeight: 700,
                   letterSpacing: '0.04em', textTransform: 'uppercase', borderRadius: 999,
                   padding: '3px 8px',
                 }}>{user?.role}</span>

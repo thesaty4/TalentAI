@@ -63,21 +63,21 @@ export function PipelinePage() {
             return (
               <div key={stage} style={{
                   display: 'flex', flexDirection: 'column', width: 230, flexShrink: 0,
-                  background: (STAGE_HEX[stage] ?? '#8A8C8E') + '17',
+                  background: (STAGE_HEX[stage] ?? '#858A9B') + '17',
                   borderRadius: 12, overflow: 'hidden',
                 }}>
                 {/* Column header */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                    <div style={{ width: 9, height: 9, borderRadius: '50%', background: STAGE_HEX[stage] ?? '#8A8C8E', flexShrink: 0 }} />
-                    <span style={{ fontSize: 12.5, fontWeight: 600, color: '#1B2430' }}>{stage}</span>
+                    <div style={{ width: 9, height: 9, borderRadius: '50%', background: STAGE_HEX[stage] ?? '#858A9B', flexShrink: 0 }} />
+                    <span style={{ fontSize: 12.5, fontWeight: 600, color: '#181A24' }}>{stage}</span>
                   </div>
-                  <span style={{ fontSize: 11, color: '#8891A0' }}>({entries.length})</span>
+                  <span style={{ fontSize: 11, color: '#858A9B' }}>({entries.length})</span>
                 </div>
                 {/* Cards */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 9, padding: 12, overflowY: 'auto' }}>
                   {entries.length === 0 && (
-                    <p style={{ textAlign: 'center', fontSize: 12, color: '#8891A0', padding: '12px 0' }}>No candidates here.</p>
+                    <p style={{ textAlign: 'center', fontSize: 12, color: '#858A9B', padding: '12px 0' }}>No candidates here.</p>
                   )}
                   {entries.map(e => (
                     <PipelineCard

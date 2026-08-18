@@ -1,9 +1,8 @@
 import { useMutation } from '@tanstack/react-query';
-import { CheckCircle } from 'lucide-react';
+import { Briefcase, Building2, CheckCircle, Clock, MapPin } from 'lucide-react';
 import { Avatar } from '../../components/Card';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
-import { cn } from '../../lib/utils/cn';
 import { pipelineApi } from '../../lib/api/pipeline.api';
 import type { SearchResult } from '../../lib/api/search.api';
 
@@ -22,9 +21,10 @@ export function ResultCard({ result, ircId, onShortlisted, onViewProfile }: Prop
   });
 
   const firstName  = result.fullName.split(' ')[0];
-  const matchColor = result.matchPct >= 70 ? 'bg-commerce-green'
-                   : result.matchPct >= 40 ? 'bg-charge-yellow'
-                   : 'bg-power-orange';
+  // Circular ring geometry — r=22 keeps stroke fully inside the 52px viewBox
+  const r = 22, circ = 2 * Math.PI * r;
+  const ringStroke = result.matchPct >= 80 ? '#2E776A' : result.matchPct >= 60 ? '#D97706' : '#FF5F2D';
+  const ringFill   = (result.matchPct / 100) * circ;
 
   return (
     <Card className="overflow-hidden">
@@ -43,19 +43,36 @@ export function ResultCard({ result, ircId, onShortlisted, onViewProfile }: Prop
             <div className="min-w-0">
               <p className="font-semibold text-network-blue">{result.fullName}</p>
               <p className="text-sm text-secure-gray">{result.roleTitle}</p>
-              <p className="mt-0.5 text-xs text-[var(--fg-3)]">
-                {result.location} · {result.currentAllocation ?? 'Available'} · {result.businessUnit}
-              </p>
+              <div className="mt-1 flex flex-wrap gap-x-3.5 gap-y-0.5">
+                <span className="flex items-center gap-1 text-[11px] text-[var(--fg-3)]">
+                  <MapPin size={11} className="shrink-0" />{result.location}
+                </span>
+                <span className="flex items-center gap-1 text-[11px] text-[var(--fg-3)]">
+                  <Building2 size={11} className="shrink-0" />{result.businessUnit}
+                </span>
+                <span className="flex items-center gap-1 text-[11px] text-[var(--fg-3)]">
+                  <Clock size={11} className="shrink-0" />{result.currentAllocation ?? 'Available'}
+                </span>
+                <span className="flex items-center gap-1 text-[11px] text-[var(--fg-3)]">
+                  <Briefcase size={11} className="shrink-0" />{result.experienceYears}y exp
+                </span>
+              </div>
             </div>
           </div>
-          <div className="shrink-0 text-right">
-            <p className="text-2xl font-bold text-network-blue">
-              {result.matchPct}<span className="text-sm font-normal text-[var(--fg-3)]">%</span>
-            </p>
-            <div className="mt-1 h-1.5 w-24 overflow-hidden rounded-full bg-level-gray">
-              <div className={cn('h-1.5 rounded-full', matchColor)} style={{ width: `${result.matchPct}%` }} />
-            </div>
-            <span className="mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-medium bg-commerce-green/10 text-commerce-green">
+          <div className="flex shrink-0 flex-col items-center gap-2">
+            <svg width="52" height="52" viewBox="0 0 52 52">
+              <circle cx="26" cy="26" r={r} fill="none" stroke="#C8CAD3" strokeWidth="4" />
+              <circle cx="26" cy="26" r={r} fill="none" stroke={ringStroke} strokeWidth="4"
+                strokeDasharray={`${ringFill} ${circ - ringFill}`}
+                strokeLinecap="round"
+                transform="rotate(-90 26 26)" />
+              <text x="26" y="26" textAnchor="middle" dominantBaseline="central"
+                fontSize="11" fontWeight="700" fill="#181A24" fontFamily="Inter,sans-serif">
+                {result.matchPct}%
+              </text>
+            </svg>
+            <span className="inline-flex items-center gap-1 rounded-full bg-commerce-green/10 px-2 py-0.5 text-[10px] font-medium text-commerce-green">
+              <span className="h-1.5 w-1.5 rounded-full bg-commerce-green" />
               Available now
             </span>
           </div>

@@ -5,21 +5,21 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../auth/useAuth";
 import { authApi, type JwtUser } from "../../lib/api/auth.api";
 
-// ─── Theme (teal + dark-slate — scoped to auth screen only) ──────────────────
+// ─── Theme (GlobalLogic brand — scoped to auth screen only) ───────────────────────────────────────────────
 const C = {
-  accentTeal:  "#3B6E64",
-  accentHover: "#2C4A44",
-  heroBg:      "#1B2430",
-  danger:      "#C1502E",
-  pageBg:      "#F5F6F8",
-  subtleBg:    "#E7EFEC",
-  fg1:         "#1B2430",
-  fg2:         "#333D4A",
-  fg3:         "#8891A0",
-  onDark2:     "#B7C1C8",
-  border:      "#D3D7DC",
-  borderSub:   "#E3E5E9",
-  focusRing:   "0 0 0 3px rgba(59,110,100,0.35)",
+  accentTeal:  "#FF5F2D",  // Impact Orange
+  accentHover: "#CF3708",  // Deep Orange
+  heroBg:      "#181A24",  // Steel Gray 100
+  danger:      "#CF3708",  // Deep Orange
+  pageBg:      "#F2F3F6",  // Light Steel
+  subtleBg:    "#FFCEB9",  // Light Orange
+  fg1:         "#181A24",  // Steel Gray 100
+  fg2:         "#484F6B",  // Steel Gray 75
+  fg3:         "#858A9B",  // Steel Gray 50
+  onDark2:     "#C8CAD3",  // Steel Gray 25
+  border:      "#C8CAD3",  // Steel Gray 25
+  borderSub:   "#F2F3F6",  // Light Steel
+  focusRing:   "0 0 0 3px rgba(255,95,45,0.35)",
 } as const;
 
 // ─── Shared input style ───────────────────────────────────────────────────────
@@ -100,7 +100,7 @@ function HeroPane() {
               width: 68, height: 86, border: "1px solid rgba(255,255,255,0.22)", borderRadius: 10,
               background: "rgba(255,255,255,0.05)", padding: 10, display: "flex", flexDirection: "column", gap: 6,
             }}>
-              <div style={{ width: 20, height: 20, borderRadius: "50%", background: "rgba(59,110,100,0.55)" }} />
+              <div style={{ width: 20, height: 20, borderRadius: '50%', background: "rgba(255,95,45,0.40)" }} />
               <div style={{ height: 5, borderRadius: 3, background: "rgba(255,255,255,0.25)", width: "80%" }} />
               <div style={{ height: 5, borderRadius: 3, background: "rgba(255,255,255,0.15)", width: "60%" }} />
             </div>

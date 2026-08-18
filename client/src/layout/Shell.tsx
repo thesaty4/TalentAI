@@ -23,12 +23,12 @@ export function Shell() {
   const title = TITLES[pathname] ?? 'TalentLens AI';
 
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: '#F5F6F8' }}>
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: '#F2F3F6' }}>
       {/* Mobile backdrop */}
       {mobileOpen && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 40,
-          background: 'rgba(0,38,58,0.45)', backdropFilter: 'blur(2px)',
+          background: 'rgba(24,26,36,0.45)', backdropFilter: 'blur(2px)',
         }} onClick={() => setMobileOpen(false)} />
       )}
 

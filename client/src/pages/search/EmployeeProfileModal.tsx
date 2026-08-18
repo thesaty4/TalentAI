@@ -9,7 +9,7 @@ import { useAuth } from '../../auth/useAuth';
 const RATING_COLORS: Record<string, string> = {
   Exceeding: 'bg-commerce-green/10 text-commerce-green',
   Meeting:   'bg-celestial-blue/10 text-celestial-blue',
-  Below:     'bg-charge-yellow/20 text-[#8A6A00]',
+  Below:     'bg-charge-yellow/20 text-[#484F6B]',
 };
 
 interface Props { employeeId: number; onClose: () => void; }

@@ -12,15 +12,29 @@ const IRC_SUMMARY = {
   id: true, ircCode: true, roleTitle: true, status: true,
 } satisfies Prisma.IrcSelect;
 
+const PROJECT_STATUS_BY_QUERY: Record<string, string> = {
+  active: 'Active',
+  'on hold': 'On hold',
+  closed: 'Closed',
+};
+
+function normalizeProjectStatus(rawStatus?: string): string | undefined {
+  if (!rawStatus) return undefined;
+  const normalizedStatus = rawStatus.trim().toLowerCase();
+  if (normalizedStatus === 'all') return undefined;
+  return PROJECT_STATUS_BY_QUERY[normalizedStatus] ?? rawStatus;
+}
+
 @Injectable()
 export class ProjectsService {
   constructor(private readonly prisma: PrismaService) {}
 
   findAll(user: JwtPayload, query: QueryProjectsDto) {
+    const status = normalizeProjectStatus(query.status);
     const where: Prisma.ProjectWhereInput = {
       // R18: manager sees only their own projects; R19: HR sees all
       ...(user.role === Role.manager && { managerId: user.sub }),
-      ...(query.status && { status: query.status }),
+      ...(status && { status }),
       ...(query.search && {
         OR: [
           { name: { contains: query.search, mode: 'insensitive' } },

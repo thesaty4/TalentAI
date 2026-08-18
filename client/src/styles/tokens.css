@@ -1,15 +1,16 @@
 :root {
-  --color-network-blue:   #00263A;
+  /* GlobalLogic brand primitives */
+  --color-network-blue:   #181A24;  /* Steel Gray 100 */
   --color-pure-white:     #FFFFFF;
-  --color-stacked-blue:   #003057;
-  --color-celestial-blue: #4197CB;
-  --color-power-orange:   #D64123;
-  --color-secure-gray:    #414042;
-  --color-commerce-green: #00945E;
-  --color-energy-orange:  #FF6B00;
-  --color-charge-yellow:  #FFCD00;
-  --color-culture-gray:   #F6F6F6;
-  --color-level-gray:     #D9D8D6;
+  --color-stacked-blue:   #00018B;  /* Deep Blue */
+  --color-celestial-blue: #4442E3;  /* Impact Blue */
+  --color-power-orange:   #FF5F2D;  /* Impact Orange */
+  --color-secure-gray:    #484F6B;  /* Steel Gray 75 */
+  --color-commerce-green: #2E776A;  /* Green */
+  --color-energy-orange:  #CF3708;  /* Deep Orange */
+  --color-charge-yellow:  #E6EB5D;  /* Yellow */
+  --color-culture-gray:   #F2F3F6;  /* Light Steel */
+  --color-level-gray:     #C8CAD3;  /* Steel Gray 25 */
 
   --bg-default:   var(--color-pure-white);
   --bg-muted:     var(--color-culture-gray);
@@ -19,11 +20,11 @@
 
   --fg-1: var(--color-network-blue);
   --fg-2: var(--color-secure-gray);
-  --fg-3: #717071;
+  --fg-3: #858A9B;  /* Steel Gray 50 */
   --fg-on-dark-1: var(--color-pure-white);
-  --fg-on-dark-2: #BFCBD5;
+  --fg-on-dark-2: #C8CAD3;  /* Steel Gray 25 */
   --fg-link: var(--color-celestial-blue);
-  --fg-link-hover: #33739A;
+  --fg-link-hover: #00018B;  /* Deep Blue */
 
   --color-success: var(--color-commerce-green);
   --color-warning: var(--color-charge-yellow);
@@ -31,15 +32,15 @@
   --color-info:    var(--color-celestial-blue);
 
   --border-subtle:  var(--color-level-gray);
-  --border-default: #C5C7CA;
+  --border-default: #C8CAD3;  /* Steel Gray 25 */
   --border-strong:  var(--color-secure-gray);
   --border-focus:   var(--color-celestial-blue);
 
   --font-display: "Bio Sans", "Inter", -apple-system, "Helvetica Neue", Arial, sans-serif;
   --font-body:    "Inter", "Bio Sans", -apple-system, "Helvetica Neue", Arial, sans-serif;
 
-  --shadow-xs: 0 1px 2px rgba(0,38,58,0.06);
-  --shadow-sm: 0 2px 4px rgba(0,38,58,0.06), 0 1px 2px rgba(0,38,58,0.04);
-  --shadow-md: 0 6px 16px rgba(0,38,58,0.08), 0 2px 4px rgba(0,38,58,0.05);
-  --shadow-focus: 0 0 0 3px rgba(65,151,203,0.35);
+  --shadow-xs: 0 1px 2px rgba(24,26,36,0.06);
+  --shadow-sm: 0 2px 4px rgba(24,26,36,0.06), 0 1px 2px rgba(24,26,36,0.04);
+  --shadow-md: 0 6px 16px rgba(24,26,36,0.08), 0 2px 4px rgba(24,26,36,0.05);
+  --shadow-focus: 0 0 0 3px rgba(68,66,227,0.35);  /* Impact Blue focus ring */
 }

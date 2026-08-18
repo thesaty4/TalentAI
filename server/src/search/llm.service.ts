@@ -106,42 +106,60 @@ export class LlmService {
     jdText: string | undefined,
     query: string,
   ): string {
-    const contextLines: string[] = [];
-    if (irc.mandatorySkills.trim()) contextLines.push(`Required skills: ${irc.mandatorySkills}`);
-    if (irc.preferredSkills?.trim()) contextLines.push(`Preferred skills: ${irc.preferredSkills}`);
-    if (irc.experienceRange.trim()) contextLines.push(`Experience range: ${irc.experienceRange}`);
-    if (irc.location.trim()) contextLines.push(`Location: ${irc.location}`);
-    if (irc.remotePolicy.trim()) contextLines.push(`Remote policy: ${irc.remotePolicy}`);
-    if (jdText?.trim()) {
-      const jdCapped = jdText.trim().replace(/\s+/g, ' ').slice(0, JD_TEXT_MAX_LENGTH);
-      contextLines.push(`\nJob Description:\n${jdCapped}`);
-    }
-    const context = contextLines.join('\n');
+    const hasIrcSkills = !!(irc.mandatorySkills.trim() || irc.preferredSkills?.trim());
 
-    // Whether the context lists any skills — determines if Step 2 applies
-    const hasSkillsInContext = !!(
-      irc.mandatorySkills.trim() ||
-      irc.preferredSkills?.trim() ||
-      jdText?.trim()
-    );
+    const ircLines: string[] = [];
+    if (irc.mandatorySkills.trim()) ircLines.push(`Required skills: ${irc.mandatorySkills}`);
+    if (irc.preferredSkills?.trim()) ircLines.push(`Preferred skills: ${irc.preferredSkills}`);
+    if (irc.experienceRange.trim()) ircLines.push(`Experience range: ${irc.experienceRange}`);
+    if (irc.location.trim()) ircLines.push(`Location: ${irc.location}`);
+    if (irc.remotePolicy.trim()) ircLines.push(`Remote policy: ${irc.remotePolicy}`);
+
+    const normalizedJd = jdText?.trim()
+      ? jdText.trim().replace(/\s+/g, ' ').slice(0, JD_TEXT_MAX_LENGTH)
+      : '';
+
+    // When IRC has skills, IRC is authoritative and JD is separated so the LLM
+    // can correctly attribute the mismatch direction (JD requests X, IRC requires Y).
+    // When IRC has no skills, JD is the only context — include it in HIRING CONTEXT.
+    let hiringContext: string;
+    let jdSection = '';
+
+    if (hasIrcSkills) {
+      hiringContext = ircLines.join('\n');
+      if (normalizedJd) {
+        jdSection = `\nATTACHED JOB DESCRIPTION (manager-provided; must align with IRC)\n${normalizedJd}`;
+      }
+    } else {
+      const lines = [...ircLines];
+      if (normalizedJd) lines.push(`\nJob Description:\n${normalizedJd}`);
+      hiringContext = lines.join('\n');
+    }
+
+    const hasSkillsInContext = hasIrcSkills || !!normalizedJd;
 
     const step2 = hasSkillsInContext
       ? `STEP 2 — SKILL / TECHNOLOGY CHECK
-If the query explicitly names a specific skill or technology (e.g., Python, ROR, Java, React, Node.js):
-  a. Look up that skill in the hiring context (required skills, preferred skills, job description).
-  b. If the named skill is NOT present anywhere in the hiring context → INVALID.
+If the manager query${hasIrcSkills ? ' or the attached JD' : ''} explicitly names a specific skill or technology (e.g., Python, ROR, Java, React, Node.js):
+  a. Look up that skill in the HIRING CONTEXT.
+  b. If the named skill is NOT present in the hiring context → INVALID.
   c. If the named skill IS present → continue.
-If the query names no specific skill (e.g., "senior engineers", "find candidates") → skip to Step 3.`
+If no specific skill is named → skip to Step 3.`
       : `STEP 2 — SKILL CHECK
 Hiring context lists no specific skills. Skip this step.`;
 
+    const keyRule = hasIrcSkills
+      ? `Key rule: any skill in the manager query or attached JD must exist in the IRC. If the JD conflicts with IRC skills, IRC is always authoritative.`
+      : `Key rule: any skill named in the query must exist in the hiring context (job description).`;
+
     return `You are a search query validator for a candidate hiring system.
 
-HIRING CONTEXT
-${context}
+HIRING CONTEXT${hasIrcSkills ? ' (IRC — authoritative requirements)' : ''}
+${hiringContext}
 
 MANAGER QUERY
 "${query}"
+${jdSection}
 
 Follow these steps in order. Stop at the first INVALID result.
 
@@ -155,18 +173,28 @@ STEP 3 — NUMERIC CONSTRAINT CHECK
 If the query specifies a numeric value (e.g., years of experience) that directly contradicts the hiring context → INVALID.
 Otherwise → VALID.
 
-Key rule for skills: a skill named in the query must exist in the hiring context. Asking for a skill that is absent from the context is going outside the IRC/JD scope.
+${keyRule}
 
 Non-skill additions that are always VALID: location preference, domain experience (e.g., "payments experience"), availability constraints.
 
+REASON FORMAT RULES (follow exactly when generating the reason field):
+- Conflict from MANAGER QUERY skill vs IRC → "Query requests [query skill] devs, but the hiring context requires [IRC skill] skills."
+- Conflict from ATTACHED JD skill vs IRC → "Job description requests [JD skill] devs, but the hiring context requires [IRC skill] skills."
+- Do NOT say "Query requests X" when the conflict originates from the attached JD — even if the query also mentions a different skill.
+- Numeric conflict → "Query requires [X] years, but the hiring context specifies [IRC range]."
+- Not about candidates → "Query is not related to candidate evaluation."
+
 Worked examples:
-- Context: Python, 5-6 yrs; Query: "Python with payments experience" → VALID
-- Context: Python, 5-6 yrs; Query: "Python candidates with 7 years" → INVALID (7 outside 5-6)
-- Context: Python; Query: "give me ROR engineers" → INVALID (ROR absent from context)
-- Context: Python; Query: "Java candidates" → INVALID (Java absent from context)
-- Context: Python; Query: "senior Python engineers" → VALID (Python present)
-- Context: Python; Query: "give me coffee" → INVALID (not about candidates)
-- Context: Python; Query: "find available candidates" → VALID (no specific skill named)
+- IRC: Python, 5-6 yrs; Query: "Python with payments experience" → VALID
+- IRC: Python, 5-6 yrs; Query: "Python candidates with 7 years" → INVALID; reason: "Query requires 7 years, but the hiring context specifies 5-6."
+- IRC: Python; Query: "give me ROR engineers" → INVALID; reason: "Query requests ROR devs, but the hiring context requires Python skills."
+- IRC: Python; Query: "Java candidates" → INVALID; reason: "Query requests Java devs, but the hiring context requires Python skills."
+- IRC: Python; Query: "Python engineers"; JD: Java → INVALID; reason: "Job description requests Java devs, but the hiring context requires Python skills."
+- IRC: Python; Query: "senior Python engineers" → VALID
+- IRC: Python; Query: "give me coffee" → INVALID; reason: "Query is not related to candidate evaluation."
+- IRC: (no skills); JD: Java; Query: "Java devs" → VALID
+- IRC: (no skills); JD: Java; Query: "Python devs" → INVALID; reason: "Query requests Python devs, but the hiring context requires Java skills."
+- IRC: (no skills); no JD; Query: "Python devs" → VALID
 
 Return JSON only: { "isValid": boolean, "reason": "brief explanation, max 25 words" }`.trim();
   }

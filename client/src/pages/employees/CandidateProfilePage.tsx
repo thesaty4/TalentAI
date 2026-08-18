@@ -9,7 +9,7 @@ import { useAuth } from '../../auth/useAuth';
 const RATING_COLORS: Record<string, string> = {
   Exceeding: 'bg-commerce-green/10 text-commerce-green',
   Meeting:   'bg-celestial-blue/10 text-celestial-blue',
-  Below:     'bg-charge-yellow/20 text-[#8A6A00]',
+  Below:     'bg-charge-yellow/20 text-[#484F6B]',
 };
 
 export function CandidateProfilePage() {
@@ -43,7 +43,7 @@ export function CandidateProfilePage() {
               {isAvailable ? '✓ Available now' : emp.benchStatus}
             </span>
             {emp.availableDate && (
-              <span className="rounded-full bg-charge-yellow/20 px-2.5 py-1 text-xs text-[#8A6A00]">
+              <span className="rounded-full bg-charge-yellow/20 px-2.5 py-1 text-xs text-[#484F6B]">
                 Free from {new Date(emp.availableDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
               </span>
             )}

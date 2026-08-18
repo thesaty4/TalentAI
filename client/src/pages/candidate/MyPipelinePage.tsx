@@ -23,7 +23,7 @@ const RATING_COLORS: Record<string, string> = {
   'Meeting':    'bg-celestial-blue/10 text-celestial-blue',
   'Scheduled':  'bg-celestial-blue/10 text-celestial-blue',
   'No':         'bg-power-orange/10 text-power-orange',
-  'Below':      'bg-charge-yellow/20 text-[#8A6A00]',
+  'Below':      'bg-charge-yellow/20 text-[#484F6B]',
 };
 
 function StageStepper({ stage }: { stage: string }) {
@@ -37,7 +37,7 @@ function StageStepper({ stage }: { stage: string }) {
         return (
           <div key={s} className="flex items-center">
             <div className={cn('flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold transition-colors shrink-0',
-              isRejected   ? 'bg-[#8A8C8E] text-white'
+              isRejected   ? 'bg-[#858A9B] text-white'
               : done       ? 'bg-commerce-green text-white'
               : current    ? 'bg-power-orange text-white'
               :              'bg-level-gray text-secure-gray')}>

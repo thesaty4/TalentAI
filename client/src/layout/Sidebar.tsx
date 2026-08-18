@@ -11,7 +11,7 @@ interface Props {
   onClose:    () => void;
 }
 
-const C = { bg: '#1B2430', accent: '#3B6E64' };
+const C = { bg: '#181A24', accent: '#FF5F2D' };
 
 const MANAGER_NAV = [
   { to: '/dashboard',   label: 'Dashboard',     Icon: LayoutDashboard },
@@ -100,17 +100,17 @@ function SidebarInner({ nav, collapsed, onToggle, onClose, isMobile }: {
         {/* Close (mobile) or toggle (desktop) */}
         {isMobile ? (
           <button onClick={onClose} style={{
-            background: 'none', border: 'none', cursor: 'pointer', color: '#B7C1C8', padding: 4,
+            background: 'none', border: 'none', cursor: 'pointer', color: '#858A9B', padding: 4,
           }}><X size={18} /></button>
         ) : (
           <button onClick={onToggle} style={{
             position: 'absolute', right: -12, top: 22,
             width: 24, height: 24, borderRadius: '50%',
-            background: '#fff', border: '1px solid #E3E5E9',
+            background: '#fff', border: '1px solid #C8CAD3',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             cursor: 'pointer', zIndex: 10, flexShrink: 0,
           }}>
-            {collapsed ? <ChevronRight size={12} color="#333D4A" /> : <ChevronLeft size={12} color="#333D4A" />}
+            {collapsed ? <ChevronRight size={12} color="#484F6B" /> : <ChevronLeft size={12} color="#484F6B" />}
           </button>
         )}
       </div>
@@ -125,8 +125,8 @@ function SidebarInner({ nav, collapsed, onToggle, onClose, isMobile }: {
                 padding: collapsed && !isMobile ? '10px 0' : '10px 12px',
                 justifyContent: collapsed && !isMobile ? 'center' : 'flex-start',
                 borderRadius: 9, cursor: 'pointer',
-                background: isActive ? 'rgba(59,110,100,0.35)' : 'transparent',
-                color: isActive ? '#CFE9E1' : '#B7C1C8',
+          background: isActive ? 'rgba(255,95,45,0.20)' : 'transparent',
+                color: isActive ? '#FFCEB9' : '#858A9B',
                 transition: 'background 150ms',
               }}>
                 <Icon size={19} strokeWidth={1.75} style={{ flexShrink: 0 }} />
@@ -159,7 +159,7 @@ function SidebarInner({ nav, collapsed, onToggle, onClose, isMobile }: {
           <p style={{ fontSize: 14, fontWeight: 700, color: '#fff', marginBottom: 3 }}>
             Try AI Search first
           </p>
-          <p style={{ fontSize: 12, color: '#B7C1C8' }}>
+          <p style={{ fontSize: 12, color: '#858A9B' }}>
             Describe the role in plain English for instant ranked matches.
           </p>
         </div>

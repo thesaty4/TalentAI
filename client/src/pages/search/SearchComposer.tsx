@@ -54,7 +54,7 @@ export function SearchComposer(p: Props) {
         <select
           value={p.selectedProject ?? ''}
           onChange={e => { p.onProjectChange(e.target.value ? +e.target.value : null); p.onIrcChange(null); }}
-          className={cn(SELECT_CLS, 'w-48')}>
+          className={cn(SELECT_CLS, 'w-72 max-w-xs')}>
           <option value="">Select project…</option>
           {p.projects.map(pr => <option key={pr.id} value={pr.id}>{pr.name}</option>)}
         </select>
@@ -63,7 +63,7 @@ export function SearchComposer(p: Props) {
           value={p.selectedIrc ?? ''}
           onChange={e => p.onIrcChange(e.target.value ? +e.target.value : null)}
           disabled={!p.selectedProject}
-          className={cn(SELECT_CLS, 'w-44')}>
+          className={cn(SELECT_CLS, 'w-80 max-w-sm')}>
           <option value="">Select IRC…</option>
           {openIrcs.map(i => <option key={i.id} value={i.id}>{i.ircCode} — {i.roleTitle}</option>)}
         </select>
@@ -96,7 +96,7 @@ export function SearchComposer(p: Props) {
             <Paperclip size={13} /> JD
           </Button>
           <Button size="sm" disabled={!p.selectedIrc || p.isPending || (!p.query.trim() && !p.jdFilename)} onClick={p.onSubmit}
-            className="bg-power-orange hover:bg-[#B5361E] disabled:opacity-40">
+            className="bg-power-orange hover:bg-energy-orange disabled:opacity-40">
             <ArrowRight size={15} />
           </Button>
         </div>

@@ -13,36 +13,36 @@ import { useDashboard } from './useDashboard';
 
 // Inline colors avoid Tailwind JIT purging dynamically-constructed class names
 const FUNNEL_COLORS: Record<string, string> = {
-  'AI Shortlisted':           '#4197CB',
-  'Manager Screening':        '#D9A400',
-  'Internal Tech Evaluation': '#FF6B00',
-  'Client Interview':         '#003057',
-  'Selected':                 '#00945E',
-  'Allocated':                '#00263A',
+  'AI Shortlisted':           '#4442E3',  // Impact Blue
+  'Manager Screening':        '#484F6B',  // Steel Gray 75
+  'Internal Tech Evaluation': '#FF5F2D',  // Impact Orange
+  'Client Interview':         '#00018B',  // Deep Blue
+  'Selected':                 '#2E776A',  // Green
+  'Allocated':                '#181A24',  // Steel Gray 100
 };
 
 function HiringFunnel({ funnel }: { funnel: Record<string, number> }) {
   const total = Object.values(funnel).reduce((s, n) => s + n, 0);
   const max   = Math.max(...Object.values(funnel), 1);
   return (
-    <div style={{ background: '#fff', border: '1px solid #E3E5E9', borderRadius: 12, padding: 18 }}>
-      <h3 style={{ fontSize: 12, fontWeight: 700, marginBottom: 14, textTransform: 'uppercase', letterSpacing: '0.03em', color: '#8891A0' }}>
+    <div style={{ background: '#fff', border: '1px solid #C8CAD3', borderRadius: 12, padding: 18 }}>
+      <h3 style={{ fontSize: 12, fontWeight: 700, marginBottom: 14, textTransform: 'uppercase', letterSpacing: '0.03em', color: '#858A9B' }}>
         Hiring Funnel
       </h3>
       {total === 0 ? (
-        <p style={{ textAlign: 'center', fontSize: 13, color: '#8891A0', padding: '16px 0' }}>No pipeline entries yet</p>
+        <p style={{ textAlign: 'center', fontSize: 13, color: '#858A9B', padding: '16px 0' }}>No pipeline entries yet</p>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {PIPELINE_STAGES.map(stage => {
             const count = funnel[stage] ?? 0;
-            const color = FUNNEL_COLORS[stage] ?? '#D3D7DC';
+            const color = FUNNEL_COLORS[stage] ?? '#C8CAD3';
             return (
               <div key={stage}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <span style={{ fontSize: 12, color: '#333D4A' }}>{stage}</span>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: '#1B2430' }}>{count}</span>
+                  <span style={{ fontSize: 12, color: '#484F6B' }}>{stage}</span>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: '#181A24' }}>{count}</span>
                 </div>
-                <div style={{ height: 10, background: '#F5F6F8', borderRadius: 999, overflow: 'hidden' }}>
+                <div style={{ height: 10, background: '#F2F3F6', borderRadius: 999, overflow: 'hidden' }}>
                   <div style={{
                     height: 10, borderRadius: 999, transition: 'width 0.4s',
                     width: `${(count / max) * 100}%`, background: color,

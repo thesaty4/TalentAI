@@ -5,27 +5,27 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        'network-blue':   '#00263A',
+        'network-blue':   '#181A24',  // Steel Gray 100
         'pure-white':     '#FFFFFF',
-        'stacked-blue':   '#003057',
-        'celestial-blue': '#4197CB',
-        'power-orange':   '#D64123',
-        'secure-gray':    '#414042',
-        'commerce-green': '#00945E',
-        'energy-orange':  '#FF6B00',
-        'charge-yellow':  '#FFCD00',
-        'culture-gray':   '#F6F6F6',
-        'level-gray':     '#D9D8D6',
+        'stacked-blue':   '#00018B',  // Deep Blue
+        'celestial-blue': '#4442E3',  // Impact Blue
+        'power-orange':   '#FF5F2D',  // Impact Orange
+        'secure-gray':    '#484F6B',  // Steel Gray 75
+        'commerce-green': '#2E776A',  // Green
+        'energy-orange':  '#CF3708',  // Deep Orange
+        'charge-yellow':  '#E6EB5D',  // Yellow
+        'culture-gray':   '#F2F3F6',  // Light Steel
+        'level-gray':     '#C8CAD3',  // Steel Gray 25
       },
       fontFamily: {
         display: ['"Bio Sans"', '"Inter"', '-apple-system', '"Helvetica Neue"', 'Arial', 'sans-serif'],
         body:    ['"Inter"', '"Bio Sans"', '-apple-system', '"Helvetica Neue"', 'Arial', 'sans-serif'],
       },
       boxShadow: {
-        xs:    '0 1px 2px rgba(0,38,58,0.06)',
-        sm:    '0 2px 4px rgba(0,38,58,0.06), 0 1px 2px rgba(0,38,58,0.04)',
-        md:    '0 6px 16px rgba(0,38,58,0.08), 0 2px 4px rgba(0,38,58,0.05)',
-        focus: '0 0 0 3px rgba(65,151,203,0.35)',
+        xs:    '0 1px 2px rgba(24,26,36,0.06)',
+        sm:    '0 2px 4px rgba(24,26,36,0.06), 0 1px 2px rgba(24,26,36,0.04)',
+        md:    '0 6px 16px rgba(24,26,36,0.08), 0 2px 4px rgba(24,26,36,0.05)',
+        focus: '0 0 0 3px rgba(68,66,227,0.35)',
       },
     },
   },
