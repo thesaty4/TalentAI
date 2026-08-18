@@ -1,8 +1,9 @@
-import { Loader2, Download, LayoutGrid, List } from 'lucide-react';
+import { Loader2, Download, LayoutGrid, List, AlertTriangle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ErrorBanner, EmptyState } from '../../components/Feedback';
+import { StepProgress } from '../../components/StepProgress';
 import { projectsApi } from '../../lib/api/projects.api';
 import { SearchComposer } from './SearchComposer';
 import { ResultCard } from './ResultCard';
@@ -30,16 +31,9 @@ export function AISearchPage() {
   });
 
   const {
-    results, jdFilename, isPending, error,
-    loadingMessage, search, uploadJd, updateResult,
+    results, jdFilename, steps, mismatch, isPending, error,
+    search, uploadJd, updateResult,
   } = useAISearch();
-
-  // Auto-select first project when data loads (if not pre-selected via URL)
-  useEffect(() => {
-    if (selectedProject == null && projectsQ.data?.length) {
-      setSelectedProject(projectsQ.data[0].id);
-    }
-  }, [projectsQ.data]);
 
   // Auto-select first Open IRC when project changes
   useEffect(() => {
@@ -125,21 +119,36 @@ export function AISearchPage() {
       />
 
       <div className="flex-1 p-6">
-        {/* Staged loading */}
-        {isPending && (
-          <div className="flex items-center gap-2 py-4 text-sm text-secure-gray">
-            <Loader2 size={15} className="animate-spin text-celestial-blue" />
-            <span className="transition-opacity">{loadingMessage}</span>
-          </div>
+        {/* Step progress — shown while search is in-flight or on scope mismatch */}
+        {(isPending || !!mismatch) && (
+          <StepProgress
+            icon={
+              mismatch
+                ? <AlertTriangle size={14} className="text-amber-500" />
+                : <Loader2 size={14} className="animate-spin text-blue-500" />
+            }
+            title="Searching candidates"
+            steps={steps}
+            footerNote={!mismatch ? "Evidence is retrieved before ranking, so every recommendation traces back to real delivery work \u2014 and every gap is named." : undefined}
+            timingNote={!mismatch ? "This may take 20\u201330 seconds depending on pool size." : undefined}
+          />
         )}
 
         {/* Error state */}
-        {error && !isPending && (
+        {error && !mismatch && !isPending && (
           <ErrorBanner message="Search failed — try again" onRetry={handleSubmit} />
         )}
 
+        {/* MISMATCH — query is outside IRC/JD scope */}
+        {mismatch && !isPending && (
+          <div className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-4">
+            <p className="text-sm font-medium text-amber-800">Query outside IRC/JD scope</p>
+            <p className="mt-1 text-sm text-amber-700">{mismatch}</p>
+          </div>
+        )}
+
         {/* Empty state — before first search */}
-        {!isPending && !error && results === null && (
+        {!isPending && !error && !mismatch && results === null && (
           <EmptyState
             title="Ready to search"
             description="Type a requirement, upload a JD, or select an IRC above to see AI-ranked matches."

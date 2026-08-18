@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Prisma } from '@prisma/client';
 import { JwtPayload } from '../auth/strategies/jwt.strategy';
@@ -38,6 +38,11 @@ export class SearchService {
     });
     if (!irc) throw new NotFoundException('IRC not found');
     if (irc.status !== 'Open') throw new BadRequestException('IRC is not Open (R2)');
+
+    // Step 1.5: validate manager query against effective IRC/JD context before searching
+    if (dto.query?.trim()) {
+      await this.runQueryValidation(irc, dto.jdText, dto.query);
+    }
 
     // Step 2: build candidate pool
     const pool = await this.buildPool(dto, irc.id);
@@ -253,6 +258,41 @@ export class SearchService {
       select: { employeeId: true, id: true },
     });
     return new Map(rows.map(r => [r.employeeId, r.id]));
+  }
+
+  // ─── Query scope validation ────────────────────────────────────────────────
+
+  private ircHasUsefulDetails(irc: IrcWithProject): boolean {
+    return (
+      irc.mandatorySkills.trim().length > 0 ||
+      (irc.preferredSkills?.trim()?.length ?? 0) > 0 ||
+      irc.experienceRange.trim().length > 0
+    );
+  }
+
+  private async runQueryValidation(
+    irc: IrcWithProject,
+    jdText: string | undefined,
+    query: string,
+  ): Promise<void> {
+    const hasIrcContext = this.ircHasUsefulDetails(irc);
+    const hasJdContext  = !!jdText?.trim();
+
+    // No context to validate against — allow search without validation
+    if (!hasIrcContext && !hasJdContext) return;
+
+    let validation: { isValid: boolean; reason: string };
+    try {
+      validation = await this.llm.validateQuery(irc, jdText, query);
+    } catch (err) {
+      // Validation LLM failure — do not block search on model unavailability
+      this.logger.warn(`Query validation unavailable — allowing search: ${(err as Error).message}`);
+      return;
+    }
+
+    if (!validation.isValid) {
+      throw new UnprocessableEntityException(validation.reason);
+    }
   }
 
 }

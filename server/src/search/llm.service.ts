@@ -36,6 +36,13 @@ const RankedItemSchema = z.object({
 export const LlmResponseSchema = z.array(RankedItemSchema);
 export type RankedItem = z.infer<typeof RankedItemSchema>;
 
+const ValidationResponseSchema = z.object({
+  // Default to true on parse failure — do not block search when validation output is ambiguous
+  isValid: z.boolean().catch(true),
+  reason:  z.string().catch('Validation result unclear.'),
+});
+export type ValidationResult = z.infer<typeof ValidationResponseSchema>;
+
 // ─── Service ──────────────────────────────────────────────────────────────────
 
 // temperature=0 + fixed seed = greedy decoding, same input always produces same ranking
@@ -67,6 +74,101 @@ export class LlmService {
 
     this.logger.log(`Ranking complete — ${result.length} results | top: ${result.slice(0, 3).map(r => `id=${r.employeeId}(${r.matchPct}%)`).join(', ')}`);
     return result;
+  }
+
+  // ─── Query scope validation — runs before ranking ─────────────────────────
+
+  async validateQuery(
+    irc: IrcWithProject,
+    jdText: string | undefined,
+    query: string,
+  ): Promise<ValidationResult> {
+    const prompt = this.buildValidationPrompt(irc, jdText, query);
+    this.logger.log(`Validating query scope for ${irc.ircCode}: "${query.slice(0, 80)}"`);
+
+    const validationSchema = {
+      type: 'object',
+      properties: {
+        isValid: { type: 'boolean' },
+        reason:  { type: 'string'  },
+      },
+      required: ['isValid', 'reason'],
+      additionalProperties: false,
+    };
+
+    const text = await this.callLlm(prompt, validationSchema);
+    const raw  = JSON.parse(text);
+    return ValidationResponseSchema.parse(raw);
+  }
+
+  private buildValidationPrompt(
+    irc: IrcWithProject,
+    jdText: string | undefined,
+    query: string,
+  ): string {
+    const contextLines: string[] = [];
+    if (irc.mandatorySkills.trim()) contextLines.push(`Required skills: ${irc.mandatorySkills}`);
+    if (irc.preferredSkills?.trim()) contextLines.push(`Preferred skills: ${irc.preferredSkills}`);
+    if (irc.experienceRange.trim()) contextLines.push(`Experience range: ${irc.experienceRange}`);
+    if (irc.location.trim()) contextLines.push(`Location: ${irc.location}`);
+    if (irc.remotePolicy.trim()) contextLines.push(`Remote policy: ${irc.remotePolicy}`);
+    if (jdText?.trim()) {
+      const jdCapped = jdText.trim().replace(/\s+/g, ' ').slice(0, JD_TEXT_MAX_LENGTH);
+      contextLines.push(`\nJob Description:\n${jdCapped}`);
+    }
+    const context = contextLines.join('\n');
+
+    // Whether the context lists any skills — determines if Step 2 applies
+    const hasSkillsInContext = !!(
+      irc.mandatorySkills.trim() ||
+      irc.preferredSkills?.trim() ||
+      jdText?.trim()
+    );
+
+    const step2 = hasSkillsInContext
+      ? `STEP 2 — SKILL / TECHNOLOGY CHECK
+If the query explicitly names a specific skill or technology (e.g., Python, ROR, Java, React, Node.js):
+  a. Look up that skill in the hiring context (required skills, preferred skills, job description).
+  b. If the named skill is NOT present anywhere in the hiring context → INVALID.
+  c. If the named skill IS present → continue.
+If the query names no specific skill (e.g., "senior engineers", "find candidates") → skip to Step 3.`
+      : `STEP 2 — SKILL CHECK
+Hiring context lists no specific skills. Skip this step.`;
+
+    return `You are a search query validator for a candidate hiring system.
+
+HIRING CONTEXT
+${context}
+
+MANAGER QUERY
+"${query}"
+
+Follow these steps in order. Stop at the first INVALID result.
+
+STEP 1 — DOMAIN CHECK
+Is this query about finding, filtering, or evaluating candidates or employees for a job role?
+If NO → INVALID. (e.g. "give me coffee", "what is the weather", "tell me a joke")
+
+${step2}
+
+STEP 3 — NUMERIC CONSTRAINT CHECK
+If the query specifies a numeric value (e.g., years of experience) that directly contradicts the hiring context → INVALID.
+Otherwise → VALID.
+
+Key rule for skills: a skill named in the query must exist in the hiring context. Asking for a skill that is absent from the context is going outside the IRC/JD scope.
+
+Non-skill additions that are always VALID: location preference, domain experience (e.g., "payments experience"), availability constraints.
+
+Worked examples:
+- Context: Python, 5-6 yrs; Query: "Python with payments experience" → VALID
+- Context: Python, 5-6 yrs; Query: "Python candidates with 7 years" → INVALID (7 outside 5-6)
+- Context: Python; Query: "give me ROR engineers" → INVALID (ROR absent from context)
+- Context: Python; Query: "Java candidates" → INVALID (Java absent from context)
+- Context: Python; Query: "senior Python engineers" → VALID (Python present)
+- Context: Python; Query: "give me coffee" → INVALID (not about candidates)
+- Context: Python; Query: "find available candidates" → VALID (no specific skill named)
+
+Return JSON only: { "isValid": boolean, "reason": "brief explanation, max 25 words" }`.trim();
   }
 
   // ─── effectiveQuery: query is PRIMARY, JD is SECONDARY context ───────────
@@ -449,7 +551,7 @@ The response must begin with [ and end with ].
 }
 
   // ─── LLM API call (Ollama REST contract) ─────────────────────────────────
-private async callLlm(prompt: string): Promise<string> {
+private async callLlm(prompt: string, formatOverride?: object): Promise<string> {
   const configuredBaseUrl =
     this.config.get<string>('llmBaseUrl');
 
@@ -552,7 +654,7 @@ private async callLlm(prompt: string): Promise<string> {
          * This does not perform any application-side filtering.
          * Qwen still decides candidate eligibility and ranking.
          */
-        format: rankingResponseSchema,
+        format: formatOverride ?? rankingResponseSchema,
 
         options: {
           temperature: 0,
