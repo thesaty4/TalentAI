@@ -30,7 +30,7 @@ export function ResultCard({ result, ircId, onShortlisted, onViewProfile }: Prop
     <Card className="overflow-hidden">
       {/* Duplicate banner — R5 */}
       {result.isDuplicate && (
-        <div className="bg-celestial-blue/10 px-5 py-2 text-xs font-medium text-celestial-blue">
+        <div className="bg-power-orange/10 px-5 py-2 text-xs font-medium text-power-orange">
           ⚠ Already in pipeline for {result.duplicateNote}
         </div>
       )}
@@ -87,17 +87,19 @@ export function ResultCard({ result, ircId, onShortlisted, onViewProfile }: Prop
           </p>
         </div>
 
-        {/* Why not — R7 */}
-        <div className="mt-2 rounded-lg bg-culture-gray px-3 py-2.5">
-          <p className="mb-1 text-xs font-medium text-secure-gray">What's missing</p>
+        {/* Why not — R7: hidden when no gaps identified */}
+        {result.whyNot.length > 0 && (
+        <div className="mt-2 rounded-lg bg-power-orange/5 px-3 py-2.5">
+          <p className="mb-1 text-xs font-semibold text-power-orange">What's missing</p>
           <ul className="space-y-0.5">
             {result.whyNot.map((w, i) => (
               <li key={i} className="flex items-start gap-1.5 text-xs text-[var(--fg-3)]">
-                <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[var(--fg-3)]" />{w}
+                <span className="mt-0.5 shrink-0 text-[10px] font-bold leading-none text-power-orange">✕</span>{w}
               </li>
             ))}
           </ul>
         </div>
+        )}
 
         {/* Skills */}
         <div className="mt-3 flex flex-wrap gap-1.5">

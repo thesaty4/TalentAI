@@ -28,7 +28,10 @@ const RankedItemSchema = z.object({
   matchPct:     z.coerce.number().int().min(0).max(100).catch(50),
   // .catch('') converts non-strings; .transform fills empty/whitespace with a safe default
   whyRecommend: z.string().catch('').transform(s => s.trim() || 'No specific evidence cited.'),
-  whyNot:       z.array(z.string()).catch(['No gap information provided.']),
+  whyNot: z.array(z.string()).catch([]).transform(
+    // Strip LLM placeholder values — frontend hides the section when the array is empty
+    arr => arr.filter(s => !/^(none|n\/a|nil|-)\.?$/i.test(s.trim())),
+  ),
   conflict:     z.boolean().catch(false),
   conflictNote: z.string().optional().catch(undefined),
 });
