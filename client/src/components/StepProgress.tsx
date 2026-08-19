@@ -18,17 +18,17 @@ export interface StepProgressProps {
 }
 
 const ICON_CLS: Record<StepStatus, string> = {
-  done:    'bg-emerald-500',
-  active:  'bg-white ring-2 ring-blue-400',
-  pending: 'bg-gray-100',
-  failed:  'bg-red-500',
+  done:    'bg-commerce-green',
+  active:  'bg-white ring-2 ring-celestial-blue',
+  pending: 'bg-culture-gray',
+  failed:  'bg-power-orange',
 };
 
 const LABEL_CLS: Record<StepStatus, string> = {
-  done:    'text-slate-400',
-  active:  'text-slate-800 font-medium',
-  pending: 'text-gray-300',
-  failed:  'text-red-700 font-medium',
+  done:    'text-secure-gray',
+  active:  'text-network-blue font-medium',
+  pending: 'text-level-gray',
+  failed:  'text-energy-orange font-medium',
 };
 
 function formatDuration(ms: number): string {
@@ -41,19 +41,19 @@ export function StepProgress({ icon, title, steps, footerNote, timingNote }: Ste
       {/* Header */}
       <div className="flex items-center gap-2.5">
         <div className="flex h-5 w-5 shrink-0 items-center justify-center">{icon}</div>
-        <span className="text-sm font-semibold text-slate-700">{title}</span>
+        <span className="text-sm font-semibold text-network-blue">{title}</span>
       </div>
 
       {/* Card */}
-      <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-white shadow-sm">
         {steps.map((step, i) => (
           <div
             key={step.label}
             className={cn(
               'flex items-center gap-3.5 px-5 py-3.5 transition-all duration-200',
-              i < steps.length - 1 && 'border-b border-gray-50',
-              step.status === 'active' && 'bg-blue-50/60',
-              step.status === 'failed' && 'bg-red-50/40',
+              i < steps.length - 1 && 'border-b border-[var(--border-subtle)]',
+              step.status === 'active' && 'bg-celestial-blue/5',
+              step.status === 'failed' && 'bg-power-orange/5',
             )}
           >
             {/* Status indicator */}
@@ -62,7 +62,7 @@ export function StepProgress({ icon, title, steps, footerNote, timingNote }: Ste
               ICON_CLS[step.status],
             )}>
               {step.status === 'done'   && <Check   size={11} strokeWidth={3} className="text-white" />}
-              {step.status === 'active' && <Loader2 size={11} className="animate-spin text-blue-500" />}
+              {step.status === 'active' && <Loader2 size={11} className="animate-spin text-celestial-blue" />}
               {step.status === 'failed' && <X       size={11} strokeWidth={3} className="text-white" />}
             </div>
 
@@ -73,7 +73,7 @@ export function StepProgress({ icon, title, steps, footerNote, timingNote }: Ste
 
             {/* Elapsed time pill — done rows only */}
             {step.status === 'done' && step.durationMs !== undefined && (
-              <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium tabular-nums text-emerald-600">
+              <span className="rounded-full bg-commerce-green/10 px-2 py-0.5 text-[11px] font-medium tabular-nums text-commerce-green">
                 {formatDuration(step.durationMs)}
               </span>
             )}
@@ -84,10 +84,10 @@ export function StepProgress({ icon, title, steps, footerNote, timingNote }: Ste
       {(footerNote || timingNote) && (
         <div className="space-y-0.5">
           {footerNote && (
-            <p className="text-[11px] leading-relaxed text-gray-400">{footerNote}</p>
+            <p className="text-xs leading-relaxed text-secure-gray">{footerNote}</p>
           )}
           {timingNote && (
-            <p className="text-[11px] text-gray-300">{timingNote}</p>
+            <p className="text-xs text-[var(--fg-3)]">{timingNote}</p>
           )}
         </div>
       )}

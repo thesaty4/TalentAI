@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Plus, ChevronDown } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '../../components/Button';
 import { EmptyState, ErrorBanner, Spinner } from '../../components/Feedback';
-import { cn } from '../../lib/utils/cn';
 import { projectsApi } from '../../lib/api/projects.api';
 import { PIPELINE_STAGES, STAGE_HEX } from '../../lib/constants/pipeline.constants';
 import { usePipeline } from './usePipeline';
@@ -16,7 +15,6 @@ export function PipelinePage() {
   const [projectId,   setProjectId]   = useState<number | null>(() => { const v = urlParams.get('projectId'); return v ? +v : null; });
   const [roleSearch,  setRoleSearch]  = useState('');
   const [addOpen,     setAddOpen]     = useState(false);
-  const [rejectedOpen, setRejectedOpen] = useState(false);
 
   const projectsQ = useQuery({ queryKey: ['projects'], queryFn: () => projectsApi.list() });
 
@@ -24,7 +22,7 @@ export function PipelinePage() {
   if (projectId) apiParams.projectId = projectId;
   if (roleSearch.trim()) apiParams.role = roleSearch.trim();
 
-  const { query, byStage, rejected, advanceMut, revertMut, notFitMut } = usePipeline(apiParams);
+  const { query, byStage, advanceMut, revertMut, notFitMut } = usePipeline(apiParams);
 
   if (query.isPending) return <Spinner />;
   if (query.isError)   return <ErrorBanner message="Failed to load pipeline" onRetry={query.refetch} />;
@@ -62,22 +60,29 @@ export function PipelinePage() {
             const entries = byStage[stage] ?? [];
             return (
               <div key={stage} style={{
-                  display: 'flex', flexDirection: 'column', width: 230, flexShrink: 0,
-                  background: (STAGE_HEX[stage] ?? '#858A9B') + '17',
-                  borderRadius: 12, overflow: 'hidden',
+                  display: 'flex', flexDirection: 'column', width: 240, flexShrink: 0,
+                  background: (STAGE_HEX[stage] ?? '#858A9B') + '12',
+                  borderRadius: 12,
+                  border: '1px solid ' + (STAGE_HEX[stage] ?? '#858A9B') + '28',
                 }}>
-                {/* Column header */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                {/* Column header — top corners clipped by overflow:hidden on this row only */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', borderBottom: '1px solid rgba(0,0,0,0.05)', borderRadius: '12px 12px 0 0', overflow: 'hidden' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                    <div style={{ width: 9, height: 9, borderRadius: '50%', background: STAGE_HEX[stage] ?? '#858A9B', flexShrink: 0 }} />
-                    <span style={{ fontSize: 12.5, fontWeight: 600, color: '#181A24' }}>{stage}</span>
+                    <div style={{ width: 7, height: 7, borderRadius: '50%', background: STAGE_HEX[stage] ?? '#858A9B', flexShrink: 0 }} />
+                    <span style={{ fontSize: 11.5, fontWeight: 700, color: '#181A24', letterSpacing: '0.01em' }}>{stage}</span>
                   </div>
-                  <span style={{ fontSize: 11, color: '#858A9B' }}>({entries.length})</span>
+                  <span style={{
+                    background: STAGE_HEX[stage] ?? '#858A9B',
+                    color: '#fff',
+                    fontSize: 10, fontWeight: 800,
+                    borderRadius: 999, padding: '2px 7px',
+                    letterSpacing: '0.02em',
+                  }}>{entries.length}</span>
                 </div>
-                {/* Cards */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 9, padding: 12, overflowY: 'auto' }}>
+                {/* Cards — no overflow constraint so dropdown menus can escape the column */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 10 }}>
                   {entries.length === 0 && (
-                    <p style={{ textAlign: 'center', fontSize: 12, color: '#858A9B', padding: '12px 0' }}>No candidates here.</p>
+                    <p style={{ textAlign: 'center', fontSize: 12, color: '#858A9B', padding: '12px 0', opacity: 0.7 }}>Empty</p>
                   )}
                   {entries.map(e => (
                     <PipelineCard
@@ -92,30 +97,6 @@ export function PipelinePage() {
               </div>
             );
           })}
-        </div>
-      )}
-
-      {/* Rejected section */}
-      {rejected.length > 0 && (
-        <div className="rounded-xl border border-[var(--border-subtle)] bg-white">
-          <button onClick={() => setRejectedOpen(o => !o)}
-            className="flex w-full items-center justify-between px-4 py-3 text-sm font-medium text-secure-gray hover:bg-culture-gray rounded-xl">
-            <span>Rejected ({rejected.length})</span>
-            <ChevronDown size={14} className={cn('transition-transform', rejectedOpen && 'rotate-180')} />
-          </button>
-          {rejectedOpen && (
-            <div className="grid gap-2 p-3 sm:grid-cols-2 lg:grid-cols-3">
-              {rejected.map(e => (
-                <PipelineCard
-                  key={e.id}
-                  entry={e}
-                  onAdvance={() => {}}
-                  onRevert={() => {}}
-                  onNotFit={() => {}}
-                />
-              ))}
-            </div>
-          )}
         </div>
       )}
 

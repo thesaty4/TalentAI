@@ -23,7 +23,7 @@ export function Shell() {
   const title = TITLES[pathname] ?? 'TalentLens AI';
 
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: '#F2F3F6' }}>
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: '#EEF0F4' }}>
       {/* Mobile backdrop */}
       {mobileOpen && (
         <div style={{

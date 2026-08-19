@@ -8,7 +8,7 @@ import { cn } from '../../lib/utils/cn';
 import { poolApi } from '../../lib/api/pool.api';
 import { useAuth } from '../../auth/useAuth';
 import { useDashboard } from './useDashboard';
-import { PIPELINE_STAGES, STAGE_COLORS } from '../../lib/constants/pipeline.constants';
+import { PIPELINE_STAGES, STAGE_HEX } from '../../lib/constants/pipeline.constants';
 import type { Project } from '../../lib/api/projects.api';
 
 function HiringFunnel({ funnel }: { funnel: Record<string, number> }) {
@@ -19,14 +19,22 @@ function HiringFunnel({ funnel }: { funnel: Record<string, number> }) {
       <div className="space-y-3">
         {PIPELINE_STAGES.map(stage => {
           const count = funnel[stage] ?? 0;
-          const bgCls = STAGE_COLORS[stage]?.split(' ')[0] ?? 'bg-level-gray';
+          const color = STAGE_HEX[stage] ?? '#C8CAD3';
           return (
-            <div key={stage} className="flex items-center gap-3">
-              <span className="w-36 truncate text-xs text-secure-gray">{stage}</span>
-              <div className="h-2 flex-1 overflow-hidden rounded-full bg-level-gray">
-                <div className={cn('h-2 rounded-full transition-all', bgCls)} style={{ width: `${(count / max) * 100}%` }} />
+            <div key={stage}>
+              <div className="mb-1.5 flex justify-between">
+                <span className="text-xs text-secure-gray">{stage}</span>
+                <span className="text-xs font-semibold text-network-blue">{count}</span>
               </div>
-              <span className="w-5 text-right text-xs font-medium text-secure-gray">{count}</span>
+              <div className="h-2 overflow-hidden rounded-full bg-level-gray">
+                <div style={{
+                  height: 8, borderRadius: 999,
+                  width: `${(count / max) * 100}%`,
+                  background: color,
+                  opacity: 0.75,
+                  transition: 'width 0.4s',
+                }} />
+              </div>
             </div>
           );
         })}

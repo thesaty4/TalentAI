@@ -13,7 +13,7 @@ export function ErrorBanner({ message, onRetry }: { message?: string; onRetry?: 
     <div className="rounded-lg border border-power-orange/30 bg-power-orange/10 p-4 text-power-orange">
       <p className="text-sm">{message ?? 'Something went wrong.'}</p>
       {onRetry && (
-        <button onClick={onRetry} className="mt-2 text-sm underline">
+        <button onClick={onRetry} className="mt-2 text-sm font-medium underline hover:no-underline">
           Retry
         </button>
       )}

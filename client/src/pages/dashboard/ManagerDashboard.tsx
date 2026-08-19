@@ -4,48 +4,39 @@ import { Card, KpiCard } from '../../components/Card';
 import { EmptyState, ErrorBanner, Spinner } from '../../components/Feedback';
 import { Badge } from '../../components/Badge';
 import { cn } from '../../lib/utils/cn';
-import { PIPELINE_STAGES } from '../../lib/constants/pipeline.constants';
+import { PIPELINE_STAGES, STAGE_HEX } from '../../lib/constants/pipeline.constants';
 import type { Project } from '../../lib/api/projects.api';
 import { useAuth } from '../../auth/useAuth';
 import { useDashboard } from './useDashboard';
 
 // ─── Hiring funnel ────────────────────────────────────────────────────────────
 
-// Inline colors avoid Tailwind JIT purging dynamically-constructed class names
-const FUNNEL_COLORS: Record<string, string> = {
-  'AI Shortlisted':           '#4442E3',  // Impact Blue
-  'Manager Screening':        '#484F6B',  // Steel Gray 75
-  'Internal Tech Evaluation': '#FF5F2D',  // Impact Orange
-  'Client Interview':         '#00018B',  // Deep Blue
-  'Selected':                 '#2E776A',  // Green
-  'Allocated':                '#181A24',  // Steel Gray 100
-};
-
 function HiringFunnel({ funnel }: { funnel: Record<string, number> }) {
   const total = Object.values(funnel).reduce((s, n) => s + n, 0);
   const max   = Math.max(...Object.values(funnel), 1);
   return (
-    <div style={{ background: '#fff', border: '1px solid #C8CAD3', borderRadius: 12, padding: 18 }}>
-      <h3 style={{ fontSize: 12, fontWeight: 700, marginBottom: 14, textTransform: 'uppercase', letterSpacing: '0.03em', color: '#858A9B' }}>
-        Hiring Funnel
-      </h3>
+    <Card className="p-5">
+      <h3 className="mb-4 text-sm font-semibold text-network-blue">Hiring funnel</h3>
       {total === 0 ? (
-        <p style={{ textAlign: 'center', fontSize: 13, color: '#858A9B', padding: '16px 0' }}>No pipeline entries yet</p>
+        <p className="py-4 text-center text-sm text-[var(--fg-3)]">No pipeline entries yet</p>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div className="space-y-3">
           {PIPELINE_STAGES.map(stage => {
             const count = funnel[stage] ?? 0;
-            const color = FUNNEL_COLORS[stage] ?? '#C8CAD3';
+            const color = STAGE_HEX[stage] ?? '#C8CAD3';
             return (
               <div key={stage}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <span style={{ fontSize: 12, color: '#484F6B' }}>{stage}</span>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: '#181A24' }}>{count}</span>
+                <div className="mb-1.5 flex justify-between">
+                  <span className="text-xs text-secure-gray">{stage}</span>
+                  <span className="text-xs font-semibold text-network-blue">{count}</span>
                 </div>
-                <div style={{ height: 10, background: '#F2F3F6', borderRadius: 999, overflow: 'hidden' }}>
+                <div className="h-2 overflow-hidden rounded-full bg-level-gray">
                   <div style={{
-                    height: 10, borderRadius: 999, transition: 'width 0.4s',
-                    width: `${(count / max) * 100}%`, background: color,
+                    height: 8, borderRadius: 999,
+                    width: `${(count / max) * 100}%`,
+                    background: color,
+                    opacity: 0.75,
+                    transition: 'width 0.4s',
                   }} />
                 </div>
               </div>
@@ -53,7 +44,7 @@ function HiringFunnel({ funnel }: { funnel: Record<string, number> }) {
           })}
         </div>
       )}
-    </div>
+    </Card>
   );
 }
 

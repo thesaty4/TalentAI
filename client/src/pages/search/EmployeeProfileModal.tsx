@@ -9,7 +9,7 @@ import { useAuth } from '../../auth/useAuth';
 const RATING_COLORS: Record<string, string> = {
   Exceeding: 'bg-commerce-green/10 text-commerce-green',
   Meeting:   'bg-celestial-blue/10 text-celestial-blue',
-  Below:     'bg-charge-yellow/20 text-[#484F6B]',
+  Below:     'bg-charge-yellow/20 text-secure-gray',
 };
 
 interface Props { employeeId: number; onClose: () => void; }
@@ -23,10 +23,10 @@ export function EmployeeProfileModal({ employeeId, onClose }: Props) {
 
   return (
     // Backdrop
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm" onClick={onClose}>
       {/* Centered popup panel */}
       <div
-        className="relative flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-md"
+        className="relative flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-xl bg-white shadow-md"
         onClick={e => e.stopPropagation()}
       >
         {/* Header bar */}

@@ -40,7 +40,6 @@ function IrcCard({ irc }: { irc: OpenIrc }) {
           </span>
         ) : (
           <Button size="sm" disabled={applyMut.isPending}
-            className="shrink-0 bg-power-orange hover:bg-energy-orange"
             onClick={() => setConfirmOpen(true)}>
             Apply
           </Button>
@@ -92,7 +91,6 @@ function IrcCard({ irc }: { irc: OpenIrc }) {
             Cancel
           </Button>
           <Button size="sm" disabled={applyMut.isPending}
-            className="bg-power-orange hover:bg-energy-orange"
             onClick={() => applyMut.mutate()}>
             {applyMut.isPending ? 'Applying…' : 'Yes, Apply'}
           </Button>

@@ -11,7 +11,7 @@ const RATING_COLORS: Record<string, string> = {
   'Meeting':    'bg-celestial-blue/10 text-celestial-blue',
   'Scheduled':  'bg-celestial-blue/10 text-celestial-blue',
   'No':         'bg-power-orange/10 text-power-orange',
-  'Below':      'bg-charge-yellow/20 text-[#484F6B]',
+  'Below':      'bg-charge-yellow/20 text-secure-gray',
 };
 
 export function MyFeedbackPage() {

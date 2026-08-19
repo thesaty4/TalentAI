@@ -3,13 +3,15 @@ export function Modal({ open, onClose, title, children }: {
 }) {
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-md">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-base font-semibold text-network-blue">{title}</h2>
-          <button onClick={onClose} className="text-[var(--fg-3)] hover:text-network-blue">✕</button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-md overflow-hidden rounded-xl bg-white shadow-md">
+        <div className="flex items-center justify-between border-b border-[var(--border-subtle)] px-5 py-3.5">
+          <h2 className="text-sm font-semibold text-network-blue">{title}</h2>
+          <button onClick={onClose} className="flex h-7 w-7 items-center justify-center rounded-lg text-sm text-secure-gray transition-colors hover:bg-culture-gray">✕</button>
         </div>
-        {children}
+        <div className="p-5">
+          {children}
+        </div>
       </div>
     </div>
   );

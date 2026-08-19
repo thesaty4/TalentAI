@@ -30,6 +30,12 @@ const DROPDOWN_STYLE: React.CSSProperties = {
   zIndex: 50, padding: 8,
 };
 
+const ROLE_CHIP: Record<string, { bg: string; color: string }> = {
+  manager:   { bg: 'rgba(255,95,45,0.12)',  color: '#FF5F2D' },
+  hr:        { bg: 'rgba(68,66,227,0.12)',   color: '#4442E3' },
+  candidate: { bg: 'rgba(46,119,106,0.12)', color: '#2E776A' },
+};
+
 export function TopBar({ title, onMenuClick }: Props) {
   const { user, logout } = useAuth();
   const qc = useQueryClient();
@@ -129,7 +135,7 @@ export function TopBar({ title, onMenuClick }: Props) {
           border: 'none', cursor: 'pointer', padding: '4px 6px', borderRadius: 8,
         }}>
           <div style={{
-            width: 32, height: 32, borderRadius: '50%', background: '#00018B',
+            width: 32, height: 32, borderRadius: '50%', background: '#484F6B',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 12, fontWeight: 700, color: '#fff', flexShrink: 0,
           }}>{initials(user?.name ?? '?')}</div>
@@ -141,9 +147,11 @@ export function TopBar({ title, onMenuClick }: Props) {
               <p style={{ fontSize: 14, fontWeight: 600, color: C.fg1 }}>{user?.name}</p>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
                 <span style={{
-                  background: '#F2F3F6', color: '#858A9B', fontSize: 10.5, fontWeight: 700,
-                  letterSpacing: '0.04em', textTransform: 'uppercase', borderRadius: 999,
-                  padding: '3px 8px',
+                  background: ROLE_CHIP[user?.role ?? '']?.bg ?? 'rgba(72,79,107,0.12)',
+                  color:      ROLE_CHIP[user?.role ?? '']?.color ?? '#484F6B',
+                  fontSize: 10.5, fontWeight: 700,
+                  letterSpacing: '0.05em', textTransform: 'uppercase', borderRadius: 999,
+                  padding: '3px 9px',
                 }}>{user?.role}</span>
               </div>
             </div>

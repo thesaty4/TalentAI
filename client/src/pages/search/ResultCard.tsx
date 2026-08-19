@@ -23,14 +23,14 @@ export function ResultCard({ result, ircId, onShortlisted, onViewProfile }: Prop
   const firstName  = result.fullName.split(' ')[0];
   // Circular ring geometry — r=22 keeps stroke fully inside the 52px viewBox
   const r = 22, circ = 2 * Math.PI * r;
-  const ringStroke = result.matchPct >= 80 ? '#2E776A' : result.matchPct >= 60 ? '#D97706' : '#FF5F2D';
+  const ringStroke = result.matchPct >= 80 ? '#2E776A' : result.matchPct >= 60 ? '#4442E3' : '#FF5F2D';
   const ringFill   = (result.matchPct / 100) * circ;
 
   return (
     <Card className="overflow-hidden">
       {/* Duplicate banner — R5 */}
       {result.isDuplicate && (
-        <div className="bg-charge-yellow/20 px-5 py-2 text-xs font-medium text-[#8A6A00]">
+        <div className="bg-celestial-blue/10 px-5 py-2 text-xs font-medium text-celestial-blue">
           ⚠ Already in pipeline for {result.duplicateNote}
         </div>
       )}

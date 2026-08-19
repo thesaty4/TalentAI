@@ -158,8 +158,8 @@ export function AISearchPage() {
           <StepProgress
             icon={
               mismatch
-                ? <AlertTriangle size={14} className="text-amber-500" />
-                : <Loader2 size={14} className="animate-spin text-blue-500" />
+                ? <AlertTriangle size={14} className="text-charge-yellow" />
+                : <Loader2 size={14} className="animate-spin text-celestial-blue" />
             }
             title="Searching candidates"
             steps={steps}
@@ -175,9 +175,9 @@ export function AISearchPage() {
 
         {/* MISMATCH — query is outside IRC/JD scope */}
         {mismatch && !isPending && (
-          <div className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-4">
-            <p className="text-sm font-medium text-amber-800">Query outside IRC/JD scope</p>
-            <p className="mt-1 text-sm text-amber-700">{mismatch}</p>
+          <div className="mt-4 rounded-lg border border-charge-yellow/40 bg-charge-yellow/15 p-4">
+            <p className="text-sm font-medium text-network-blue">Query outside IRC/JD scope</p>
+            <p className="mt-1 text-sm text-secure-gray">{mismatch}</p>
           </div>
         )}
 

@@ -35,7 +35,8 @@ export class PipelineService {
     };
 
     const where: Prisma.PipelineCandidateWhereInput = {
-      isActive: true,
+      // Include active entries AND rejected entries (isActive:false but still shown in Rejected column)
+      OR: [{ isActive: true }, { stage: 'Rejected' }],
       ...(Object.keys(ircFilter).length > 0 && { irc: ircFilter }),
       ...(dto.ircId   && { ircId: dto.ircId }),
       ...(stages?.length && { stage: { in: stages } }),

@@ -81,36 +81,44 @@ function SidebarInner({ nav, collapsed, onToggle, onClose, isMobile }: {
     <>
       {/* Header */}
       <div style={{
-        padding: '18px 16px', display: 'flex', alignItems: 'center',
+        padding: '14px 12px',
+        display: 'flex',
+        alignItems: 'center',
         justifyContent: collapsed && !isMobile ? 'center' : 'space-between',
-        position: 'relative', flexShrink: 0,
+        flexShrink: 0,
+        borderBottom: '1px solid rgba(255,255,255,0.07)',
+        gap: 8,
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, overflow: 'hidden' }}>
-          <div style={{
-            width: 26, height: 26, borderRadius: 7, background: C.accent, flexShrink: 0,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontWeight: 700, fontSize: 13, color: '#fff',
-          }}>T</div>
-          {(!collapsed || isMobile) && (
-            <span style={{ color: '#fff', fontWeight: 600, fontSize: 14.5, whiteSpace: 'nowrap', overflow: 'hidden' }}>
+        {/* Logo + name — hidden when collapsed on desktop */}
+        {(!collapsed || isMobile) && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, overflow: 'hidden', flex: 1, minWidth: 0 }}>
+            <div style={{
+              width: 28, height: 28, borderRadius: 8, background: C.accent, flexShrink: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontWeight: 700, fontSize: 13, color: '#fff',
+            }}>T</div>
+            <span style={{ color: '#fff', fontWeight: 600, fontSize: 14.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               TalentLens AI
             </span>
-          )}
-        </div>
-        {/* Close (mobile) or toggle (desktop) */}
+          </div>
+        )}
+
+        {/* Close (mobile) or collapse toggle (desktop) */}
         {isMobile ? (
           <button onClick={onClose} style={{
-            background: 'none', border: 'none', cursor: 'pointer', color: '#858A9B', padding: 4,
-          }}><X size={18} /></button>
-        ) : (
-          <button onClick={onToggle} style={{
-            position: 'absolute', right: -12, top: 22,
-            width: 24, height: 24, borderRadius: '50%',
-            background: '#fff', border: '1px solid #C8CAD3',
+            width: 30, height: 30, borderRadius: 8, flexShrink: 0,
+            background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.10)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', zIndex: 10, flexShrink: 0,
+            cursor: 'pointer', color: '#C8CAD3',
+          }}><X size={15} /></button>
+        ) : (
+          <button onClick={onToggle} title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} style={{
+            width: 30, height: 30, borderRadius: 8, flexShrink: 0,
+            background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.10)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', color: '#C8CAD3', transition: 'background 150ms',
           }}>
-            {collapsed ? <ChevronRight size={12} color="#484F6B" /> : <ChevronLeft size={12} color="#484F6B" />}
+            {collapsed ? <ChevronRight size={15} /> : <ChevronLeft size={15} />}
           </button>
         )}
       </div>
@@ -125,8 +133,8 @@ function SidebarInner({ nav, collapsed, onToggle, onClose, isMobile }: {
                 padding: collapsed && !isMobile ? '10px 0' : '10px 12px',
                 justifyContent: collapsed && !isMobile ? 'center' : 'flex-start',
                 borderRadius: 9, cursor: 'pointer',
-          background: isActive ? 'rgba(255,95,45,0.20)' : 'transparent',
-                color: isActive ? '#FFCEB9' : '#858A9B',
+                background: isActive ? 'rgba(255,95,45,0.18)' : 'transparent',
+                color: isActive ? '#FF5F2D' : '#858A9B',
                 transition: 'background 150ms',
               }}>
                 <Icon size={19} strokeWidth={1.75} style={{ flexShrink: 0 }} />

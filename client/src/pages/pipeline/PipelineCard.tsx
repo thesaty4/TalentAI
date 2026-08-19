@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, MoreVertical } from 'lucide-react';
 import { Avatar } from '../../components/Card';
@@ -22,6 +22,7 @@ interface Props {
 
 export function PipelineCard({ entry, onAdvance, onRevert, onNotFit }: Props) {
   const navigate   = useNavigate();
+  const menuRef    = useRef<HTMLDivElement>(null);
   const [menuOpen, setMenuOpen]       = useState(false);
   const [revertModal, setRevertModal] = useState(false);
   const [notFitModal, setNotFitModal] = useState(false);
@@ -32,11 +33,21 @@ export function PipelineCard({ entry, onAdvance, onRevert, onNotFit }: Props) {
   // Reset busy when stage changes (optimistic update resolved)
   useEffect(() => { setBusy(false); }, [entry.stage, entry.id]);
 
-  // Reset busy when the stage changes (optimistic update resolved)
-  useEffect(() => { setBusy(false); }, [entry.stage, entry.id]);
+  // Close menu on outside click
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (!menuRef.current?.contains(e.target as Node)) setMenuOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [menuOpen]);
 
+  // Rejected is a terminal state reached only via explicit rejection — not part of sequential advance
+  const ADVANCE_STAGES = PIPELINE_STAGES.filter(s => s !== 'Rejected');
+  const advanceIdx = ADVANCE_STAGES.indexOf(entry.stage as any);
+  const nextStage = advanceIdx >= 0 && advanceIdx < ADVANCE_STAGES.length - 1 ? ADVANCE_STAGES[advanceIdx + 1] : null;
   const stageIdx  = PIPELINE_STAGES.indexOf(entry.stage as any);
-  const nextStage = stageIdx < PIPELINE_STAGES.length - 1 ? PIPELINE_STAGES[stageIdx + 1] : null;
   const prevStage = stageIdx > 0 ? PIPELINE_STAGES[stageIdx - 1] : null;
 
   function handleAdvance() {
@@ -53,7 +64,7 @@ export function PipelineCard({ entry, onAdvance, onRevert, onNotFit }: Props) {
   }
 
   return (
-    <div className="rounded-lg border border-[var(--border-subtle)] bg-white p-3 shadow-xs">
+    <div className="rounded-xl border border-[var(--border-subtle)] bg-white p-3 shadow-xs">
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
         <div className="flex min-w-0 items-start gap-2">
@@ -62,14 +73,17 @@ export function PipelineCard({ entry, onAdvance, onRevert, onNotFit }: Props) {
             <div className="flex items-baseline gap-1.5">
               <p className="truncate text-sm font-medium text-network-blue">{entry.employee.fullName}</p>
               {entry.matchPct != null && (
-                <span className="shrink-0 text-[10px] font-semibold text-celestial-blue">{entry.matchPct}%</span>
+                <span className={`shrink-0 text-[10px] font-semibold ${
+                  entry.matchPct >= 70 ? 'text-commerce-green' :
+                  entry.matchPct >= 50 ? 'text-celestial-blue' : 'text-secure-gray'
+                }`}>{entry.matchPct}%</span>
               )}
             </div>
             <p className="truncate text-xs text-[var(--fg-3)]">{entry.employee.roleTitle}</p>
           </div>
         </div>
         {/* Action menu */}
-        <div className="relative shrink-0">
+        <div ref={menuRef} className="relative shrink-0">
           <button onClick={() => !busy && setMenuOpen(o => !o)} disabled={busy} className={cn('rounded p-1 text-secure-gray', busy ? 'opacity-40 cursor-not-allowed' : 'hover:bg-culture-gray')}>
             <MoreVertical size={14} />
           </button>
@@ -77,7 +91,7 @@ export function PipelineCard({ entry, onAdvance, onRevert, onNotFit }: Props) {
             <div className="absolute right-0 top-7 z-20 w-44 rounded-lg border border-[var(--border-subtle)] bg-white py-1 shadow-md text-xs">
               <button onClick={() => { navigate(`/employees/${entry.employee.id}`); setMenuOpen(false); }}
                 className="block w-full px-3 py-1.5 text-left hover:bg-culture-gray">View profile</button>
-              {nextStage && entry.stage !== 'Allocated' && (
+              {nextStage && (
                 <button onClick={handleAdvance}
                   className="block w-full px-3 py-1.5 text-left text-commerce-green hover:bg-culture-gray">
                   Advance → {nextStage}
@@ -91,8 +105,13 @@ export function PipelineCard({ entry, onAdvance, onRevert, onNotFit }: Props) {
               )}
               <button onClick={() => { setMenuOpen(false); }}
                 className="block w-full px-3 py-1.5 text-left hover:bg-culture-gray">Schedule screening</button>
-              <button onClick={openNotFit}
-                className="block w-full px-3 py-1.5 text-left text-power-orange hover:bg-culture-gray">Not a fit</button>
+              {entry.stage !== 'Rejected' && (
+                <>
+                  <div className="my-1 border-t border-[var(--border-subtle)]" />
+                  <button onClick={openNotFit}
+                    className="block w-full px-3 py-1.5 text-left font-medium text-power-orange hover:bg-power-orange/5">Reject candidate</button>
+                </>
+              )}
             </div>
           )}
         </div>
@@ -118,11 +137,11 @@ export function PipelineCard({ entry, onAdvance, onRevert, onNotFit }: Props) {
 
         {/* → Next stage */}
         <button
-          disabled={!nextStage || busy || entry.stage === 'Allocated' || entry.stage === 'Rejected'}
+          disabled={!nextStage || busy || entry.stage === 'Rejected'}
           onClick={handleAdvance}
           title={nextStage ? `Advance to ${nextStage}` : 'No next stage'}
           className={cn('flex h-6 w-6 items-center justify-center rounded text-secure-gray transition-colors',
-            nextStage && !busy && entry.stage !== 'Allocated' && entry.stage !== 'Rejected' ? 'hover:bg-culture-gray hover:text-commerce-green' : 'opacity-30'
+            nextStage && !busy && entry.stage !== 'Rejected' ? 'hover:bg-culture-gray hover:text-commerce-green' : 'opacity-30'
           )}>
           <ChevronRight size={14} />
         </button>
@@ -147,11 +166,11 @@ export function PipelineCard({ entry, onAdvance, onRevert, onNotFit }: Props) {
       </Modal>
 
       {/* Not-a-fit modal — R14 */}
-      <Modal open={notFitModal} onClose={() => setNotFitModal(false)} title="Mark as not a fit">
-        <p className="mb-3 text-sm text-secure-gray">Select a reason:</p>
+      <Modal open={notFitModal} onClose={() => setNotFitModal(false)} title="Reject candidate">
+        <p className="mb-3 text-sm text-secure-gray">Optionally select a reason:</p>
         <div className="mb-4 flex flex-wrap gap-1.5">
           {NOT_FIT_REASONS.map(r => (
-            <button key={r} onClick={() => setSelectedReason(r)}
+            <button key={r} onClick={() => setSelectedReason(prev => prev === r ? '' : r)}
               className={cn('rounded-full border px-2.5 py-1 text-xs transition-colors',
                 selectedReason === r ? 'border-power-orange bg-power-orange/10 text-power-orange' : 'border-[var(--border-default)] text-secure-gray')}>
               {r}
@@ -160,9 +179,9 @@ export function PipelineCard({ entry, onAdvance, onRevert, onNotFit }: Props) {
         </div>
         <div className="flex justify-end gap-2">
           <Button variant="secondary" size="sm" onClick={() => setNotFitModal(false)}>Cancel</Button>
-          <Button size="sm" variant="danger" disabled={!selectedReason}
-            onClick={() => { setNotFitModal(false); if (selectedReason) onNotFit(entry.id, selectedReason); }}>
-            Confirm
+          <Button size="sm" variant="danger"
+            onClick={() => { setNotFitModal(false); onNotFit(entry.id, selectedReason || 'Rejected'); }}>
+            Confirm reject
           </Button>
         </div>
       </Modal>

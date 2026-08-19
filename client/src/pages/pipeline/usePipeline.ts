@@ -59,12 +59,11 @@ export function usePipeline(params: Record<string, unknown>) {
 
   const entries = query.data?.data ?? [];
 
-  // Group by stage
+  // Group by stage — Rejected is now a first-class kanban column
   const byStage = PIPELINE_STAGES.reduce<Record<string, PipelineEntry[]>>((acc, s) => {
     acc[s] = entries.filter(e => e.stage === s);
     return acc;
   }, {});
-  const rejected = entries.filter(e => e.stage === 'Rejected');
 
-  return { query, entries, byStage, rejected, advanceMut, revertMut, notFitMut, shortlistMut };
+  return { query, entries, byStage, advanceMut, revertMut, notFitMut, shortlistMut };
 }
