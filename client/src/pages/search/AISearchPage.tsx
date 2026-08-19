@@ -1,4 +1,4 @@
-import { Loader2, Download, LayoutGrid, List, AlertTriangle, ChevronDown, MapPin, Users } from 'lucide-react';
+import { ArrowUpDown, Hash, Loader2, Download, LayoutGrid, List, AlertTriangle, ChevronDown, MapPin, Users } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -276,6 +276,7 @@ export function AISearchPage() {
 
                   {/* Single sort dropdown — "No Sort" restores original AI Search order */}
                   <label className="flex items-center gap-1.5 text-xs text-secure-gray">
+                    <ArrowUpDown size={12} className="shrink-0 text-[var(--fg-3)]" />
                     Sort by:
                     <select
                       value={activeSort}
@@ -296,14 +297,17 @@ export function AISearchPage() {
                   <span className="text-level-gray">|</span>
 
                   {/* Result count dropdown */}
-                  <select
-                    value={resultLimit ?? ''}
-                    onChange={e => setResultLimit(e.target.value === '' ? null : Number(e.target.value) as 3 | 10)}
-                    className="h-8 rounded-lg border border-[var(--border-subtle)] bg-white px-2.5 text-xs text-secure-gray focus:border-power-orange focus:outline-none">
-                    <option value="">Show Candidates</option>
-                    <option value="3">Top 3</option>
-                    <option value="10">Top 10</option>
-                  </select>
+                  <div className="flex items-center gap-1.5">
+                    <Hash size={12} className="shrink-0 text-[var(--fg-3)]" />
+                    <select
+                      value={resultLimit ?? ''}
+                      onChange={e => setResultLimit(e.target.value === '' ? null : Number(e.target.value) as 3 | 10)}
+                      className="h-8 rounded-lg border border-[var(--border-subtle)] bg-white px-2.5 text-xs text-secure-gray focus:border-power-orange focus:outline-none">
+                      <option value="">Show Candidates</option>
+                      <option value="3">Top 3</option>
+                      <option value="10">Top 10</option>
+                    </select>
+                  </div>
 
                   <span className="text-level-gray">|</span>
 

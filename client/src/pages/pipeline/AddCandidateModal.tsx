@@ -57,7 +57,7 @@ export function AddCandidateModal({ open, onClose, onAdded }: Props) {
         <label className="mb-1 block text-sm font-medium text-secure-gray">Search employee</label>
         <input value={search} onChange={e => { setSearch(e.target.value); setSelectedEmp(null); }}
           placeholder="Type name or role…"
-          className="w-full rounded-lg border border-[var(--border-default)] px-3 py-2 text-sm focus:border-celestial-blue focus:outline-none" />
+          className="w-full rounded-lg border border-[var(--border-default)] px-3 py-2 text-sm focus:border-power-orange focus:outline-none" />
         {poolQ.isFetching && <Spinner className="py-2" />}
         {poolQ.data && poolQ.data.length > 0 && !selectedEmp && (
           <div className="mt-1 rounded-lg border border-[var(--border-subtle)] bg-white shadow-sm">
@@ -77,7 +77,7 @@ export function AddCandidateModal({ open, onClose, onAdded }: Props) {
       <div className="mb-4">
         <label className="mb-1 block text-sm font-medium text-secure-gray">Open IRC (R2)</label>
         <select value={selectedIrc ?? ''} onChange={e => setSelectedIrc(e.target.value ? +e.target.value : null)}
-          className="w-full rounded-lg border border-[var(--border-default)] px-3 py-2 text-sm focus:border-celestial-blue focus:outline-none">
+          className="w-full rounded-lg border border-[var(--border-default)] px-3 py-2 text-sm focus:border-power-orange focus:outline-none">
           <option value="">Select IRC…</option>
           {openIrcs.map(i => (
             <option key={i.id} value={i.id}>{i.ircCode} — {i.roleTitle} ({i.projectName})</option>

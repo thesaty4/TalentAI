@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Upload, History } from 'lucide-react';
+import { Building2, History, List, Upload } from 'lucide-react';
 import { Modal } from '../../components/Modal';
 import { useAuth } from '../../auth/useAuth';
 import { StageChip } from '../../components/Badge';
@@ -105,19 +105,31 @@ export function IRCAppliedPage() {
   return (
     <div className="space-y-4">
       {/* Filter bar */}
-      <div className="flex flex-wrap items-end gap-3 rounded-xl border border-[var(--border-subtle)] bg-white p-4">
-        <div>
-          <label className="mb-1 block text-xs font-medium text-secure-gray">Project</label>
+      <div className="flex items-center gap-3">
+        {/* Project filter */}
+        <div className="relative">
+          <Building2 size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--fg-3)] pointer-events-none z-10" />
           <select value={projectId ?? ''} onChange={e => { setProjectId(e.target.value ? +e.target.value : null); setPage(1); }}
-            className="rounded-lg border border-[var(--border-default)] px-3 py-1.5 text-sm focus:border-celestial-blue focus:outline-none">
+            className={cn(
+              'h-[34px] rounded-lg border pl-8 pr-3 text-sm focus:border-power-orange focus:outline-none',
+              projectId !== null
+                ? 'border-celestial-blue bg-celestial-blue/5'
+                : 'border-[var(--border-default)]',
+            )}>
             <option value="">All projects</option>
             {(projectsQ.data ?? []).map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
         </div>
-        <div>
-          <label className="mb-1 block text-xs font-medium text-secure-gray">Stage</label>
+        {/* Stage filter */}
+        <div className="relative">
+          <List size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--fg-3)] pointer-events-none z-10" />
           <select value={stage} onChange={e => { setStage(e.target.value); setPage(1); }}
-            className="rounded-lg border border-[var(--border-default)] px-3 py-1.5 text-sm focus:border-celestial-blue focus:outline-none">
+            className={cn(
+              'h-[34px] rounded-lg border pl-8 pr-3 text-sm focus:border-power-orange focus:outline-none',
+              stage !== ''
+                ? 'border-celestial-blue bg-celestial-blue/5'
+                : 'border-[var(--border-default)]',
+            )}>
             <option value="">All stages</option>
             {[...PIPELINE_STAGES, 'Rejected'].map(s => <option key={s} value={s}>{s}</option>)}
           </select>

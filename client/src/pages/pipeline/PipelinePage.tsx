@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Download, Plus } from 'lucide-react';
+import { Building2, Download, List, Plus, Search, Users } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '../../components/Button';
+import { cn } from '../../lib/utils/cn';
 import { EmptyState, ErrorBanner, Spinner } from '../../components/Feedback';
 import { MultiSelect } from '../../components/MultiSelect';
 import { projectsApi } from '../../lib/api/projects.api';
@@ -38,16 +39,15 @@ export function PipelinePage() {
 
   const { query, byStage, advanceMut, revertMut, notFitMut, addFeedbackMut } = usePipeline(apiParams);
 
-  if (query.isPending) return <Spinner />;
-  if (query.isError)   return <ErrorBanner message="Failed to load pipeline" onRetry={query.refetch} />;
-
-  // Unique employee names for the user filter — derived from all fetched entries
+  // Unique employee names for the user filter — must be above early returns to satisfy Rules of Hooks
   const allEntries = query.data?.data ?? [];
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const userOptions = useMemo(
     () => [...new Set(allEntries.map(e => e.employee.fullName))].sort(),
     [allEntries],
   );
+
+  if (query.isPending) return <Spinner />;
+  if (query.isError)   return <ErrorBanner message="Failed to load pipeline" onRetry={query.refetch} />;
 
   // Client-side user filter applied on top of the server-filtered data
   const visibleByStage = selectedUsers.length === 0
@@ -97,34 +97,70 @@ export function PipelinePage() {
         <ErrorBanner message="Rejection failed — please try again." />
       )}
       {/* Filter bar */}
-      <div className="flex flex-wrap items-center gap-3">
-        <select
-          value={projectId ?? ''}
-          onChange={e => setProjectId(e.target.value ? +e.target.value : null)}
-          className="rounded-lg border border-[var(--border-default)] px-3 py-2 text-sm focus:border-celestial-blue focus:outline-none">
-          <option value="">All projects</option>
-          {(projectsQ.data ?? []).map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-        </select>
-        <input
-          value={roleSearch} onChange={e => setRoleSearch(e.target.value)}
-          placeholder="Filter by role…"
-          className="rounded-lg border border-[var(--border-default)] px-3 py-2 text-sm focus:border-celestial-blue focus:outline-none w-48" />
-        <MultiSelect
-          options={[...PIPELINE_STAGES]}
-          selected={selectedStages}
-          onChange={handleStageChange}
-          placeholder="Stage filter"
-          countLabel="Stage"
-          className="w-44"
-        />
-        <MultiSelect
-          options={userOptions}
-          selected={selectedUsers}
-          onChange={setSelectedUsers}
-          placeholder="User filter"
-          countLabel="Users"
-          className="w-44"
-        />
+      <div className="flex items-center gap-3">
+        {/* Project filter */}
+        <div className="relative flex items-center">
+          <Building2 size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--fg-3)] pointer-events-none z-10" />
+          <select
+            value={projectId ?? ''}
+            onChange={e => setProjectId(e.target.value ? +e.target.value : null)}
+            className={cn(
+              'h-[34px] w-36 rounded-lg border pl-8 pr-3 text-sm focus:border-power-orange focus:outline-none',
+              projectId !== null
+                ? 'border-celestial-blue bg-celestial-blue/5'
+                : 'border-[var(--border-default)]',
+            )}>
+            <option value="">All projects</option>
+            {(projectsQ.data ?? []).map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+          </select>
+        </div>
+        {/* Role filter */}
+        <div className="relative flex items-center">
+          <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--fg-3)] pointer-events-none z-10" />
+          <input
+            value={roleSearch} onChange={e => setRoleSearch(e.target.value)}
+            placeholder="Filter by role…"
+            className={cn(
+              'h-[34px] w-40 rounded-lg border pl-8 pr-3 text-sm focus:border-power-orange focus:outline-none',
+              roleSearch !== ''
+                ? 'border-celestial-blue bg-celestial-blue/5'
+                : 'border-[var(--border-default)]',
+            )} />
+        </div>
+        {/* Stage filter */}
+        <div className="relative">
+          <List size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--fg-3)] pointer-events-none z-10" />
+          <MultiSelect
+            options={[...PIPELINE_STAGES]}
+            selected={selectedStages}
+            onChange={handleStageChange}
+            placeholder="Stage filter"
+            countLabel="Stage"
+            className={cn(
+              'w-36 [&>button]:h-[34px] [&>button]:pl-8',
+              selectedStages.length < PIPELINE_STAGES.length
+                ? '[&>button]:border-celestial-blue [&>button]:bg-celestial-blue/5'
+                : '',
+            )}
+          />
+        </div>
+        {/* User filter */}
+        <div className="relative">
+          <Users size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--fg-3)] pointer-events-none z-10" />
+          <MultiSelect
+            options={userOptions}
+            selected={selectedUsers}
+            onChange={setSelectedUsers}
+            placeholder="User filter"
+            countLabel="Users"
+            className={cn(
+              'w-36 [&>button]:h-[34px] [&>button]:pl-8',
+              selectedUsers.length > 0
+                ? '[&>button]:border-celestial-blue [&>button]:bg-celestial-blue/5'
+                : '',
+            )}
+          />
+        </div>
         <Button size="sm" onClick={() => setAddOpen(true)} className="ml-auto flex items-center gap-1.5">
           <Plus size={14} /> Add candidate
         </Button>

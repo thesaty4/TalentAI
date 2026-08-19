@@ -13,6 +13,12 @@ async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
   const config = app.get(ConfigService);
 
+  // CORS must be registered before helmet so OPTIONS preflight is answered first
+  app.enableCors({
+    origin: config.get<string>('clientUrl'),
+    credentials: true,
+  });
+
   app.use(helmet());
   app.use(
     rateLimit({
@@ -22,7 +28,6 @@ async function bootstrap(): Promise<void> {
       legacyHeaders: false,
     }),
   );
-  app.enableCors({ origin: true, credentials: true });
 
   app.useGlobalPipes(
     new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),

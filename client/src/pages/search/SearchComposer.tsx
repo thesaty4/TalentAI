@@ -86,7 +86,7 @@ export function SearchComposer(p: Props) {
           onChange={e => p.onQueryChange(e.target.value)}
           placeholder="Describe the talent requirement… e.g. Find engineers who've actually worked on similar payments integration projects."
           rows={2}
-          className="flex-1 resize-none rounded-lg border border-[var(--border-default)] px-3 py-2 text-sm focus:border-celestial-blue focus:outline-none"
+          className="flex-1 resize-none rounded-lg border border-[var(--border-default)] px-3 py-2 text-sm focus:border-power-orange focus:outline-none"
         />
         <div className="flex flex-col gap-1.5">
           <input ref={fileRef} type="file" accept=".pdf,.docx" className="hidden" onChange={handleFile} />
@@ -102,7 +102,7 @@ export function SearchComposer(p: Props) {
 
       {/* JD chip */}
       {p.jdFilename && (
-        <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-celestial-blue/10 px-2.5 py-1 text-xs text-celestial-blue">
+        <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-power-orange/10 px-2.5 py-1 text-xs text-power-orange">
           <Paperclip size={10} /> {p.jdFilename}
           <button onClick={p.onJdRemove} className="ml-0.5 hover:text-power-orange"><X size={10} /></button>
         </div>

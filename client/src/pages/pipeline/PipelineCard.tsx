@@ -20,7 +20,7 @@ interface Props {
   onAdvance:       (id: number, stage: string) => void;
   onRevert:        (id: number, stage: string, note?: string) => void;
   onNotFit:        (id: number, reason: string) => void;
-  onAddFeedback:   (id: number, roundName: string, comments: string, rating?: string) => Promise<void>;
+  onAddFeedback:   (id: number, roundName: string, comments: string, rating?: string) => Promise<unknown>;
   onViewHistory:   (id: number) => void;
 }
 
@@ -215,7 +215,7 @@ export function PipelineCard({ entry, onAdvance, onRevert, onNotFit, onAddFeedba
             'mb-1 w-full rounded-lg border px-3 py-2 text-sm focus:outline-none',
             feedbackError
               ? 'border-power-orange focus:border-power-orange'
-              : 'border-[var(--border-default)] focus:border-celestial-blue',
+              : 'border-[var(--border-default)] focus:border-power-orange',
           )}
         />
         {feedbackError && (
@@ -238,7 +238,7 @@ export function PipelineCard({ entry, onAdvance, onRevert, onNotFit, onAddFeedba
         </p>
         <textarea value={revertNote} onChange={e => setRevertNote(e.target.value)} rows={2}
           placeholder="Optional note…"
-          className="mb-4 w-full rounded-lg border border-[var(--border-default)] px-3 py-2 text-sm focus:border-celestial-blue focus:outline-none" />
+          className="mb-4 w-full rounded-lg border border-[var(--border-default)] px-3 py-2 text-sm focus:border-power-orange focus:outline-none" />
         <div className="flex justify-end gap-2">
           <Button variant="secondary" size="sm" onClick={() => setRevertModal(false)}>Cancel</Button>
           <Button size="sm" variant="danger" onClick={() => { setRevertModal(false); if (prevStage) onRevert(entry.id, prevStage, revertNote || undefined); }}>

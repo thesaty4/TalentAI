@@ -1,10 +1,12 @@
 import { useNavigate } from 'react-router-dom';
-import { Search, Download, ChevronUp, ChevronDown } from 'lucide-react';
+import { Briefcase, ChevronDown, ChevronUp, Download, Search, TrendingUp, Zap } from 'lucide-react';
 import { useState } from 'react';
+import { cn } from '../../lib/utils/cn';
 import { Avatar } from '../../components/Card';
-import { SkillsMultiSelect } from '../../components/SkillsMultiSelect';
+import { MultiSelect } from '../../components/MultiSelect';
 import { ErrorBanner, Spinner } from '../../components/Feedback';
 import { Pagination } from '../../components/Pagination';
+import { SKILL_LIST } from '../../lib/constants/skills.constants';
 import { usePool } from './usePool';
 
 const SORTABLE = new Set(['Name', 'Exp', 'Status']);
@@ -33,56 +35,87 @@ export function ResourcePoolPage() {
   return (
     <div className="flex flex-col gap-3.5">
       {/* ── Toolbar ── */}
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex items-center gap-2">
         {/* Search */}
         <div className="relative shrink-0">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--fg-3)]" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--fg-3)] pointer-events-none z-10" />
           <input
             value={filters.search ?? ''}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search name or role…"
-            className="w-56 rounded-lg border border-[var(--border-default)] bg-white py-2 pl-8 pr-3 text-sm text-network-blue outline-none focus:border-celestial-blue"
+            className={cn(
+              'h-[34px] w-56 rounded-lg border pl-8 pr-3 text-sm text-network-blue outline-none focus:border-power-orange',
+              (filters.search ?? '') !== ''
+                ? 'border-celestial-blue bg-celestial-blue/5'
+                : 'border-[var(--border-default)]',
+            )}
           />
         </div>
         {/* Status filter */}
-        <select
-          value={filters.benchStatus ?? ''}
-          onChange={e => setFilter('benchStatus', e.target.value || undefined)}
-          className="rounded-lg border border-[var(--border-default)] bg-white px-3 py-2 text-sm text-network-blue outline-none focus:border-celestial-blue"
-        >
-          <option value="">All Status</option>
-          <option value="Bench">Bench</option>
-          <option value="Allocated">Allocated</option>
-        </select>
+        <div className="relative">
+          <Briefcase size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--fg-3)] pointer-events-none z-10" />
+          <select
+            value={filters.benchStatus ?? ''}
+            onChange={e => setFilter('benchStatus', e.target.value || undefined)}
+            className={cn(
+              'h-[34px] rounded-lg border pl-8 pr-3 text-sm text-network-blue outline-none focus:border-power-orange',
+              (filters.benchStatus ?? '') !== ''
+                ? 'border-celestial-blue bg-celestial-blue/5'
+                : 'border-[var(--border-default)]',
+            )}
+          >
+            <option value="">All Status</option>
+            <option value="Bench">Bench</option>
+            <option value="Allocated">Allocated</option>
+          </select>
+        </div>
         {/* Exp range */}
         <div className="flex items-center gap-1.5">
+          <TrendingUp size={14} className="shrink-0 text-[var(--fg-3)]" />
           <input
             type="number" min={0} placeholder="Min exp"
             value={filters.minExp ?? ''}
             onChange={e => setFilter('minExp', e.target.value ? +e.target.value : undefined)}
-            className="w-20 rounded-lg border border-[var(--border-default)] bg-white px-2.5 py-2 text-sm text-network-blue outline-none focus:border-celestial-blue"
+            className={cn(
+              'h-[34px] w-20 rounded-lg border px-2.5 text-sm text-network-blue outline-none focus:border-power-orange',
+              filters.minExp !== undefined
+                ? 'border-celestial-blue bg-celestial-blue/5'
+                : 'border-[var(--border-default)]',
+            )}
           />
           <span className="text-xs text-[var(--fg-3)]">–</span>
           <input
             type="number" min={0} placeholder="Max exp"
             value={filters.maxExp ?? ''}
             onChange={e => setFilter('maxExp', e.target.value ? +e.target.value : undefined)}
-            className="w-20 rounded-lg border border-[var(--border-default)] bg-white px-2.5 py-2 text-sm text-network-blue outline-none focus:border-celestial-blue"
+            className={cn(
+              'h-[34px] w-20 rounded-lg border px-2.5 text-sm text-network-blue outline-none focus:border-power-orange',
+              filters.maxExp !== undefined
+                ? 'border-celestial-blue bg-celestial-blue/5'
+                : 'border-[var(--border-default)]',
+            )}
           />
         </div>
-        {/* Skills multi-select */}
-        <div className="min-w-[200px] flex-1">
-          <SkillsMultiSelect
+        {/* Skills filter */}
+        <div className="relative w-52">
+          <Zap size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--fg-3)] pointer-events-none z-10" />
+          <MultiSelect
+            options={SKILL_LIST}
             selected={skillInput ? skillInput.split(',').map(s => s.trim()).filter(Boolean) : []}
             onChange={skills => setSkills(skills.join(','))}
             placeholder="Filter by skills…"
+            countLabel="Skills"
+            className={cn(
+              'w-full [&>button]:h-[34px] [&>button]:pl-8',
+              skillInput ? '[&>button]:border-celestial-blue [&>button]:bg-celestial-blue/5' : '',
+            )}
           />
         </div>
         {/* Export */}
         <button
           onClick={handleExport}
           disabled={exportLoading}
-          className="ml-auto flex items-center gap-1.5 rounded-lg border border-[var(--border-default)] bg-white px-3 py-2 text-sm text-network-blue transition-colors hover:bg-culture-gray disabled:cursor-not-allowed disabled:opacity-50"
+          className="ml-auto flex h-[34px] items-center gap-1.5 rounded-lg border border-[var(--border-default)] bg-white px-3 text-sm text-network-blue transition-colors hover:bg-culture-gray disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Download size={14} /> Export
         </button>
