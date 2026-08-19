@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '../../components/Button';
 import { EmptyState, ErrorBanner, Spinner } from '../../components/Feedback';
+import { MultiSelect } from '../../components/MultiSelect';
 import { projectsApi } from '../../lib/api/projects.api';
 import { PIPELINE_STAGES, STAGE_HEX } from '../../lib/constants/pipeline.constants';
 import { usePipeline } from './usePipeline';
@@ -12,10 +13,12 @@ import { AddCandidateModal } from './AddCandidateModal';
 
 export function PipelinePage() {
   const [urlParams] = useSearchParams();
-  const [projectId,    setProjectId]   = useState<number | null>(() => { const v = urlParams.get('projectId'); return v ? +v : null; });
-  const [roleSearch,   setRoleSearch]  = useState('');
-  const [debouncedRole, setDebouncedRole] = useState('');
-  const [addOpen,      setAddOpen]     = useState(false);
+  const [projectId,      setProjectId]    = useState<number | null>(() => { const v = urlParams.get('projectId'); return v ? +v : null; });
+  const [roleSearch,     setRoleSearch]   = useState('');
+  const [debouncedRole,  setDebouncedRole] = useState('');
+  const [selectedStages, setSelectedStages] = useState<string[]>([...PIPELINE_STAGES]);
+  const [selectedUsers,  setSelectedUsers]  = useState<string[]>([]);
+  const [addOpen,        setAddOpen]      = useState(false);
 
   // Debounce role input so the query key only changes after the user pauses typing
   useEffect(() => {
@@ -34,7 +37,34 @@ export function PipelinePage() {
   if (query.isPending) return <Spinner />;
   if (query.isError)   return <ErrorBanner message="Failed to load pipeline" onRetry={query.refetch} />;
 
-  const totalEntries = Object.values(byStage).reduce((s, a) => s + a.length, 0);
+  // Unique employee names for the user filter — derived from all fetched entries
+  const allEntries = query.data?.data ?? [];
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const userOptions = useMemo(
+    () => [...new Set(allEntries.map(e => e.employee.fullName))].sort(),
+    [allEntries],
+  );
+
+  // Client-side user filter applied on top of the server-filtered data
+  const visibleByStage = selectedUsers.length === 0
+    ? byStage
+    : Object.fromEntries(
+        PIPELINE_STAGES.map(s => [s, (byStage[s] ?? []).filter(e => selectedUsers.includes(e.employee.fullName))]),
+      );
+
+  // Columns to render — only selected stages (preserving original order)
+  const stageColumns = PIPELINE_STAGES.filter(s => selectedStages.includes(s));
+
+  const isAllStages = selectedStages.length === PIPELINE_STAGES.length;
+  function handleToggleAllStages() {
+    setSelectedStages(isAllStages ? [PIPELINE_STAGES[0]] : [...PIPELINE_STAGES]);
+  }
+  function handleStageChange(stages: string[]) {
+    if (stages.length === 0) return; // at least 1 stage must stay visible
+    setSelectedStages(stages);
+  }
+
+  const totalEntries = Object.values(byStage).reduce((sum, a) => sum + a.length, 0);
 
   return (
     <div className="flex flex-col gap-4">
@@ -54,6 +84,22 @@ export function PipelinePage() {
           value={roleSearch} onChange={e => setRoleSearch(e.target.value)}
           placeholder="Filter by role…"
           className="rounded-lg border border-[var(--border-default)] px-3 py-2 text-sm focus:border-celestial-blue focus:outline-none w-48" />
+        <MultiSelect
+          options={[...PIPELINE_STAGES]}
+          selected={selectedStages}
+          onChange={handleStageChange}
+          placeholder="Stage filter"
+          countLabel="Stage"
+          className="w-44"
+        />
+        <MultiSelect
+          options={userOptions}
+          selected={selectedUsers}
+          onChange={setSelectedUsers}
+          placeholder="User filter"
+          countLabel="Users"
+          className="w-44"
+        />
         <Button size="sm" onClick={() => setAddOpen(true)} className="ml-auto flex items-center gap-1.5">
           <Plus size={14} /> Add candidate
         </Button>
@@ -63,11 +109,11 @@ export function PipelinePage() {
         <EmptyState title="No pipeline entries" description="Use AI Search to shortlist candidates, or add manually." />
       )}
 
-      {/* Kanban columns */}
+      {/* Kanban columns — only render stages that are selected */}
       {totalEntries > 0 && (
         <div className="flex gap-3 overflow-x-auto pb-2">
-          {PIPELINE_STAGES.map(stage => {
-            const entries = byStage[stage] ?? [];
+          {stageColumns.map(stage => {
+            const entries = visibleByStage[stage] ?? [];
             return (
               <div key={stage} style={{
                   display: 'flex', flexDirection: 'column', width: 240, flexShrink: 0,
