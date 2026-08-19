@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Plus } from 'lucide-react';
+import { Download, Plus } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '../../components/Button';
 import { EmptyState, ErrorBanner, Spinner } from '../../components/Feedback';
@@ -64,6 +64,31 @@ export function PipelinePage() {
     setSelectedStages(stages);
   }
 
+  function exportCSV() {
+    const rows = stageColumns.flatMap(stage =>
+      (visibleByStage[stage] ?? []).map(e => ([
+        e.employee.fullName,
+        e.employee.roleTitle,
+        e.employee.location,
+        e.stage,
+        e.irc.ircCode,
+        e.irc.roleTitle,
+        e.matchPct ?? '',
+        e.appliedDate ? new Date(e.appliedDate).toLocaleDateString() : '',
+      ]))
+    );
+    if (rows.length === 0) return;
+    const headers = ['Name', 'Role Title', 'Location', 'Stage', 'IRC Code', 'IRC Role', 'Match %', 'Applied Date'];
+    const csv = [headers, ...rows].map(r => r.map(v => JSON.stringify(v)).join(',')).join('\n');
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    const a = Object.assign(document.createElement('a'), {
+      href: url,
+      download: `pipeline-${new Date().toISOString().slice(0, 10)}.csv`,
+    });
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   const totalEntries = Object.values(byStage).reduce((sum, a) => sum + a.length, 0);
 
   return (
@@ -102,6 +127,9 @@ export function PipelinePage() {
         />
         <Button size="sm" onClick={() => setAddOpen(true)} className="ml-auto flex items-center gap-1.5">
           <Plus size={14} /> Add candidate
+        </Button>
+        <Button size="sm" variant="secondary" onClick={exportCSV} className="flex items-center gap-1.5">
+          <Download size={14} /> Export
         </Button>
       </div>
 
