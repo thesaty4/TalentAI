@@ -41,11 +41,11 @@ export function SkillsMultiSelect({ selected, onChange, placeholder = 'Search sk
     <div ref={containerRef} className="relative">
       {/* Trigger: shows first few chips + overflow count + search input */}
       <div
-        className="flex max-h-[34px] w-full cursor-text items-center gap-1 overflow-hidden rounded-lg border border-[var(--border-default)] px-2 py-1 focus-within:border-celestial-blue"
+        className="flex max-h-[34px] w-full cursor-text items-center gap-1 overflow-hidden rounded-lg border border-[var(--border-default)] px-2 py-1 focus-within:border-power-orange"
         onClick={() => setOpen(true)}
       >
         {selected.slice(0, 3).map(s => (
-          <span key={s} className="flex shrink-0 items-center gap-0.5 rounded-full bg-celestial-blue/10 px-2 py-0.5 text-[10px] font-medium text-celestial-blue">
+          <span key={s} className="flex shrink-0 items-center gap-0.5 rounded-full bg-power-orange/10 px-2 py-0.5 text-[10px] font-medium text-power-orange">
             {s}
             <button type="button" onClick={e => { e.stopPropagation(); toggle(s); }} className="hover:text-power-orange">
               <X size={9} />
@@ -72,7 +72,7 @@ export function SkillsMultiSelect({ selected, onChange, placeholder = 'Search sk
           {/* Select all / Deselect all */}
           <div className="flex gap-2 border-b border-[var(--border-subtle)] px-3 py-1.5">
             <button type="button" onClick={selectAll}
-              className="text-[10px] font-medium text-celestial-blue hover:underline">Select all</button>
+              className="text-[10px] font-medium text-power-orange hover:underline">Select all</button>
             <span className="text-[var(--fg-3)]">·</span>
             <button type="button" onClick={deselectAll}
               className="text-[10px] font-medium text-power-orange hover:underline">Deselect all</button>

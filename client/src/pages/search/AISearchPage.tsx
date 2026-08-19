@@ -203,18 +203,18 @@ export function AISearchPage() {
           return (
             <div className="space-y-4">
               {/* Result count + controls */}
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center justify-center gap-2">
                 <p className="text-sm text-[var(--fg-3)]">
                   {visible.length}/{results.length} candidate{results.length !== 1 ? 's' : ''}
-                  {jdFilename && <span className="ml-1 text-celestial-blue">· JD: {jdFilename}</span>}
+                  {jdFilename && <span className="ml-1 text-power-orange">· JD: {jdFilename}</span>}
                 </p>
-                <div className="ml-auto flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center justify-center gap-2">
 
                   {/* Location filter */}
                   <div ref={locationDropRef} className="relative">
                     <button onClick={() => setLocationDropOpen(o => !o)}
                       className={`flex h-8 items-center gap-1.5 rounded-lg border px-3 text-xs font-medium transition-colors ${
-                        locationFilter.length > 0 ? 'border-celestial-blue bg-celestial-blue/5 text-celestial-blue' : 'border-[var(--border-subtle)] bg-white text-secure-gray hover:bg-culture-gray'
+                        locationFilter.length > 0 ? 'border-power-orange bg-power-orange/5 text-power-orange' : 'border-[var(--border-subtle)] bg-white text-secure-gray hover:bg-culture-gray'
                       }`}>
                       <MapPin size={12} className="shrink-0" />
                       Location{locationFilter.length > 0 ? ` (${locationFilter.length})` : ''}
@@ -229,7 +229,7 @@ export function AISearchPage() {
                           <label key={loc} className="flex cursor-pointer items-center gap-2 px-3 py-1.5 hover:bg-culture-gray">
                             <input type="checkbox" checked={locationFilter.includes(loc)}
                               onChange={e => setLocationFilter(prev => e.target.checked ? [...prev, loc] : prev.filter(l => l !== loc))}
-                              className="h-3.5 w-3.5 rounded accent-celestial-blue" />
+                              className="h-3.5 w-3.5 rounded accent-power-orange" />
                             <span className="text-xs">{loc}</span>
                           </label>
                         ))}
@@ -241,7 +241,7 @@ export function AISearchPage() {
                   <div ref={poolStatusDropRef} className="relative">
                     <button onClick={() => setPoolStatusDropOpen(o => !o)}
                       className={`flex h-8 items-center gap-1.5 rounded-lg border px-3 text-xs font-medium transition-colors ${
-                        poolStatusFilter.length > 0 ? 'border-celestial-blue bg-celestial-blue/5 text-celestial-blue' : 'border-[var(--border-subtle)] bg-white text-secure-gray hover:bg-culture-gray'
+                        poolStatusFilter.length > 0 ? 'border-power-orange bg-power-orange/5 text-power-orange' : 'border-[var(--border-subtle)] bg-white text-secure-gray hover:bg-culture-gray'
                       }`}>
                       <Users size={12} className="shrink-0" />
                       Pool Status{poolStatusFilter.length > 0 ? ` (${poolStatusFilter.length})` : ''}
@@ -256,7 +256,7 @@ export function AISearchPage() {
                           <label className="flex cursor-pointer items-center gap-2 px-3 py-1.5 hover:bg-culture-gray">
                             <input type="checkbox" checked={poolStatusFilter.includes('InPool')}
                               onChange={e => setPoolStatusFilter(prev => e.target.checked ? [...prev, 'InPool'] : prev.filter(s => s !== 'InPool'))}
-                              className="h-3.5 w-3.5 rounded accent-celestial-blue" />
+                              className="h-3.5 w-3.5 rounded accent-power-orange" />
                             <span className="text-xs">In Pool</span>
                           </label>
                         )}
@@ -264,7 +264,7 @@ export function AISearchPage() {
                           <label className="flex cursor-pointer items-center gap-2 px-3 py-1.5 hover:bg-culture-gray">
                             <input type="checkbox" checked={poolStatusFilter.includes('ForecastToPool')}
                               onChange={e => setPoolStatusFilter(prev => e.target.checked ? [...prev, 'ForecastToPool'] : prev.filter(s => s !== 'ForecastToPool'))}
-                              className="h-3.5 w-3.5 rounded accent-celestial-blue" />
+                              className="h-3.5 w-3.5 rounded accent-power-orange" />
                             <span className="text-xs">Forecast to Pool</span>
                           </label>
                         )}
@@ -280,8 +280,8 @@ export function AISearchPage() {
                     <select
                       value={activeSort}
                       onChange={e => setActiveSort(e.target.value as SortOption)}
-                      className={`h-8 rounded-lg border px-2 text-xs focus:outline-none focus:border-celestial-blue ${
-                        activeSort ? 'border-celestial-blue bg-celestial-blue/5 font-medium text-network-blue' : 'border-[var(--border-subtle)] bg-white text-secure-gray'
+                      className={`h-8 rounded-lg border px-2 text-xs focus:outline-none focus:border-power-orange ${
+                        activeSort ? 'border-power-orange bg-power-orange/5 font-medium text-network-blue' : 'border-[var(--border-subtle)] bg-white text-secure-gray'
                       }`}>
                       <option value="">No Sort</option>
                       <option value="match-desc">Match % — High to Low</option>
@@ -299,7 +299,7 @@ export function AISearchPage() {
                   <select
                     value={resultLimit ?? ''}
                     onChange={e => setResultLimit(e.target.value === '' ? null : Number(e.target.value) as 3 | 10)}
-                    className="h-8 rounded-lg border border-[var(--border-subtle)] bg-white px-2.5 text-xs text-secure-gray focus:border-celestial-blue focus:outline-none">
+                    className="h-8 rounded-lg border border-[var(--border-subtle)] bg-white px-2.5 text-xs text-secure-gray focus:border-power-orange focus:outline-none">
                     <option value="">Show Candidates</option>
                     <option value="3">Top 3</option>
                     <option value="10">Top 10</option>
