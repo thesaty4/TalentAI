@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../auth/useAuth";
 import { authApi, type JwtUser } from "../../lib/api/auth.api";
+import { PipelineFlow } from "../../components/PipelineFlow";
 
 // ─── Theme (GlobalLogic brand — scoped to auth screen only) ───────────────────────────────────────────────
 const C = {
@@ -25,8 +26,8 @@ const C = {
 // ─── Shared input style ───────────────────────────────────────────────────────
 function inputStyle(hasError: boolean): React.CSSProperties {
   return {
-    width: "100%", padding: "10px 12px", border: `1px solid ${hasError ? C.danger : C.border}`,
-    borderRadius: 8, fontSize: 14, color: C.fg1, outline: "none", boxSizing: "border-box" as const,
+    width: "100%", padding: "8px 12px", border: `1px solid ${hasError ? C.danger : C.border}`,
+    borderRadius: 8, fontSize: 13, color: C.fg1, outline: "none", boxSizing: "border-box" as const,
     backgroundColor: "#fff",
   };
 }
@@ -34,12 +35,12 @@ function inputStyle(hasError: boolean): React.CSSProperties {
 // ─── Field wrapper with label + inline error ──────────────────────────────────
 function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
   return (
-    <div style={{ marginBottom: 14 }}>
-      <label style={{ display: "block", marginBottom: 6, fontSize: 13, fontWeight: 500, color: C.fg2 }}>
+    <div style={{ marginBottom: 10 }}>
+      <label style={{ display: "block", marginBottom: 4, fontSize: 12, fontWeight: 500, color: C.fg2 }}>
         {label} <span style={{ color: C.danger }}>*</span>
       </label>
       {children}
-      {error && <p style={{ marginTop: 4, fontSize: 12, color: C.danger }}>{error}</p>}
+      {error && <p style={{ marginTop: 3, fontSize: 11, color: C.danger }}>{error}</p>}
     </div>
   );
 }
@@ -54,59 +55,47 @@ function HeroPane() {
   return (
     <div style={{
       flex: 1, minWidth: 380, maxWidth: 560, background: C.heroBg,
-      padding: "56px 60px", display: "flex", flexDirection: "column",
+      padding: "40px 48px", display: "flex", flexDirection: "column", justifyContent: "center",
     }} className="hero-pane">
       {/* Logo */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 40 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 28 }}>
         <div style={{
-          width: 34, height: 34, borderRadius: 9, background: C.accentTeal,
+          width: 28, height: 28, borderRadius: 8, background: C.accentTeal,
           display: "flex", alignItems: "center", justifyContent: "center",
-          fontWeight: 700, fontSize: 17, color: "#fff", fontFamily: "var(--font-display)",
+          fontWeight: 700, fontSize: 14, color: "#fff", fontFamily: "var(--font-display)",
         }}>T</div>
-        <span style={{ color: "#fff", fontWeight: 600, fontSize: 18, fontFamily: "var(--font-display)" }}>
+        <span style={{ color: "#fff", fontWeight: 600, fontSize: 16, fontFamily: "var(--font-display)" }}>
           TalentLens AI
         </span>
       </div>
       {/* Headline */}
       <h1 style={{
-        color: "#fff", fontWeight: 600, fontSize: 34, lineHeight: 1.2, maxWidth: 420,
-        marginBottom: 14, fontFamily: "var(--font-display)",
+        color: "#fff", fontWeight: 600, fontSize: 26, lineHeight: 1.25, maxWidth: 420,
+        marginBottom: 10, fontFamily: "var(--font-display)",
       }} className="hero-headline">
         See talent clearly.<br />Move opportunities forward.
       </h1>
       {/* Subhead */}
-      <p style={{ color: C.onDark2, fontSize: 14.5, lineHeight: 1.6, maxWidth: 400, marginBottom: 26 }}>
+      <p style={{ color: C.onDark2, fontSize: 13, lineHeight: 1.6, maxWidth: 400, marginBottom: 18 }}>
         TalentLens AI brings candidate evidence, staffing pipelines, and hiring progress into one focused workspace.
       </p>
       {/* Benefits */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 28 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
         {benefits.map(b => (
           <div key={b} style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{
-              width: 20, height: 20, borderRadius: "50%", background: "rgba(59,110,100,0.45)",
+              width: 18, height: 18, borderRadius: "50%", background: "rgba(255,95,45,0.35)",
               display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
             }}>
-              <Check size={11} color="#fff" strokeWidth={3} />
+              <Check size={10} color="#fff" strokeWidth={3} />
             </div>
-            <span style={{ color: "#fff", fontSize: 13.5 }}>{b}</span>
+            <span style={{ color: "#fff", fontSize: 12.5 }}>{b}</span>
           </div>
         ))}
       </div>
-      {/* Decorative cards (desktop only) */}
-      <div className="hero-cards" style={{ display: "flex", alignItems: "center", gap: 0 }}>
-        {[0, 1, 2].map(i => (
-          <div key={i} style={{ display: "flex", alignItems: "center" }}>
-            <div style={{
-              width: 68, height: 86, border: "1px solid rgba(255,255,255,0.22)", borderRadius: 10,
-              background: "rgba(255,255,255,0.05)", padding: 10, display: "flex", flexDirection: "column", gap: 6,
-            }}>
-              <div style={{ width: 20, height: 20, borderRadius: '50%', background: "rgba(255,95,45,0.40)" }} />
-              <div style={{ height: 5, borderRadius: 3, background: "rgba(255,255,255,0.25)", width: "80%" }} />
-              <div style={{ height: 5, borderRadius: 3, background: "rgba(255,255,255,0.15)", width: "60%" }} />
-            </div>
-            {i < 2 && <div style={{ width: 24, height: 1, background: "rgba(255,255,255,0.22)" }} />}
-          </div>
-        ))}
+      {/* Animated pipeline flow diagram (desktop only) */}
+      <div className="hero-cards">
+        <PipelineFlow />
       </div>
     </div>
   );
@@ -174,7 +163,7 @@ function LoginForm({ onSuccess }: { onSuccess: (t: string, u: JwtUser) => void }
         </div>
       </Field>
       {/* Remember me + Forgot */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
         <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: C.fg2, cursor: "pointer" }}>
           <input type="checkbox" checked={remember} onChange={e => setRemember(e.target.checked)}
             style={{ accentColor: C.accentTeal, width: 15, height: 15 }} />
@@ -185,14 +174,14 @@ function LoginForm({ onSuccess }: { onSuccess: (t: string, u: JwtUser) => void }
         </a>
       </div>
       {/* Demo login box */}
-      <div style={{ background: C.subtleBg, borderRadius: 10, padding: 14, marginBottom: 20 }}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 5, marginBottom: 8 }}>
+      <div style={{ background: C.subtleBg, borderRadius: 8, padding: 10, marginBottom: 14 }}>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 5, marginBottom: 6 }}>
           <span style={{ fontWeight: 700, fontSize: 11.5, textTransform: "uppercase" as const, letterSpacing: "0.03em", color: C.fg1 }}>
             Login as
           </span>
           <span style={{ fontSize: 11.5, color: C.fg3 }}>(demo only)</span>
         </div>
-        <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
+        <div style={{ display: "flex", gap: 6, marginBottom: 6 }}>
           {(["manager", "hr", "candidate"] as DemoRole[]).map(role => (
             <button key={role} type="button" disabled={busy}
               onClick={() => { setDemoRole(role); demoMut.mutate(role); }}
@@ -212,7 +201,7 @@ function LoginForm({ onSuccess }: { onSuccess: (t: string, u: JwtUser) => void }
       {/* Submit */}
       <button type="submit" disabled={busy} style={{
         width: "100%", background: busy ? C.border : C.accentTeal, color: busy ? C.fg3 : "#fff",
-        border: "none", borderRadius: 9, padding: "12px", fontSize: 14.5, fontWeight: 600,
+        border: "none", borderRadius: 8, padding: "10px", fontSize: 14, fontWeight: 600,
         cursor: busy ? "not-allowed" : "pointer",
       }}>{loginMut.isPending ? "Logging in…" : "Log in"}</button>
     </form>
@@ -295,7 +284,7 @@ function SignupForm({ onSuccess }: { onSuccess: (t: string, u: JwtUser) => void 
       </div>
       <button type="submit" disabled={busy} style={{
         width: "100%", background: busy ? C.border : C.accentTeal, color: busy ? C.fg3 : "#fff",
-        border: "none", borderRadius: 9, padding: "12px", fontSize: 14.5, fontWeight: 600,
+        border: "none", borderRadius: 8, padding: "10px", fontSize: 14, fontWeight: 600,
         cursor: busy ? "not-allowed" : "pointer",
       }}>{busy ? "Creating account…" : "Create account"}</button>
     </form>
@@ -335,17 +324,17 @@ export function LoginPage() {
         <HeroPane />
         {/* Right auth pane */}
         <div className="auth-pane" style={{
-          flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 40,
+          flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 24,
         }}>
           <div style={{
-            maxWidth: 420, width: "100%", background: "#fff",
-            border: `1px solid ${C.borderSub}`, borderRadius: 14, padding: 32,
+            maxWidth: 380, width: "100%", background: "#fff",
+            border: `1px solid ${C.borderSub}`, borderRadius: 12, padding: 22,
             boxShadow: "0 2px 4px rgba(0,0,0,0.06)",
           }}>
             {/* Tab switcher */}
             <div style={{
-              background: C.pageBg, borderRadius: 9, padding: 3,
-              display: "flex", marginBottom: 22,
+              background: C.pageBg, borderRadius: 8, padding: 3,
+              display: "flex", marginBottom: 16,
             }}>
               {(["login", "signup"] as const).map(t => (
                 <button key={t} type="button" onClick={() => setTab(t)} style={{
@@ -360,10 +349,10 @@ export function LoginPage() {
               ))}
             </div>
             {/* Heading */}
-            <h2 style={{ margin: "0 0 4px", fontSize: 21, fontWeight: 600, color: C.fg1, fontFamily: "var(--font-display)" }}>
+            <h2 style={{ margin: "0 0 3px", fontSize: 18, fontWeight: 600, color: C.fg1, fontFamily: "var(--font-display)" }}>
               {tabHeadings[tab].h}
             </h2>
-            <p style={{ margin: "0 0 22px", fontSize: 13, color: C.fg3 }}>{tabHeadings[tab].sub}</p>
+            <p style={{ margin: "0 0 16px", fontSize: 12, color: C.fg3 }}>{tabHeadings[tab].sub}</p>
             {tab === "login"
               ? <LoginForm  onSuccess={handleSuccess} />
               : <SignupForm onSuccess={handleSuccess} />}
