@@ -1,6 +1,6 @@
 export const PIPELINE_STAGES = [
   'AI Shortlisted',
-  'Manager Screening',
+  'Screening',
   'Internal Tech Evaluation',
   'Client Interview',
   'Selected',

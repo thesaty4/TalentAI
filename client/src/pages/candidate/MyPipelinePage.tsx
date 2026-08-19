@@ -4,11 +4,11 @@ import { Card } from '../../components/Card';
 import { EmptyState, ErrorBanner, Spinner } from '../../components/Feedback';
 import { cn } from '../../lib/utils/cn';
 
-const STEPPER_STAGES = ['AI Shortlisted', 'Manager Screening', 'Internal Tech Evaluation', 'Client Interview', 'Selected'] as const;
+const STEPPER_STAGES = ['AI Shortlisted', 'Screening', 'Internal Tech Evaluation', 'Client Interview', 'Selected'] as const;
 
 const NEXT_STEP_MSG: Record<string, string> = {
   'AI Shortlisted':           'Your profile is under review. A manager will reach out to schedule a screening.',
-  'Manager Screening':        'Your manager screening is confirmed. Check Upcoming for the schedule.',
+  'Screening':               'Your screening is confirmed. Check Upcoming for the schedule.',
   'Internal Tech Evaluation': "You're progressing to the technical evaluation stage.",
   'Client Interview':         "Excellent! You're meeting the client. Prepare thoroughly.",
   'Selected':                 'Congratulations — you have been selected! HR will reach out with next steps.',

@@ -300,7 +300,7 @@ async function main(): Promise<void> {
 
   // 6. Initial pipeline entries for IRC104521
   const pc1 = await prisma.pipelineCandidate.create({
-    data: { employeeId: employeeMap['EMP1042'], ircId: irc1.id, stage: 'Manager Screening', matchPct: 92, whyRecommend: 'Spent 8 months owning reconciliation and settlement flows for a fintech payments integration — directly relevant project evidence.', whyNot: ['Currently allocated until 2 Sep 2026 — 1-day availability gap'], conflict: true, conflictNote: 'Available 2 Sep 2026; role needs joining by 1 Sep — 1-day gap' },
+    data: { employeeId: employeeMap['EMP1042'], ircId: irc1.id, stage: 'Screening', matchPct: 92, whyRecommend: 'Spent 8 months owning reconciliation and settlement flows for a fintech payments integration — directly relevant project evidence.', whyNot: ['Currently allocated until 2 Sep 2026 — 1-day availability gap'], conflict: true, conflictNote: 'Available 2 Sep 2026; role needs joining by 1 Sep — 1-day gap' },
   });
   const pc2 = await prisma.pipelineCandidate.create({
     data: { employeeId: employeeMap['EMP1088'], ircId: irc1.id, stage: 'AI Shortlisted', matchPct: 78, whyRecommend: 'Built a high-transaction-volume claims backend — strong backend systems evidence transferable to payments.', whyNot: ['No direct payments domain experience', 'PostgreSQL proficient but no Kafka experience'] },
@@ -312,16 +312,16 @@ async function main(): Promise<void> {
 
   // 7. Feedback round for Satya's pipeline entry
   await prisma.feedbackRound.create({
-    data: { pipelineCandidateId: pc1.id, roundName: 'Manager Screening', interviewer: 'Prince Verma', roundDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), rating: 'Strong yes', comments: 'Great domain knowledge on payments reconciliation. Strong communicator. Recommend advancing to tech evaluation.' },
+    data: { pipelineCandidateId: pc1.id, roundName: 'Screening', interviewer: 'Prince Verma', roundDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), rating: 'Strong yes', comments: 'Great domain knowledge on payments reconciliation. Strong communicator. Recommend advancing to tech evaluation.' },
   });
   console.log('  ✓ 1 feedback round');
 
   // 8. Notifications for Prince Verma
   await prisma.notification.createMany({
     data: [
-      { userId: prince.id, title: 'Satya Mishra moved to Manager Screening', description: 'IRC104521 · Payments Platform Phase 2', seen: false },
+      { userId: prince.id, title: 'Satya Mishra moved to Screening', description: 'IRC104521 · Payments Platform Phase 2', seen: false },
       { userId: prince.id, title: 'New application: Rohan Mehta for IRC104521', description: 'Rohan applied to Senior Python Engineer', seen: false },
-      { userId: satyaUser.id, title: 'Your screening is confirmed', description: 'Manager screening for IRC104521 is scheduled', seen: false },
+      { userId: satyaUser.id, title: 'Your screening is confirmed', description: 'Screening for IRC104521 is scheduled', seen: false },
     ],
   });
   console.log('  ✓ 3 notifications');
