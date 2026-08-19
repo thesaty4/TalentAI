@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { pipelineApi, type PipelineEntry } from '../../lib/api/pipeline.api';
+import { pipelineApi, type PipelineEntry, type StageFeedbackDto } from '../../lib/api/pipeline.api';
 import { PIPELINE_STAGES } from '../../lib/constants/pipeline.constants';
 
 const QUERY_KEY = ['pipeline', 'board'] as const;
@@ -59,6 +59,11 @@ export function usePipeline(params: Record<string, unknown>) {
     onSettled: () => qc.invalidateQueries({ queryKey: QUERY_KEY }),
   });
 
+  const addFeedbackMut = useMutation({
+    mutationFn: ({ id, dto }: { id: number; dto: StageFeedbackDto }) =>
+      pipelineApi.addFeedback(id, dto),
+  });
+
   const entries = query.data?.data ?? [];
 
   // Group by stage — Rejected is now a first-class kanban column
@@ -67,5 +72,5 @@ export function usePipeline(params: Record<string, unknown>) {
     return acc;
   }, {});
 
-  return { query, entries, byStage, advanceMut, revertMut, notFitMut, shortlistMut };
+  return { query, entries, byStage, advanceMut, revertMut, notFitMut, shortlistMut, addFeedbackMut };
 }

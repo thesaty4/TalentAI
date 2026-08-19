@@ -28,6 +28,22 @@ export interface UpdateStageDto {
   note?:     string;
 }
 
+export interface FeedbackRound {
+  id:          number;
+  roundName:   string;
+  interviewer: string | null;
+  roundDate:   string | null;
+  rating:      string | null;
+  comments:    string | null;
+}
+
+export interface StageFeedbackDto {
+  roundName:    string;
+  comments:     string;
+  rating?:      string;
+  interviewer?: string;
+}
+
 export const pipelineApi = {
   list: (params?: Record<string, unknown>) =>
     apiClient.get<PipelinePage>('/pipeline', { params }).then(r => r.data),
@@ -40,6 +56,12 @@ export const pipelineApi = {
 
   notFit: (id: number, reason: string) =>
     apiClient.post(`/pipeline/${id}/not-fit`, { reason }).then(r => r.data),
+
+  addFeedback: (id: number, dto: StageFeedbackDto) =>
+    apiClient.post<{ data: FeedbackRound }>(`/pipeline/${id}/feedback`, dto).then(r => r.data.data),
+
+  getFeedback: (id: number) =>
+    apiClient.get<{ data: FeedbackRound[] }>(`/pipeline/${id}/feedback`).then(r => r.data.data),
 
   getHistory: (id: number) =>
     apiClient.get<{ data: StageHistoryEntry[] }>(`/pipeline/${id}/history`).then(r => r.data.data),

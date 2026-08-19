@@ -7,18 +7,22 @@ import { EmptyState, ErrorBanner, Spinner } from '../../components/Feedback';
 import { MultiSelect } from '../../components/MultiSelect';
 import { projectsApi } from '../../lib/api/projects.api';
 import { PIPELINE_STAGES, STAGE_HEX } from '../../lib/constants/pipeline.constants';
+import { useAuth } from '../../auth/useAuth';
 import { usePipeline } from './usePipeline';
 import { PipelineCard } from './PipelineCard';
 import { AddCandidateModal } from './AddCandidateModal';
+import { FeedbackHistoryModal } from './FeedbackHistoryModal';
 
 export function PipelinePage() {
-  const [urlParams] = useSearchParams();
+  const { user }             = useAuth();
+  const [urlParams]          = useSearchParams();
   const [projectId,      setProjectId]    = useState<number | null>(() => { const v = urlParams.get('projectId'); return v ? +v : null; });
   const [roleSearch,     setRoleSearch]   = useState('');
   const [debouncedRole,  setDebouncedRole] = useState('');
   const [selectedStages, setSelectedStages] = useState<string[]>([...PIPELINE_STAGES]);
   const [selectedUsers,  setSelectedUsers]  = useState<string[]>([]);
   const [addOpen,        setAddOpen]      = useState(false);
+  const [historyEntry,   setHistoryEntry] = useState<{ id: number; name: string; ircCode: string } | null>(null);
 
   // Debounce role input so the query key only changes after the user pauses typing
   useEffect(() => {
@@ -32,7 +36,7 @@ export function PipelinePage() {
   if (projectId) apiParams.projectId = projectId;
   if (debouncedRole) apiParams.role = debouncedRole;
 
-  const { query, byStage, advanceMut, revertMut, notFitMut } = usePipeline(apiParams);
+  const { query, byStage, advanceMut, revertMut, notFitMut, addFeedbackMut } = usePipeline(apiParams);
 
   if (query.isPending) return <Spinner />;
   if (query.isError)   return <ErrorBanner message="Failed to load pipeline" onRetry={query.refetch} />;
@@ -55,10 +59,6 @@ export function PipelinePage() {
   // Columns to render — only selected stages (preserving original order)
   const stageColumns = PIPELINE_STAGES.filter(s => selectedStages.includes(s));
 
-  const isAllStages = selectedStages.length === PIPELINE_STAGES.length;
-  function handleToggleAllStages() {
-    setSelectedStages(isAllStages ? [PIPELINE_STAGES[0]] : [...PIPELINE_STAGES]);
-  }
   function handleStageChange(stages: string[]) {
     if (stages.length === 0) return; // at least 1 stage must stay visible
     setSelectedStages(stages);
@@ -175,6 +175,16 @@ export function PipelinePage() {
                       onAdvance={(id, s) => advanceMut.mutate({ id, stage: s })}
                       onRevert={(id, s, note) => revertMut.mutate({ id, stage: s, note })}
                       onNotFit={(id, reason) => notFitMut.mutate({ id, reason })}
+                      onAddFeedback={(id, roundName, comments, rating) =>
+                        addFeedbackMut.mutateAsync({
+                          id,
+                          dto: { roundName, comments, rating, interviewer: user?.name },
+                        })
+                      }
+                      onViewHistory={(id) => {
+                        const found = allEntries.find(en => en.id === id);
+                        if (found) setHistoryEntry({ id, name: found.employee.fullName, ircCode: found.irc.ircCode });
+                      }}
                     />
                   ))}
                 </div>
@@ -185,6 +195,12 @@ export function PipelinePage() {
       )}
 
       <AddCandidateModal open={addOpen} onClose={() => setAddOpen(false)} onAdded={() => query.refetch()} />
+      <FeedbackHistoryModal
+        entryId={historyEntry?.id ?? null}
+        entryName={historyEntry?.name ?? ''}
+        ircCode={historyEntry?.ircCode ?? ''}
+        onClose={() => setHistoryEntry(null)}
+      />
     </div>
   );
 }

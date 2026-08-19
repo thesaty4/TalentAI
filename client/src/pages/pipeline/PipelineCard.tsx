@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, MoreVertical } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MessageSquare, MoreVertical } from 'lucide-react';
 import { Avatar } from '../../components/Card';
 import { Modal } from '../../components/Modal';
 import { Button } from '../../components/Button';
@@ -13,22 +13,32 @@ const NOT_FIT_REASONS = [
   "Availability doesn't work", 'Level mismatch', 'Already staffed elsewhere',
 ] as const;
 
+const RECOMMENDATIONS = ['Strong yes', 'Yes', 'Maybe'] as const;
+
 interface Props {
-  entry:     PipelineEntry;
-  onAdvance: (id: number, stage: string) => void;
-  onRevert:  (id: number, stage: string, note?: string) => void;
-  onNotFit:  (id: number, reason: string) => void;
+  entry:           PipelineEntry;
+  onAdvance:       (id: number, stage: string) => void;
+  onRevert:        (id: number, stage: string, note?: string) => void;
+  onNotFit:        (id: number, reason: string) => void;
+  onAddFeedback:   (id: number, roundName: string, comments: string, rating?: string) => Promise<void>;
+  onViewHistory:   (id: number) => void;
 }
 
-export function PipelineCard({ entry, onAdvance, onRevert, onNotFit }: Props) {
+export function PipelineCard({ entry, onAdvance, onRevert, onNotFit, onAddFeedback, onViewHistory }: Props) {
   const navigate   = useNavigate();
   const menuRef    = useRef<HTMLDivElement>(null);
-  const [menuOpen, setMenuOpen]       = useState(false);
-  const [revertModal, setRevertModal] = useState(false);
-  const [notFitModal, setNotFitModal] = useState(false);
-  const [revertNote,  setRevertNote]  = useState('');
+  const [menuOpen, setMenuOpen]         = useState(false);
+  const [revertModal, setRevertModal]   = useState(false);
+  const [notFitModal, setNotFitModal]   = useState(false);
+  const [revertNote,  setRevertNote]    = useState('');
   const [selectedReason, setSelectedReason] = useState('');
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy]                 = useState(false);
+  // Stage-advance feedback state
+  const [feedbackModal, setFeedbackModal]   = useState(false);
+  const [feedbackText, setFeedbackText]     = useState('');
+  const [feedbackRating, setFeedbackRating] = useState('');
+  const [feedbackError, setFeedbackError]   = useState('');
+  const [feedbackBusy, setFeedbackBusy]     = useState(false);
 
   // Reset busy when stage changes (optimistic update resolved)
   useEffect(() => { setBusy(false); }, [entry.stage, entry.id]);
@@ -50,9 +60,33 @@ export function PipelineCard({ entry, onAdvance, onRevert, onNotFit }: Props) {
   const stageIdx  = PIPELINE_STAGES.indexOf(entry.stage as any);
   const prevStage = stageIdx > 0 ? PIPELINE_STAGES[stageIdx - 1] : null;
 
+  // Open feedback capture modal instead of advancing immediately
   function handleAdvance() {
     setMenuOpen(false);
-    if (nextStage && !busy) { setBusy(true); onAdvance(entry.id, nextStage); }
+    if (nextStage && !busy) {
+      setFeedbackText('');
+      setFeedbackRating('');
+      setFeedbackError('');
+      setFeedbackModal(true);
+    }
+  }
+
+  async function handleFeedbackSubmit() {
+    if (!feedbackText.trim()) {
+      setFeedbackError('Feedback is required before advancing.');
+      return;
+    }
+    setFeedbackBusy(true);
+    try {
+      await onAddFeedback(entry.id, entry.stage, feedbackText.trim(), feedbackRating || undefined);
+      setFeedbackModal(false);
+      setBusy(true);
+      onAdvance(entry.id, nextStage!);
+    } catch {
+      setFeedbackError('Failed to save feedback. Please try again.');
+    } finally {
+      setFeedbackBusy(false);
+    }
   }
   function openRevert() {
     if (busy) return;
@@ -103,6 +137,10 @@ export function PipelineCard({ entry, onAdvance, onRevert, onNotFit }: Props) {
                   Revert ← {prevStage}
                 </button>
               )}
+              <button onClick={() => { setMenuOpen(false); onViewHistory(entry.id); }}
+                className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-culture-gray">
+                <MessageSquare size={11} className="text-secure-gray" /> View feedback history
+              </button>
               <button onClick={() => { setMenuOpen(false); }}
                 className="block w-full px-3 py-1.5 text-left hover:bg-culture-gray">Schedule screening</button>
               {entry.stage !== 'Rejected' && (
@@ -146,6 +184,50 @@ export function PipelineCard({ entry, onAdvance, onRevert, onNotFit }: Props) {
           <ChevronRight size={14} />
         </button>
       </div>
+
+      {/* Stage-advance feedback modal — mandatory before completing a forward move */}
+      <Modal open={feedbackModal} onClose={() => setFeedbackModal(false)} title="Stage feedback">
+        <p className="mb-1 text-sm text-secure-gray">
+          <strong>{entry.employee.fullName}</strong> · {entry.irc.ircCode}
+        </p>
+        <p className="mb-4 text-xs text-[var(--fg-3)]">
+          {entry.stage} &rarr; {nextStage}
+        </p>
+        {/* Optional recommendation */}
+        <div className="mb-3 flex flex-wrap gap-2">
+          {RECOMMENDATIONS.map(r => (
+            <button key={r} type="button"
+              onClick={() => setFeedbackRating(prev => prev === r ? '' : r)}
+              className={cn('rounded-full border px-2.5 py-1 text-xs transition-colors',
+                feedbackRating === r
+                  ? 'border-power-orange bg-power-orange/10 text-power-orange'
+                  : 'border-[var(--border-default)] text-secure-gray')}>
+              {r}
+            </button>
+          ))}
+        </div>
+        <textarea
+          rows={3}
+          value={feedbackText}
+          onChange={e => { setFeedbackText(e.target.value); if (e.target.value.trim()) setFeedbackError(''); }}
+          placeholder="Feedback for this stage… (required)"
+          className={cn(
+            'mb-1 w-full rounded-lg border px-3 py-2 text-sm focus:outline-none',
+            feedbackError
+              ? 'border-power-orange focus:border-power-orange'
+              : 'border-[var(--border-default)] focus:border-celestial-blue',
+          )}
+        />
+        {feedbackError && (
+          <p className="mb-3 text-xs text-power-orange">{feedbackError}</p>
+        )}
+        <div className="flex justify-end gap-2">
+          <Button variant="secondary" size="sm" onClick={() => setFeedbackModal(false)}>Cancel</Button>
+          <Button size="sm" disabled={feedbackBusy} onClick={handleFeedbackSubmit}>
+            {feedbackBusy ? 'Saving…' : `Advance → ${nextStage}`}
+          </Button>
+        </div>
+      </Modal>
 
       {/* Revert modal — R13 */}
       <Modal open={revertModal} onClose={() => setRevertModal(false)}
