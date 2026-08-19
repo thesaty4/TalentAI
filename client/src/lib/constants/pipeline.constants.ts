@@ -18,7 +18,7 @@ export const STAGE_HEX: Record<string, string> = {
   'Client Interview':         '#00018B',  // Deep Blue
   'Selected':                 '#2E776A',  // Green
   'Allocated':                '#181A24',  // Steel Gray 100
-  'Rejected':                 '#858A9B',  // Steel Gray 50
+  'Rejected':                 '#EF4444',
 };
 
 // Tailwind className map (kept for backward-compat with any remaining usages)

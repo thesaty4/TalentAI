@@ -38,6 +38,9 @@ export function PipelinePage() {
 
   return (
     <div className="flex flex-col gap-4">
+      {notFitMut.isError && (
+        <ErrorBanner message="Rejection failed — please try again." />
+      )}
       {/* Filter bar */}
       <div className="flex flex-wrap items-center gap-3">
         <select

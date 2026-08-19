@@ -3,6 +3,7 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma, Role } from '@prisma/client';
@@ -153,24 +154,37 @@ export class PipelineService {
   async notFit(id: number, dto: NotFitDto, user: JwtPayload) {
     const entry = await this.findActiveEntry(id, user);
 
-    await this.prisma.$transaction([
-      this.prisma.pipelineCandidate.update({
-        where: { id },
-        data: { stage: 'Rejected', isActive: false },
-      }),
-      this.prisma.notFitFeedback.create({
-        data: { pipelineCandidateId: id, reason: dto.reason },
-      }),
-      this.prisma.pipelineStageHistory.create({
-        data: {
-          pipelineCandidateId: id,
-          fromStage:   entry.stage,
-          toStage:     'Rejected',
-          changedById: user.sub,
-          reason:      dto.reason,
-        },
-      }),
-    ]);
+    try {
+      await this.prisma.$transaction(async (tx) => {
+        // Remove stale archived row for the same (employee, IRC) to avoid the
+        // @@unique([employeeId, ircId, isActive]) conflict on the upcoming update
+        await tx.pipelineCandidate.deleteMany({
+          where: { employeeId: entry.employeeId, ircId: entry.ircId, isActive: false, id: { not: id } },
+        });
+        await tx.pipelineCandidate.update({
+          where: { id },
+          data: { stage: 'Rejected', isActive: false },
+        });
+        await tx.notFitFeedback.create({
+          data: { pipelineCandidateId: id, reason: dto.reason },
+        });
+        await tx.pipelineStageHistory.create({
+          data: {
+            pipelineCandidateId: id,
+            fromStage:   entry.stage,
+            toStage:     'Rejected',
+            changedById: user.sub,
+            reason:      dto.reason,
+          },
+        });
+      });
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError) {
+        if (err.code === 'P2002') throw new ConflictException('Candidate is already rejected');
+        if (err.code === 'P2025') throw new NotFoundException('Pipeline entry not found during update');
+      }
+      throw new InternalServerErrorException((err as Error).message);
+    }
 
     await this.notify(
       entry.irc.project.managerId,
