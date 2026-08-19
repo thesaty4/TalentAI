@@ -21,7 +21,15 @@ interface Props {
   onJdRemove:       () => void;
 }
 
-const SELECT_CLS = 'rounded-lg border border-[var(--border-default)] bg-white px-3 py-2 text-sm focus:border-celestial-blue focus:outline-none';
+// appearance-none + inline SVG arrow + consistent height for polished native selects
+const SELECT_CLS = [
+  'h-9 cursor-pointer appearance-none rounded-lg border border-[var(--border-default)]',
+  'bg-white pl-3 pr-8 text-sm text-network-blue shadow-xs',
+  'bg-[url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%23484F6B\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3E%3Cpath d=\'m6 9 6 6 6-6\'/%3E%3C/svg%3E")]',
+  'bg-no-repeat bg-[right_10px_center]',
+  'focus:border-celestial-blue focus:outline-none focus:ring-1 focus:ring-celestial-blue/30',
+  'disabled:cursor-not-allowed disabled:opacity-40',
+].join(' ');
 
 export function SearchComposer(p: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
@@ -48,13 +56,13 @@ export function SearchComposer(p: Props) {
   }
 
   return (
-    <div className="sticky -top-6 z-10 border-b border-[var(--border-subtle)] bg-white px-6 py-4 shadow-sm" style={{ isolation: 'isolate' }}>
-      {/* Row 1: Project + IRC + Scope */}
-      <div className="flex flex-wrap items-center gap-3">
+    <div className="sticky -top-6 z-10 border-b border-[var(--border-subtle)] bg-white px-8 py-4 shadow-sm" style={{ isolation: 'isolate' }}>
+      {/* Row 1: all filters on a single non-wrapping line */}
+      <div className="flex items-center gap-3">
         <select
           value={p.selectedProject ?? ''}
           onChange={e => { p.onProjectChange(e.target.value ? +e.target.value : null); p.onIrcChange(null); }}
-          className={cn(SELECT_CLS, 'w-72 max-w-xs')}>
+          className={cn(SELECT_CLS, 'min-w-0 flex-1')}>
           <option value="">Select project…</option>
           {p.projects.map(pr => <option key={pr.id} value={pr.id}>{pr.name}</option>)}
         </select>
@@ -63,7 +71,7 @@ export function SearchComposer(p: Props) {
           value={p.selectedIrc ?? ''}
           onChange={e => p.onIrcChange(e.target.value ? +e.target.value : null)}
           disabled={!p.selectedProject}
-          className={cn(SELECT_CLS, 'w-80 max-w-sm')}>
+          className={cn(SELECT_CLS, 'min-w-0 flex-[1.3]')}>
           <option value="">Select IRC…</option>
           {openIrcs.map(i => <option key={i.id} value={i.id}>{i.ircCode} — {i.roleTitle}</option>)}
         </select>

@@ -61,6 +61,7 @@ export function Sidebar({ collapsed, mobileOpen, onToggle, onClose }: Props) {
         ...mobileStyle,
         width: 250, background: C.bg,
         display: 'flex', flexDirection: 'column',
+        overflow: 'hidden',
       }} className="visible-mobile">
         <SidebarInner nav={nav} collapsed={false} onToggle={onToggle} onClose={onClose} isMobile={true} />
       </aside>
@@ -68,6 +69,41 @@ export function Sidebar({ collapsed, mobileOpen, onToggle, onClose }: Props) {
       <style>{`
         @media (min-width: 920px) { .visible-mobile { display: none !important; } }
         @media (max-width: 919px) { .hidden-mobile  { display: none !important; } }
+
+        @keyframes smoke-drift-1 {
+          0%,100% { transform: translate(0,0) scale(1); }
+          33%     { transform: translate(18px,-28px) scale(1.14); }
+          66%     { transform: translate(-14px,-10px) scale(0.91); }
+        }
+        @keyframes smoke-drift-2 {
+          0%,100% { transform: translate(0,0) scale(1); }
+          50%     { transform: translate(-24px,-38px) scale(1.2); }
+        }
+        @keyframes smoke-drift-3 {
+          0%,100% { transform: translate(0,0) scale(1); }
+          40%     { transform: translate(22px,28px) scale(1.1); }
+          75%     { transform: translate(-16px,-18px) scale(0.88); }
+        }
+
+        .smoke-blob { position: absolute; border-radius: 50%; pointer-events: none; z-index: 0; }
+        .smoke-1 {
+          width: 220px; height: 220px; bottom: 30px; left: -60px;
+          background: radial-gradient(circle, rgba(255,95,45,0.14) 0%, transparent 70%);
+          filter: blur(38px);
+          animation: smoke-drift-1 14s ease-in-out infinite;
+        }
+        .smoke-2 {
+          width: 160px; height: 160px; top: 90px; right: -40px;
+          background: radial-gradient(circle, rgba(255,95,45,0.10) 0%, transparent 70%);
+          filter: blur(32px);
+          animation: smoke-drift-2 19s ease-in-out infinite 4s;
+        }
+        .smoke-3 {
+          width: 140px; height: 140px; top: 44%; left: 18%;
+          background: radial-gradient(circle, rgba(255,95,45,0.08) 0%, transparent 70%);
+          filter: blur(28px);
+          animation: smoke-drift-3 24s ease-in-out infinite 9s;
+        }
       `}</style>
     </>
   );
@@ -79,6 +115,10 @@ function SidebarInner({ nav, collapsed, onToggle, onClose, isMobile }: {
 }) {
   return (
     <>
+      <div className="smoke-blob smoke-1" />
+      <div className="smoke-blob smoke-2" />
+      <div className="smoke-blob smoke-3" />
+
       {/* Header */}
       <div style={{
         padding: '14px 12px',
@@ -88,6 +128,7 @@ function SidebarInner({ nav, collapsed, onToggle, onClose, isMobile }: {
         flexShrink: 0,
         borderBottom: '1px solid rgba(255,255,255,0.07)',
         gap: 8,
+        position: 'relative', zIndex: 1,
       }}>
         {/* Logo + name — hidden when collapsed on desktop */}
         {(!collapsed || isMobile) && (
@@ -124,7 +165,7 @@ function SidebarInner({ nav, collapsed, onToggle, onClose, isMobile }: {
       </div>
 
       {/* Nav */}
-      <nav style={{ flex: 1, padding: '8px 16px', display: 'flex', flexDirection: 'column', gap: 4, overflowY: 'auto' }}>
+      <nav style={{ flex: 1, padding: '8px 16px', display: 'flex', flexDirection: 'column', gap: 4, overflowY: 'auto', position: 'relative', zIndex: 1 }}>
         {nav.map(({ to, label, Icon }) => (
           <NavLink key={to} to={to} style={{ textDecoration: 'none' }}>
             {({ isActive }) => (
@@ -159,6 +200,7 @@ function SidebarInner({ nav, collapsed, onToggle, onClose, isMobile }: {
           background: 'rgba(255,255,255,0.06)',
           border: '1px solid rgba(255,255,255,0.10)',
           flexShrink: 0,
+          position: 'relative', zIndex: 1,
         }}>
           <p style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.07em',
             textTransform: 'uppercase', color: C.accent, marginBottom: 4 }}>
