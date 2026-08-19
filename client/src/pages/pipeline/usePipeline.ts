@@ -11,6 +11,8 @@ export function usePipeline(params: Record<string, unknown>) {
   const query = useQuery({
     queryKey: qKey,
     queryFn:  () => pipelineApi.list({ ...params, limit: 100 }),
+    // Keep stale board visible while re-fetching so the filter bar never unmounts
+    placeholderData: (prev) => prev,
   });
 
   const advanceMut = useMutation({

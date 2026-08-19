@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
@@ -12,15 +12,22 @@ import { AddCandidateModal } from './AddCandidateModal';
 
 export function PipelinePage() {
   const [urlParams] = useSearchParams();
-  const [projectId,   setProjectId]   = useState<number | null>(() => { const v = urlParams.get('projectId'); return v ? +v : null; });
-  const [roleSearch,  setRoleSearch]  = useState('');
-  const [addOpen,     setAddOpen]     = useState(false);
+  const [projectId,    setProjectId]   = useState<number | null>(() => { const v = urlParams.get('projectId'); return v ? +v : null; });
+  const [roleSearch,   setRoleSearch]  = useState('');
+  const [debouncedRole, setDebouncedRole] = useState('');
+  const [addOpen,      setAddOpen]     = useState(false);
+
+  // Debounce role input so the query key only changes after the user pauses typing
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedRole(roleSearch.trim()), 400);
+    return () => clearTimeout(t);
+  }, [roleSearch]);
 
   const projectsQ = useQuery({ queryKey: ['projects'], queryFn: () => projectsApi.list() });
 
   const apiParams: Record<string, unknown> = {};
   if (projectId) apiParams.projectId = projectId;
-  if (roleSearch.trim()) apiParams.role = roleSearch.trim();
+  if (debouncedRole) apiParams.role = debouncedRole;
 
   const { query, byStage, advanceMut, revertMut, notFitMut } = usePipeline(apiParams);
 
