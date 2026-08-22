@@ -1,10 +1,9 @@
 import { Role } from '@prisma/client';
 
-// R22 — demo convenience logins; keyed by Role enum
 export const DEMO_EMAILS: Record<Role, string> = {
-  [Role.manager]:   'prince.verma@fortis.demo',
-  [Role.hr]:        'soumyadeep@fortis.demo',
-  [Role.candidate]: 'satya.mishra@fortis.demo',
+  [Role.manager]:   'shilpi.mittal@globallogic.com',
+  [Role.hr]:        'malleswari.arun2@globallogic.com',
+  [Role.candidate]: 'satya.mishra@globallogic.com',
 };
 
 export const JWT_EXPIRY    = '7d';
