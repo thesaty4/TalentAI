@@ -8,6 +8,13 @@ import { cn } from '../../lib/utils/cn';
 import { PIPELINE_STAGES } from '../../lib/constants/pipeline.constants';
 import type { PipelineEntry } from '../../lib/api/pipeline.api';
 
+// Derive GLO profile URL from email (local part lowercased); returns null when email is absent
+function gloUrl(email: string | null | undefined): string | null {
+  if (!email) return null;
+  const local = email.trim().split('@')[0]?.toLowerCase();
+  return local ? `https://glo.globallogic.com/users/profile/${local}` : null;
+}
+
 const NOT_FIT_REASONS = [
   'Not enough domain exposure', 'Wrong location',
   "Availability doesn't work", 'Level mismatch', 'Already staffed elsewhere',
@@ -102,7 +109,7 @@ export function PipelineCard({ entry, onAdvance, onRevert, onNotFit, onAddFeedba
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
         <div className="flex min-w-0 items-start gap-2">
-          <Avatar name={entry.employee.fullName} className="mt-0.5 h-7 w-7 shrink-0 text-[10px]" />
+          <Avatar name={entry.employee.fullName} className="mt-0.5 h-7 w-7 shrink-0 text-[10px]" gloEmail={entry.employee.email} />
           <div className="min-w-0">
             <div className="flex items-baseline gap-1.5">
               <p className="truncate text-sm font-medium text-network-blue">{entry.employee.fullName}</p>
@@ -184,6 +191,31 @@ export function PipelineCard({ entry, onAdvance, onRevert, onNotFit, onAddFeedba
           <ChevronRight size={14} />
         </button>
       </div>
+
+      {/* Inline feedback — most recent only; "+N more" opens the full history modal */}
+      {(entry.feedbackRounds?.length ?? 0) > 0 && (() => {
+        const latest = entry.feedbackRounds![0];
+        const extra  = entry.feedbackRounds!.length - 1;
+        return (
+          <div className="mt-2 rounded-md bg-culture-gray px-2.5 py-1.5 text-[10px]">
+            <div className="flex items-center justify-between gap-1">
+              <span className="font-semibold text-secure-gray truncate">{latest.roundName}</span>
+              {latest.rating && (
+                <span className="shrink-0 rounded-full bg-commerce-green/10 px-1.5 py-0.5 text-[9px] font-medium text-commerce-green">{latest.rating}</span>
+              )}
+            </div>
+            {latest.comments && (
+              <p className="mt-0.5 line-clamp-2 text-[var(--fg-3)]">{latest.comments}</p>
+            )}
+            {extra > 0 && (
+              <button onClick={() => onViewHistory(entry.id)}
+                className="mt-1 text-[10px] text-celestial-blue hover:underline">
+                +{extra} more
+              </button>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Stage-advance feedback modal — mandatory before completing a forward move */}
       <Modal open={feedbackModal} onClose={() => setFeedbackModal(false)} title="Stage feedback">

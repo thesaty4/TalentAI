@@ -175,7 +175,7 @@ export function IRCAppliedPage() {
                 <tr key={e.id} className="hover:bg-culture-gray/50">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <Avatar name={e.employee.fullName} className="h-7 w-7 shrink-0 text-[10px]" />
+                      <Avatar name={e.employee.fullName} className="h-7 w-7 shrink-0 text-[10px]" gloEmail={e.employee.email} />
                       <div>
                         <p className="font-medium text-network-blue">{e.employee.fullName}</p>
                         <p className="text-xs text-[var(--fg-3)]">{e.employee.roleTitle}</p>

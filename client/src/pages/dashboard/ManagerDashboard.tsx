@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import { Card, KpiCard } from '../../components/Card';
@@ -8,6 +9,8 @@ import { PIPELINE_STAGES, STAGE_HEX } from '../../lib/constants/pipeline.constan
 import type { Project } from '../../lib/api/projects.api';
 import { useAuth } from '../../auth/useAuth';
 import { useDashboard } from './useDashboard';
+import { useQuery } from '@tanstack/react-query';
+import { poolApi } from '../../lib/api/pool.api';
 
 // ─── Hiring funnel ────────────────────────────────────────────────────────────
 
@@ -79,14 +82,30 @@ function ProjectRow({ project, pipelineCount }: { project: Project; pipelineCoun
 // ─── Manager Dashboard ────────────────────────────────────────────────────────
 
 export function ManagerDashboard() {
-  const navigate                                          = useNavigate();
-  const { user }                                          = useAuth();
-  const { projectsQ, pipelineQ, projects, kpis, funnel, pipelinePerProject } = useDashboard();
+  const navigate                = useNavigate();
+  const { user }                = useAuth();
+
+  const [filterProjectId, setFilterProjectId] = useState<number | null>(null);
+  const [filterIrcId,     setFilterIrcId]     = useState<number | null>(null);
+
+  const { projectsQ, pipelineQ, projects, allProjects, kpis, funnel, pipelinePerProject } =
+    useDashboard(filterProjectId, filterIrcId);
+
+  const forecastQ = useQuery({
+    queryKey: ['pool', 'forecast'],
+    queryFn:  () => poolApi.list({ benchStatus: 'Allocated', limit: 100 })
+                     .then(r => r.data.filter(e => !!e.availableDate).length),
+  });
+  const benchQ = useQuery({ queryKey: ['pool', 'bench'], queryFn: () => poolApi.count('Bench') });
 
   if (projectsQ.isPending || pipelineQ.isPending) return <Spinner />;
   if (projectsQ.isError)  return <ErrorBanner message="Failed to load projects" onRetry={projectsQ.refetch} />;
 
   const firstName = user?.name?.split(' ')[0] ?? 'there';
+
+  const ircOptions = filterProjectId
+    ? (allProjects.find(p => p.id === filterProjectId)?.ircs ?? [])
+    : [];
 
   return (
     <div className="space-y-6">
@@ -95,14 +114,50 @@ export function ManagerDashboard() {
         Here's where your projects stand today.
       </p>
 
-      {/* KPI cards */}
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-3">
+        <select
+          value={filterProjectId ?? ''}
+          onChange={e => { setFilterProjectId(e.target.value ? +e.target.value : null); setFilterIrcId(null); }}
+          className="h-8 rounded-lg border border-[var(--border-default)] bg-white px-3 text-sm text-network-blue focus:border-power-orange focus:outline-none">
+          <option value="">All projects</option>
+          {allProjects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+        </select>
+        <select
+          value={filterIrcId ?? ''}
+          onChange={e => setFilterIrcId(e.target.value ? +e.target.value : null)}
+          disabled={!filterProjectId}
+          className="h-8 rounded-lg border border-[var(--border-default)] bg-white px-3 text-sm text-network-blue focus:border-power-orange focus:outline-none disabled:opacity-50">
+          <option value="">All IRCs</option>
+          {ircOptions.map(i => <option key={i.id} value={i.id}>{i.ircCode} — {i.roleTitle}</option>)}
+        </select>
+        {(filterProjectId || filterIrcId) && (
+          <button onClick={() => { setFilterProjectId(null); setFilterIrcId(null); }}
+            className="text-xs text-power-orange hover:underline">Clear filters</button>
+        )}
+      </div>
+
+      {/* KPI cards — row 1 */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }} className="lg-4-cols">
-        <KpiCard label="Open Requisitions"   value={kpis.openIrcs} />
-        <KpiCard label="Active Pipeline"     value={kpis.activePipeline} />
-        <KpiCard label="Awaiting Review"     value={kpis.awaitingReview} sub="AI Shortlisted" />
-        <KpiCard label="Positions Filled"    value={kpis.filled} />
+        <KpiCard label="Number of IRCs"   value={`${kpis.openIrcs}/${kpis.totalIrcs}`} sub="Open / Total" />
+        <KpiCard label="Active Pipeline"  value={kpis.activePipeline} />
+        <KpiCard label="Awaiting Review"  value={kpis.awaitingReview} sub="AI Shortlisted" />
+        <KpiCard label="Positions Filled" value={kpis.filled} />
       </div>
       <style>{'@media (min-width: 1024px) { .lg-4-cols { grid-template-columns: repeat(4, 1fr) !important; } }'}</style>
+
+      {/* KPI cards — row 2: pipeline-stage counts with navigation */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }} className="lg-4-cols">
+        <KpiCard label="Selected"   value={kpis.selectedCount}  accent="#2E776A" onClick={() => navigate('/pipeline?stage=Selected')} />
+        <KpiCard label="Allocated"  value={kpis.filled}                          onClick={() => navigate('/pipeline?stage=Allocated')} />
+        <KpiCard label="Rejected"   value={kpis.rejectedCount}  accent="#EF4444" onClick={() => navigate('/pipeline?stage=Rejected')} />
+        <KpiCard label="On Pool"    value={benchQ.data ?? '—'}                   onClick={() => navigate('/pool?benchStatus=Bench')} />
+      </div>
+
+      {/* Forecasted Pool */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <KpiCard label="Forecasted Pool" value={forecastQ.data ?? '—'} sub="Returning soon" onClick={() => navigate('/pool?benchStatus=Allocated')} />
+      </div>
 
       {/* Hiring funnel + projects */}
       <div className="grid gap-6 lg:grid-cols-2">

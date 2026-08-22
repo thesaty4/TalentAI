@@ -3,10 +3,10 @@ import {
   Body,
   Controller,
   Post,
-  UploadedFile,
+  UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -31,6 +31,7 @@ const mammoth  = require('mammoth') as { extractRawText(opts: { buffer: Buffer }
 
 const PDF_MIME  = 'application/pdf';
 const DOCX_MIME = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+const ALLOWED_MIMES = [PDF_MIME, DOCX_MIME];
 
 @ApiTags('search')
 @ApiBearerAuth()
@@ -49,14 +50,14 @@ export class SearchController {
   }
 
   @Post('upload-jd')
-  @ApiOperation({ summary: 'Upload PDF/DOCX JD → extract text → run search (R11)' })
+  @ApiOperation({ summary: 'Upload 1–5 PDF/DOCX JD files → extract text → run search (R11)' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
       type: 'object',
-      required: ['file', 'ircId', 'scope'],
+      required: ['files', 'ircId', 'scope'],
       properties: {
-        file:  { type: 'string', format: 'binary' },
+        files: { type: 'array', items: { type: 'string', format: 'binary' } },
         ircId: { type: 'integer' },
         scope: { type: 'string', enum: ['all', 'applied'] },
         query: { type: 'string' },
@@ -64,25 +65,29 @@ export class SearchController {
     },
   })
   @UseInterceptors(
-    FileInterceptor('file', {
+    FilesInterceptor('files', 5, {
       storage: memoryStorage(),
       limits: { fileSize: 5 * 1024 * 1024 },
-      // Silently reject disallowed types; controller checks for missing file
-      fileFilter: (_req, file, cb) => cb(null, [PDF_MIME, DOCX_MIME].includes(file.mimetype)),
+      fileFilter: (_req, file, cb) => cb(null, ALLOWED_MIMES.includes(file.mimetype)),
     }),
   )
   async uploadJd(
     @CurrentUser() user: JwtPayload,
     @Body() dto: SearchDto,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFiles() files: Express.Multer.File[],
   ) {
-    if (!file) throw new BadRequestException('PDF or DOCX file required (R11)');
+    if (!files?.length) throw new BadRequestException('At least one PDF or DOCX file is required (R11)');
 
-    const jdText = file.mimetype === PDF_MIME
-      ? (await pdfParse(file.buffer)).text
-      : (await mammoth.extractRawText({ buffer: file.buffer })).value;
+    // Extract text from each file; concatenate with a separator so context is clear
+    const texts = await Promise.all(files.map(f =>
+      f.mimetype === PDF_MIME
+        ? pdfParse(f.buffer).then(r => r.text)
+        : mammoth.extractRawText({ buffer: f.buffer }).then(r => r.value),
+    ));
+    const jdText      = texts.join('\n\n---\n\n');
+    const filenames   = files.map(f => f.originalname).join(', ');
 
-    return this.searchService.search(user, { ...dto, jdText }, file.originalname);
+    return this.searchService.search(user, { ...dto, jdText }, filenames);
   }
 
   @Post('embed-all')

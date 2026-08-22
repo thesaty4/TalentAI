@@ -49,7 +49,7 @@ export function EmployeeProfileModal({ employeeId, onClose }: Props) {
               <>
                 {/* Header */}
                 <div className="flex items-start gap-4">
-                  <Avatar name={emp.fullName} className="h-14 w-14 shrink-0 text-lg" />
+                  <Avatar name={emp.fullName} className="h-14 w-14 shrink-0 text-lg" gloEmail={emp.email} />
                   <div>
                     <p className="font-bold text-network-blue">{emp.fullName}</p>
                     <p className="text-sm text-secure-gray">{emp.roleTitle}</p>

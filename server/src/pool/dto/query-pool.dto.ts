@@ -75,4 +75,9 @@ export class QueryPoolDto {
   @IsOptional()
   @IsString()
   export?: string;
+
+  @ApiPropertyOptional({ description: 'true = Allocated employees with a known return date (Forecast to Pool)' })
+  @IsOptional()
+  @Type(() => Boolean)
+  forecasted?: boolean;
 }

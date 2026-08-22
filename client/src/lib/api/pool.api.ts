@@ -25,6 +25,7 @@ export interface PoolFilters {
   location?:     string;
   businessUnit?: string;
   benchStatus?:  string;
+  forecasted?:   boolean;
   skills?:       string;
   minExp?:       number;
   maxExp?:       number;

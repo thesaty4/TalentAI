@@ -12,6 +12,7 @@ export interface EmployeeProfile {
   currentAllocation: string | null;
   availableDate:     string | null;
   joiningNotice:     string | null;
+  email:             string | null;
   skills:            string[];
   projectHistory:    { id: number; projectName: string; clientName: string | null; duration: string | null; description: string; domainTags: string[] }[];
   ratings:           { id: number; reviewCycle: string; rating: string }[];

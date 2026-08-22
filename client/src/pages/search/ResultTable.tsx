@@ -45,7 +45,7 @@ function ResultTableRow({ r, ircId, onShortlisted, onViewProfile }: {
     <tr className="hover:bg-culture-gray/40">
       <td className="px-4 py-3">
         <div className="flex min-w-0 items-center gap-2">
-          <Avatar name={r.fullName} className="h-7 w-7 shrink-0 text-[10px]" />
+          <Avatar name={r.fullName} className="h-7 w-7 shrink-0 text-[10px]" gloEmail={r.email} />
           <div className="min-w-0">
             <p className="truncate font-medium text-network-blue">{r.fullName}</p>
             <p className="truncate text-xs text-[var(--fg-3)]">{r.roleTitle}</p>

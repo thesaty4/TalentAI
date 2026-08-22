@@ -87,6 +87,8 @@ export class PoolService {
       ...(dto.location     && { location:     dto.location }),
       ...(dto.businessUnit && { businessUnit: dto.businessUnit }),
       ...(dto.benchStatus  && { benchStatus:  dto.benchStatus }),
+      // Forecast to Pool = Allocated with a known return date
+      ...(dto.forecasted   && { availableDate: { not: null } }),
       ...(expFilter        && { experienceYears: expFilter }),
       // All listed skills must be present — Prisma AND with multiple `some` conditions
       ...(skillNames.length > 0 && {

@@ -75,6 +75,27 @@ export function CandidateDashboard() {
           )}
         </div>
       )}
+
+      {/* Suggested Learning & Development — Coming Soon */}
+      <div className="rounded-xl border border-dashed border-[var(--border-subtle)] bg-culture-gray p-5">
+        <div className="mb-3 flex items-center gap-2">
+          <h2 className="text-sm font-semibold text-network-blue">Suggested Learning &amp; Development</h2>
+          <span className="rounded-full bg-celestial-blue/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-celestial-blue">
+            Coming Soon
+          </span>
+        </div>
+        <p className="mb-4 text-xs text-[var(--fg-3)]">
+          Personalised AI-powered recommendations tailored to your career path — arriving in a future release.
+        </p>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {(['Suggested Training', 'Suggested Courses', 'Suggested Certifications'] as const).map(label => (
+            <div key={label} className="flex items-center gap-2.5 rounded-lg border border-[var(--border-subtle)] bg-white px-3 py-2.5 opacity-60">
+              <span className="text-xs text-secure-gray">{label}</span>
+              <span className="ml-auto rounded-full bg-level-gray px-1.5 py-0.5 text-[9px] font-semibold text-secure-gray">Soon</span>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

@@ -19,6 +19,7 @@ export interface SearchResult {
   duplicateNote:       string | null;
   alreadyInPipeline:   boolean;
   pipelineCandidateId: number | null;
+  email:               string | null;
 }
 
 export interface SearchDto {
@@ -32,9 +33,10 @@ export const searchApi = {
   rank: (dto: SearchDto) =>
     apiClient.post<{ data: SearchResult[] }>('/search', dto).then(r => r.data.data),
 
-  uploadJd: (ircId: number, scope: string, file: File, query?: string) => {
+  uploadJd: (ircId: number, scope: string, files: File[], query?: string) => {
     const form = new FormData();
-    form.append('file', file);
+    // Backend accepts field name 'files' with FilesInterceptor (up to 5)
+    files.forEach(f => form.append('files', f));
     form.append('ircId', String(ircId));
     form.append('scope', scope);
     if (query) form.append('query', query);

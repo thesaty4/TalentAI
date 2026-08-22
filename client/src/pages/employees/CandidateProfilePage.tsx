@@ -33,7 +33,7 @@ export function CandidateProfilePage() {
     <div className="mx-auto max-w-3xl space-y-6">
       {/* Header */}
       <div className="flex items-start gap-5 rounded-xl border border-[var(--border-subtle)] bg-white p-6">
-        <Avatar name={emp.fullName} className="h-16 w-16 text-xl shrink-0" />
+        <Avatar name={emp.fullName} className="h-16 w-16 text-xl shrink-0" gloEmail={emp.email} />
         <div className="min-w-0 flex-1">
           <h1 className="text-xl font-bold text-network-blue">{emp.fullName}</h1>
           <p className="text-sm text-secure-gray">{emp.roleTitle}</p>

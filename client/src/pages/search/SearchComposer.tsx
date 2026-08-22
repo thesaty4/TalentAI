@@ -11,7 +11,7 @@ interface Props {
   selectedIrc:      number | null;
   query:            string;
   scope:            'all' | 'applied';
-  jdFilename:       string | null;
+  jdFilenames:      string[];
   isPending:        boolean;
   onProjectChange:  (id: number | null) => void;
   onIrcChange:      (id: number | null) => void;
@@ -19,7 +19,7 @@ interface Props {
   onScopeChange:    (s: 'all' | 'applied') => void;
   onSubmit:         () => void;
   onJdUpload:       (file: File) => void;
-  onJdRemove:       () => void;
+  onJdRemove:       (filename: string) => void;
 }
 
 export function SearchComposer(p: Props) {
@@ -89,22 +89,38 @@ export function SearchComposer(p: Props) {
           className="flex-1 resize-none rounded-lg border border-[var(--border-default)] px-3 py-2 text-sm focus:border-power-orange focus:outline-none"
         />
         <div className="flex flex-col gap-1.5">
-          <input ref={fileRef} type="file" accept=".pdf,.docx" className="hidden" onChange={handleFile} />
-          <Button variant="secondary" size="sm" onClick={() => fileRef.current?.click()} disabled={!p.selectedIrc || p.isPending}
-            className="flex items-center gap-1.5">
-            <Paperclip size={13} /> JD
-          </Button>
-          <Button size="sm" disabled={!p.selectedIrc || p.isPending || (!p.query.trim() && !p.jdFilename)} onClick={p.onSubmit}>
+          <input ref={fileRef} type="file" accept=".pdf,.docx" multiple className="hidden" onChange={handleFile} />
+          {/* Icon-only attachment button — tooltip shows purpose on hover */}
+          <button
+            type="button"
+            title="Add attachments"
+            aria-label="Add attachments"
+            onClick={() => fileRef.current?.click()}
+            disabled={!p.selectedIrc || p.isPending}
+            className={cn(
+              'flex h-8 w-8 items-center justify-center rounded-lg border transition-colors',
+              !p.selectedIrc || p.isPending
+                ? 'cursor-not-allowed border-[var(--border-subtle)] bg-white opacity-40'
+                : 'border-[var(--border-default)] bg-white text-secure-gray hover:border-power-orange hover:text-power-orange',
+            )}
+          >
+            <Paperclip size={14} />
+          </button>
+          <Button size="sm" disabled={!p.selectedIrc || p.isPending || (!p.query.trim() && p.jdFilenames.length === 0)} onClick={p.onSubmit}>
             <ArrowRight size={15} />
           </Button>
         </div>
       </div>
 
-      {/* JD chip */}
-      {p.jdFilename && (
-        <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-power-orange/10 px-2.5 py-1 text-xs text-power-orange">
-          <Paperclip size={10} /> {p.jdFilename}
-          <button onClick={p.onJdRemove} className="ml-0.5 hover:text-power-orange"><X size={10} /></button>
+      {/* JD chips — one per attached file with individual remove */}
+      {p.jdFilenames.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {p.jdFilenames.map(name => (
+            <div key={name} className="inline-flex items-center gap-1.5 rounded-full bg-power-orange/10 px-2.5 py-1 text-xs text-power-orange">
+              <Paperclip size={10} /> {name}
+              <button onClick={() => p.onJdRemove(name)} className="ml-0.5 hover:text-power-orange"><X size={10} /></button>
+            </div>
+          ))}
         </div>
       )}
       {/* Upload validation error */}

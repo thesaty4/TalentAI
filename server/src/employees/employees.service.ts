@@ -14,6 +14,7 @@ export class EmployeesService {
         skills:         { include: { skill: true } },
         projectHistory: true,
         ratings:        true,
+        user:           { select: { email: true } },
         pipelineCandidates: {
           where:   { stage: { not: 'Rejected' } },
           include: { irc: { select: { id: true, ircCode: true, roleTitle: true } } },
@@ -23,9 +24,10 @@ export class EmployeesService {
 
     if (!employee) throw new NotFoundException('Employee not found');
 
-    const { pipelineCandidates, skills, ...rest } = employee;
+    const { pipelineCandidates, skills, user: linkedUser, ...rest } = employee;
     const shaped = {
       ...rest,
+      email: linkedUser?.email ?? null,
       skills: skills.map(es => es.skill.name),
     };
 

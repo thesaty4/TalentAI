@@ -21,6 +21,59 @@ interface EmployeeSeed {
   rating?: string;
 }
 
+// Real globallogic.com emails — used for GLO profile link (keyed by employee code)
+const EMAIL_MAP: Record<string, string> = {
+  EMP1042: 'satya.mishra@globallogic.com',
+  EMP1088: 'prince.verma2@globallogic.com',
+  EMP1121: 'renu.saraswat@globallogic.com',
+  EMP1155: 'soumyadeep.nayak@globallogic.com',
+  EMP1190: 'a.p.singh2@globallogic.com',
+  EMP1204: 'amit.k.gupta2@globallogic.com',
+  EMP1233: 'amodh.mandloi@globallogic.com',
+  EMP1267: 'anish.mishra@globallogic.com',
+  EMP1301: 'ankit.sanpuria@globallogic.com',
+  EMP1302: 'archit.tyagi3@globallogic.com',
+  EMP1303: 'arvind.kumar1@globallogic.com',
+  EMP1304: 'atharva.thenge@globallogic.com',
+  EMP1305: 'gaurav.dhapola@globallogic.com',
+  EMP1306: 'gaurav.k.sharma2@globallogic.com',
+  EMP1307: 'harshal.there@globallogic.com',
+  EMP1308: 'himanshu.tyagi4@globallogic.com',
+  EMP1309: 'jitin.gupta@globallogic.com',
+  EMP1310: 'komal.singh2@globallogic.com',
+  EMP1311: 'kshama.thikane@globallogic.com',
+  EMP1312: 'mahima.makkar@globallogic.com',
+  EMP1313: 'malika.bindal@globallogic.com',
+  EMP1314: 'manikarnika.kukreti@globallogic.com',
+  EMP1315: 'nidhi.bharti@globallogic.com',
+  EMP1316: 'nitin.tyagi3@globallogic.com',
+  EMP1317: 'nitish.kumar16@globallogic.com',
+  EMP1318: 'p.chandrakala@globallogic.com',
+  EMP1319: 'pankaj.sharma11@globallogic.com',
+  EMP1320: 'pragya.sharma3@globallogic.com',
+  EMP1321: 'rajat.saraswat2@globallogic.com',
+  EMP1322: 'ram.s.singh@globallogic.com',
+  EMP1323: 'riya.gupta@globallogic.com',
+  EMP1324: 'sabyasachi.kar@globallogic.com',
+  EMP1325: 'satyam.prakash2@globallogic.com',
+  EMP1326: 'saumyaranjan.das@globallogic.com',
+  EMP1327: 'saurabh.salame@globallogic.com',
+  EMP1328: 'saurav.1@globallogic.com',
+  EMP1329: 'sheelendra.singh@globallogic.com',
+  EMP1330: 'shyan.wasi@globallogic.com',
+  EMP1331: 'swati.manikpure@globallogic.com',
+  EMP1332: 'varun.kulkarni@globallogic.com',
+  EMP1333: 'vinty.mittal@globallogic.com',
+  EMP1334: 'harmanik.sethi@globallogic.com',
+  EMP1335: 'anand.rathod@globallogic.com',
+  EMP1336: 'rohit.saraswat@globallogic.com',
+  EMP1337: 'parvinder.singh3@globallogic.com',
+  EMP1338: 'ashish.kapoor2@globallogic.com',
+  EMP1339: 'jasmine.kaur2@globallogic.com',
+  EMP1340: 'ritik.p.tripathi@globallogic.com',
+  EMP1341: 'chetan.karale@globallogic.com',
+};
+
 // ─── Seed data ────────────────────────────────────────────────────────────────
 
 const ALL_SKILLS = [
@@ -265,7 +318,17 @@ async function main(): Promise<void> {
   const nitin = await prisma.user.create({
     data: { name: 'Nitin Sharma', email: 'nitin.sharma13@globallogic.com', passwordHash, role: 'manager', title: 'Delivery Manager · Hyderabad' },
   });
-  console.log('  ✓ 4 users');
+
+  // Create candidate User accounts for all remaining employees so GLO profile links work
+  for (const e of ALL_EMPLOYEES) {
+    if (e.code === 'EMP1042') continue; // Satya already created above
+    const email = EMAIL_MAP[e.code];
+    if (!email) continue;
+    await prisma.user.create({
+      data: { name: e.name, email, passwordHash, role: 'candidate', title: e.role, employeeId: employeeMap[e.code] },
+    });
+  }
+  console.log(`  ✓ ${ALL_EMPLOYEES.length + 3} users (3 manager/hr + ${ALL_EMPLOYEES.length} candidates)`);
 
   // 4. Projects
   const proj1 = await prisma.project.create({ data: { name: 'Payments Platform — Phase 2', customer: 'Northwind Financial', managerId: shilpi.id, status: 'Active', startDate: new Date('2025-10-01'), tags: ['Payments', 'FinTech'] } });

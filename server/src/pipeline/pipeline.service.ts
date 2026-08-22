@@ -18,9 +18,15 @@ import { UpdateStageDto } from './dto/update-stage.dto';
 
 const ENTRY_INCLUDE = {
   employee: {
-    include: { skills: { include: { skill: { select: { name: true } } } } },
+    include: {
+      skills: { include: { skill: { select: { name: true } } } },
+      user:   { select: { email: true } },
+    },
   },
   irc: { select: { id: true, ircCode: true, roleTitle: true } },
+  feedbackRounds: {
+    orderBy: { roundDate: 'desc' as const },
+  },
 } satisfies Prisma.PipelineCandidateInclude;
 
 @Injectable()
@@ -291,14 +297,23 @@ export class PipelineService {
       appliedDate:  r.appliedDate,
       updatedAt:    r.updatedAt,
       employee: {
-        id:            r.employee.id,
-        fullName:      r.employee.fullName,
-        roleTitle:     r.employee.roleTitle,
-        location:      r.employee.location,
+        id:              r.employee.id,
+        fullName:        r.employee.fullName,
+        roleTitle:       r.employee.roleTitle,
+        location:        r.employee.location,
         experienceYears: Number(r.employee.experienceYears),
-        skills:        r.employee.skills.map(es => es.skill.name),
+        skills:          r.employee.skills.map(es => es.skill.name),
+        email:           r.employee.user?.email ?? null,
       },
       irc: r.irc,
+      feedbackRounds: r.feedbackRounds.map(fb => ({
+        id:          fb.id,
+        roundName:   fb.roundName,
+        interviewer: fb.interviewer,
+        roundDate:   fb.roundDate,
+        rating:      fb.rating,
+        comments:    fb.comments,
+      })),
     };
   }
 }

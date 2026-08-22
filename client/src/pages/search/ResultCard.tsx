@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { Briefcase, Building2, CheckCircle, Clock, MapPin } from 'lucide-react';
+import { Briefcase, Building2, Clock, MapPin } from 'lucide-react';
 import { Avatar } from '../../components/Card';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
@@ -39,7 +39,7 @@ export function ResultCard({ result, ircId, onShortlisted, onViewProfile }: Prop
         {/* Top: avatar + meta | match score */}
         <div className="flex items-start justify-between gap-4">
           <div className="flex min-w-0 items-start gap-3">
-            <Avatar name={result.fullName} className="mt-0.5 shrink-0" />
+            <Avatar name={result.fullName} className="mt-0.5 shrink-0" gloEmail={result.email} />
             <div className="min-w-0">
               <p className="font-semibold text-network-blue">{result.fullName}</p>
               <p className="text-sm text-secure-gray">{result.roleTitle}</p>
@@ -78,13 +78,25 @@ export function ResultCard({ result, ircId, onShortlisted, onViewProfile }: Prop
           </div>
         </div>
 
-        {/* Why recommend — R6 */}
-        <div className="mt-3 flex gap-2 rounded-lg bg-commerce-green/5 px-3 py-2.5">
-          <CheckCircle size={13} className="mt-0.5 shrink-0 text-commerce-green" />
-          <p className="text-xs text-network-blue">
-            <span className="font-medium">Why we recommend {firstName}: </span>
-            {result.whyRecommend}
-          </p>
+        {/* Why recommend — green tick per reason; section-level icon removed per spec */}
+        <div className="mt-3 rounded-lg bg-commerce-green/5 px-3 py-2.5">
+          <p className="mb-1 text-xs font-bold text-commerce-green">Why we recommend {firstName}</p>
+          {(() => {
+            const points = result.whyRecommend
+              .split(/;\s+|\n/)
+              .map(s => s.trim())
+              .filter(Boolean);
+            const items = points.length > 1 ? points : [result.whyRecommend.trim()].filter(Boolean);
+            return (
+              <ul className="space-y-0.5">
+                {items.map((pt, i) => (
+                  <li key={i} className="flex items-start gap-1.5 text-xs text-network-blue">
+                    <span className="mt-0.5 shrink-0 text-[10px] font-bold leading-none text-commerce-green">✓</span>{pt}
+                  </li>
+                ))}
+              </ul>
+            );
+          })()}
         </div>
 
         {/* Why not — R7: hidden when no gaps identified */}

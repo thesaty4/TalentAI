@@ -99,6 +99,7 @@ export class SearchService {
           duplicateNote:     dup ?? null,
           alreadyInPipeline: inThisPipeline.has(r.employeeId),
           pipelineCandidateId: inThisPipeline.get(r.employeeId) ?? null,
+          email:             emp.email,
         };
       });
 
@@ -216,7 +217,10 @@ export class SearchService {
   private async rehydrate(employeeIds: number[]) {
     const employees = await this.prisma.employee.findMany({
       where: { id: { in: employeeIds } },
-      include: { skills: { include: { skill: true } } },
+      include: {
+        skills: { include: { skill: true } },
+        user:   { select: { email: true } },
+      },
     });
     return new Map(employees.map(e => [e.id, {
       fullName:          e.fullName,
@@ -227,6 +231,7 @@ export class SearchService {
       currentAllocation: e.currentAllocation,
       availableDate:     e.availableDate,
       skills:            e.skills.map(es => es.skill.name),
+      email:             e.user?.email ?? null,
     }]));
   }
 

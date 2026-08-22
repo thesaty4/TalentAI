@@ -26,8 +26,16 @@ export function usePool() {
   const debouncedSkills = useDebounce(skillInput.trim(),  DEBOUNCE_MS);
 
   // Full params sent to API — stable filters change immediately, text fields debounced
+  // Map 'ForecastToPool' display value to the actual backend params (Allocated + forecasted=true)
+  const { benchStatus: rawBenchStatus, ...otherFilters } = stableFilters as Record<string, unknown>;
+  const forecastedParams =
+    rawBenchStatus === 'ForecastToPool'
+      ? { benchStatus: 'Allocated', forecasted: true }
+      : { benchStatus: rawBenchStatus as string | undefined };
+
   const queryFilters: PoolFilters = {
-    ...stableFilters,
+    ...otherFilters,
+    ...forecastedParams,
     ...(debouncedSearch && { search: debouncedSearch }),
     ...(debouncedSkills && { skills: debouncedSkills }),
   };

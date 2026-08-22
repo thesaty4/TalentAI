@@ -1,6 +1,6 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Briefcase, ChevronDown, ChevronUp, Download, Search, TrendingUp, Zap } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { cn } from '../../lib/utils/cn';
 import { Avatar } from '../../components/Card';
 import { MultiSelect } from '../../components/MultiSelect';
@@ -20,9 +20,16 @@ function SortIcon({ col, current, order }: { col: string; current?: string; orde
 
 export function ResourcePoolPage() {
   const navigate = useNavigate();
+  const [urlParams] = useSearchParams();
   const { query, filters, skillInput, setFilter, setSearch, setSkills, toggleSort, exportCsv } = usePool();
   const [exportLoading, setExportLoading] = useState(false);
   const [openMenu, setOpenMenu] = useState<number | null>(null);
+
+  // Apply benchStatus from URL on first mount (for deep-link from dashboard KPI cards)
+  useEffect(() => {
+    const bs = urlParams.get('benchStatus');
+    if (bs) setFilter('benchStatus', bs);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const employees = query.data?.data ?? [];
   const meta      = query.data?.meta;
@@ -65,8 +72,9 @@ export function ResourcePoolPage() {
             )}
           >
             <option value="">All Status</option>
-            <option value="Bench">Bench</option>
+            <option value="Bench">On Pool</option>
             <option value="Allocated">Allocated</option>
+            <option value="ForecastToPool">Forecast to Pool</option>
           </select>
         </div>
         {/* Exp range */}
@@ -193,13 +201,13 @@ export function ResourcePoolPage() {
               <span className="truncate text-secure-gray">{emp.location}</span>
               {/* Active IRC */}
               <span className="text-xs text-[var(--fg-3)]">{emp.activeIrcCode ?? '—'}</span>
-              {/* Status pill */}
+              {/* Status pill — display "On Pool" for Bench, keep "Allocated" as-is */}
               <span className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
                 emp.benchStatus === 'Bench'
                   ? 'bg-power-orange/10 text-power-orange'
                   : 'bg-level-gray/50 text-secure-gray'
               }`}>
-                {emp.benchStatus}
+                {emp.benchStatus === 'Bench' ? 'On Pool' : emp.benchStatus}
               </span>
               {/* Actions */}
               <div className="relative">

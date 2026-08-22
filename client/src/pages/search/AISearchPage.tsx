@@ -12,6 +12,7 @@ import { EmployeeProfileModal } from './EmployeeProfileModal';
 import { useAISearch } from './useAISearch';
 
 type SortOption = '' | 'match-desc' | 'match-asc' | 'exp-desc' | 'exp-asc' | 'availDate-asc' | 'availDate-desc';
+type CountOption = 'all' | 5 | 10 | 50 | 'custom';
 
 export function AISearchPage() {
   const [params] = useSearchParams();
@@ -21,17 +22,20 @@ export function AISearchPage() {
   const [selectedIrc, setSelectedIrc] = useState<number | null>(null);
   const [query,   setQuery]   = useState('');
   const [scope,   setScope]   = useState<'all' | 'applied'>('all');
-  const [jdFile,       setJdFile]       = useState<File | null>(null);
+  const [jdFiles,      setJdFiles]      = useState<File[]>([]);
   const [profileId,    setProfileId]    = useState<number | null>(null);
-  const [resultLimit,      setResultLimit]      = useState<3 | 10 | null>(null);
+  const [countOption,      setCountOption]      = useState<CountOption>('all');
+  const [customCount,      setCustomCount]      = useState('');
   const [activeSort,       setActiveSort]       = useState<SortOption>('');
   const [viewMode,         setViewMode]         = useState<'card' | 'table'>('card');
   const [locationFilter,   setLocationFilter]   = useState<string[]>([]);
   const [poolStatusFilter, setPoolStatusFilter] = useState<('InPool' | 'ForecastToPool')[]>([]);
   const [locationDropOpen,   setLocationDropOpen]   = useState(false);
   const [poolStatusDropOpen, setPoolStatusDropOpen] = useState(false);
+  const [countDropOpen,      setCountDropOpen]      = useState(false);
   const locationDropRef   = useRef<HTMLDivElement>(null);
   const poolStatusDropRef = useRef<HTMLDivElement>(null);
+  const countDropRef      = useRef<HTMLDivElement>(null);
 
   const projectsQ = useQuery({
     queryKey: ['projects'],
@@ -66,27 +70,38 @@ export function AISearchPage() {
     return () => document.removeEventListener('mousedown', close);
   }, []);
 
+  useEffect(() => {
+    function close(e: MouseEvent) {
+      if (!countDropRef.current?.contains(e.target as Node)) setCountDropOpen(false);
+    }
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, []);
+
   function handleSubmit() {
     if (!selectedIrc) return;
-    setResultLimit(null);
+    setCountOption('all');
+    setCustomCount('');
     setActiveSort('');
     setLocationFilter([]);
     setPoolStatusFilter([]);
-    if (jdFile) {
-      // User attached a JD — run the JD-aware search path
-      uploadJd({ ircId: selectedIrc, scope, file: jdFile, query: query.trim() || undefined });
+    if (jdFiles.length > 0) {
+      uploadJd({ ircId: selectedIrc, scope, files: jdFiles, query: query.trim() || undefined });
     } else {
       search({ ircId: selectedIrc, query: query.trim() || undefined, scope });
     }
   }
 
-  // Store file in state only — do NOT trigger search on upload (#8)
+  // Add file to list — do NOT trigger search on upload (#8)
   function handleJdUpload(file: File) {
-    setJdFile(file);
+    setJdFiles(prev => {
+      if (prev.some(f => f.name === file.name)) return prev; // skip duplicate
+      return [...prev, file];
+    });
   }
 
-  function handleJdRemove() {
-    setJdFile(null);
+  function handleJdRemove(filename: string) {
+    setJdFiles(prev => prev.filter(f => f.name !== filename));
   }
 
   function handleShortlisted(employeeId: number, pipelineCandidateId: number) {
@@ -106,7 +121,15 @@ export function AISearchPage() {
     else if (activeSort === 'exp-asc')        pool.sort((a, b) => a.experienceYears - b.experienceYears);
     else if (activeSort === 'availDate-asc')  pool.sort((a, b) => (a.availableDate ?? '9999').localeCompare(b.availableDate ?? '9999'));
     else if (activeSort === 'availDate-desc') pool.sort((a, b) => (b.availableDate ?? '').localeCompare(a.availableDate ?? ''));
-    return resultLimit ? pool.slice(0, resultLimit) : pool;
+
+    // Apply count limit based on countOption
+    if (countOption === 'all') return pool;
+    if (countOption === 'custom') {
+      const n = parseInt(customCount, 10);
+      if (n > 0) return pool.slice(0, Math.min(n, pool.length));
+      return pool;
+    }
+    return pool.slice(0, Math.min(countOption, pool.length));
   }
 
   function handleExportCsv() {
@@ -141,7 +164,7 @@ export function AISearchPage() {
         selectedIrc={selectedIrc}
         query={query}
         scope={scope}
-        jdFilename={jdFile?.name ?? null}
+        jdFilenames={jdFiles.map(f => f.name)}
         isPending={isPending}
         onProjectChange={setSelectedProject}
         onIrcChange={setSelectedIrc}
@@ -194,12 +217,12 @@ export function AISearchPage() {
           <EmptyState title="No matches found" description="Try broadening the requirement or switching to All scope." />
         )}
 
-        {/* Results */}
         {!isPending && results && results.length > 0 && (() => {
-          const visible      = buildVisible();
-          const allLocations = [...new Set(results.map(r => r.location))].sort();
-          const hasInPool    = results.some(r => !r.availableDate);
-          const hasForecast  = results.some(r => !!r.availableDate);
+          const visible = buildVisible();
+          // Derive location options from ALL results (before location filter) — faceted filter behaviour
+          const availLocations = [...new Set(results.map(r => r.location).filter(Boolean))].sort();
+          const hasInPool   = results.some(r => !r.availableDate);
+          const hasForecast = results.some(r => !!r.availableDate);
           return (
             <div className="space-y-4">
               {/* Result count + controls */}
@@ -210,7 +233,7 @@ export function AISearchPage() {
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-2">
 
-                  {/* Location filter */}
+                  {/* Location filter — options derived dynamically from current result set */}
                   <div ref={locationDropRef} className="relative">
                     <button onClick={() => setLocationDropOpen(o => !o)}
                       className={`flex h-8 items-center gap-1.5 rounded-lg border px-3 text-xs font-medium transition-colors ${
@@ -225,7 +248,7 @@ export function AISearchPage() {
                         <div className="border-b border-[var(--border-subtle)] px-3 py-1.5">
                           <button onClick={() => setLocationFilter([])} className="text-[10px] font-medium text-power-orange hover:underline">Clear</button>
                         </div>
-                        {allLocations.map(loc => (
+                        {availLocations.map(loc => (
                           <label key={loc} className="flex cursor-pointer items-center gap-2 px-3 py-1.5 hover:bg-culture-gray">
                             <input type="checkbox" checked={locationFilter.includes(loc)}
                               onChange={e => setLocationFilter(prev => e.target.checked ? [...prev, loc] : prev.filter(l => l !== loc))}
@@ -274,7 +297,7 @@ export function AISearchPage() {
 
                   <span className="text-level-gray">|</span>
 
-                  {/* Single sort dropdown — "No Sort" restores original AI Search order */}
+                  {/* Sort dropdown */}
                   <label className="flex items-center gap-1.5 text-xs text-secure-gray">
                     <ArrowUpDown size={12} className="shrink-0 text-[var(--fg-3)]" />
                     Sort by:
@@ -296,22 +319,54 @@ export function AISearchPage() {
 
                   <span className="text-level-gray">|</span>
 
-                  {/* Result count dropdown */}
-                  <div className="flex items-center gap-1.5">
+                  {/* Show Candidates — custom dropdown with embedded number input for Custom */}
+                  <div ref={countDropRef} className="relative flex items-center gap-1.5">
                     <Hash size={12} className="shrink-0 text-[var(--fg-3)]" />
-                    <select
-                      value={resultLimit ?? ''}
-                      onChange={e => setResultLimit(e.target.value === '' ? null : Number(e.target.value) as 3 | 10)}
-                      className="h-8 rounded-lg border border-[var(--border-subtle)] bg-white px-2.5 text-xs text-secure-gray focus:border-power-orange focus:outline-none">
-                      <option value="">Show Candidates</option>
-                      <option value="3">Top 3</option>
-                      <option value="10">Top 10</option>
-                    </select>
+                    <button
+                      onClick={() => setCountDropOpen(o => !o)}
+                      className={`flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium transition-colors ${
+                        countOption !== 'all' ? 'border-power-orange bg-power-orange/5 text-network-blue' : 'border-[var(--border-subtle)] bg-white text-secure-gray hover:bg-culture-gray'
+                      }`}>
+                      {countOption === 'all' ? 'Show All'
+                        : countOption === 'custom'
+                          ? (customCount && parseInt(customCount, 10) > 0 ? `Custom: ${customCount}` : 'Custom')
+                          : `Top ${countOption}`}
+                      <ChevronDown size={10} />
+                    </button>
+                    {countDropOpen && (
+                      <div className="absolute left-0 top-full z-30 mt-1 min-w-[140px] rounded-lg border border-[var(--border-subtle)] bg-white shadow-md">
+                        {(['all', 5, 10, 50, 'custom'] as const).map(opt => (
+                          <button key={String(opt)}
+                            onClick={() => {
+                              if (opt !== 'custom') { setCountOption(opt); setCustomCount(''); setCountDropOpen(false); }
+                              else setCountOption('custom');
+                            }}
+                            className={`flex w-full items-center px-3 py-1.5 text-left text-xs hover:bg-culture-gray ${countOption === opt ? 'font-medium text-power-orange' : 'text-secure-gray'}`}>
+                            {opt === 'all' ? 'Show All' : opt === 'custom' ? 'Custom…' : `Top ${opt}`}
+                          </button>
+                        ))}
+                        {countOption === 'custom' && (
+                          <div className="border-t border-[var(--border-subtle)] px-3 py-2">
+                            <input
+                              type="number"
+                              min={1}
+                              max={results.length}
+                              autoFocus
+                              placeholder={`1–${results.length}`}
+                              value={customCount}
+                              onChange={e => setCustomCount(e.target.value)}
+                              onKeyDown={e => e.key === 'Enter' && setCountDropOpen(false)}
+                              className="w-full rounded border border-[var(--border-default)] px-2 py-1 text-xs text-network-blue focus:border-power-orange focus:outline-none"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   <span className="text-level-gray">|</span>
 
-                  {/* Export — exports the currently visible filtered/sorted set */}
+                  {/* Export */}
                   <button onClick={handleExportCsv}
                     className="flex h-8 items-center gap-1.5 rounded-lg border border-[var(--border-subtle)] bg-white px-3 text-xs font-medium text-secure-gray hover:bg-culture-gray">
                     <Download size={12} /> Export
@@ -331,7 +386,12 @@ export function AISearchPage() {
                   </button>
                 </div>
               </div>
-              {viewMode === 'table' ? (
+              {visible.length === 0 ? (
+                <EmptyState
+                  title="No candidates found"
+                  description="Try adjusting or clearing your filters to see more candidates."
+                />
+              ) : viewMode === 'table' ? (
                 <ResultTable results={visible} ircId={selectedIrc!}
                   onShortlisted={handleShortlisted} onViewProfile={setProfileId} />
               ) : (

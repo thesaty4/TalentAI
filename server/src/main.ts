@@ -13,9 +13,9 @@ async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
   const config = app.get(ConfigService);
 
-  // CORS must be registered before helmet so OPTIONS preflight is answered first
+  // Allow any localhost port in development so Vite port-cycling doesn't break CORS
   app.enableCors({
-    origin: config.get<string>('clientUrl'),
+    origin: (origin, cb) => cb(null, !origin || /^https?:\/\/localhost(:\d+)?$/.test(origin)),
     credentials: true,
   });
 

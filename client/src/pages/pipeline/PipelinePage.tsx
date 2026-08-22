@@ -20,7 +20,11 @@ export function PipelinePage() {
   const [projectId,      setProjectId]    = useState<number | null>(() => { const v = urlParams.get('projectId'); return v ? +v : null; });
   const [roleSearch,     setRoleSearch]   = useState('');
   const [debouncedRole,  setDebouncedRole] = useState('');
-  const [selectedStages, setSelectedStages] = useState<string[]>([...PIPELINE_STAGES]);
+  const [selectedStages, setSelectedStages] = useState<string[]>(() => {
+    const v = urlParams.get('stage');
+    // Support comma-separated stages or single stage from URL param
+    return v ? v.split(',').map(s => decodeURIComponent(s.trim())).filter(s => (PIPELINE_STAGES as readonly string[]).includes(s)) : [...PIPELINE_STAGES];
+  });
   const [selectedUsers,  setSelectedUsers]  = useState<string[]>([]);
   const [addOpen,        setAddOpen]      = useState(false);
   const [historyEntry,   setHistoryEntry] = useState<{ id: number; name: string; ircCode: string } | null>(null);
@@ -66,19 +70,37 @@ export function PipelinePage() {
 
   function exportCSV() {
     const rows = stageColumns.flatMap(stage =>
-      (visibleByStage[stage] ?? []).map(e => ([
-        e.employee.fullName,
-        e.employee.roleTitle,
-        e.employee.location,
-        e.stage,
-        e.irc.ircCode,
-        e.irc.roleTitle,
-        e.matchPct ?? '',
-        e.appliedDate ? new Date(e.appliedDate).toLocaleDateString() : '',
-      ]))
+      (visibleByStage[stage] ?? []).map(e => {
+        // One cell per stage with all feedback records for that stage combined (newest first)
+        const stageFeedback = PIPELINE_STAGES.map(s => {
+          const records = (e.feedbackRounds ?? []).filter(fb => fb.roundName === s);
+          if (!records.length) return '';
+          return records
+            .map(fb => {
+              const parts: string[] = [];
+              if (fb.roundDate) parts.push(new Date(fb.roundDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }));
+              if (fb.rating)    parts.push(fb.rating);
+              if (fb.comments)  parts.push(fb.comments.replace(/[\r\n]+/g, ' '));
+              return parts.join(' - ');
+            })
+            .join('\n');
+        });
+        return [
+          e.employee.fullName,
+          e.employee.roleTitle,
+          e.employee.location,
+          e.stage,
+          e.irc.ircCode,
+          e.irc.roleTitle,
+          e.matchPct ?? '',
+          e.appliedDate ? new Date(e.appliedDate).toLocaleDateString() : '',
+          ...stageFeedback,
+        ];
+      })
     );
     if (rows.length === 0) return;
-    const headers = ['Name', 'Role Title', 'Location', 'Stage', 'IRC Code', 'IRC Role', 'Match %', 'Applied Date'];
+    const stageFeedbackHeaders = PIPELINE_STAGES.map(s => `${s} Feedback`);
+    const headers = ['Name', 'Role Title', 'Location', 'Stage', 'IRC Code', 'IRC Role', 'Match %', 'Applied Date', ...stageFeedbackHeaders];
     const csv = [headers, ...rows].map(r => r.map(v => JSON.stringify(v)).join(',')).join('\n');
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
     const a = Object.assign(document.createElement('a'), {

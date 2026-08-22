@@ -44,10 +44,10 @@ export function useAISearch() {
   });
 
   const jdMutation = useMutation({
-    mutationFn: ({ ircId, scope, file, query }: { ircId: number; scope: string; file: File; query?: string }) =>
-      searchApi.uploadJd(ircId, scope, file, query),
+    mutationFn: ({ ircId, scope, files, query }: { ircId: number; scope: string; files: File[]; query?: string }) =>
+      searchApi.uploadJd(ircId, scope, files, query),
     onMutate:   () => { startCycle(); },
-    onSuccess:  (data, vars) => { stopCycle(); setResults(data); setJdFilename(vars.file.name); },
+    onSuccess:  (data, vars) => { stopCycle(); setResults(data); setJdFilename(vars.files.map(f => f.name).join(', ')); },
     onError:    (err)  => { stopCycle(isMismatch(err)); if (isMismatch(err)) setResults(null); },
   });
 
