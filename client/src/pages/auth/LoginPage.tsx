@@ -182,17 +182,17 @@ function LoginForm({ onSuccess }: { onSuccess: (t: string, u: JwtUser) => void }
           <span style={{ fontSize: 11.5, color: C.fg3 }}>(demo only)</span>
         </div>
         <div style={{ display: "flex", gap: 6, marginBottom: 6 }}>
-          {(["manager", "hr", "candidate"] as DemoRole[]).map(role => (
+          {(["hr", "manager", "candidate"] as DemoRole[]).map(role => (
             <button key={role} type="button" disabled={busy}
               onClick={() => { setDemoRole(role); demoMut.mutate(role); }}
               style={{
                 flex: 1, borderRadius: 7, padding: "7px 4px", fontSize: 12, fontWeight: 600,
-                cursor: "pointer", textTransform: "capitalize" as const,
+                cursor: "pointer",
                 background: demoRole === role && demoMut.isPending ? C.accentTeal : demoRole === role ? C.accentTeal : "#fff",
                 color: demoRole === role ? "#fff" : C.fg2,
                 border: `1px solid ${demoRole === role ? C.accentTeal : C.border}`,
               }}>
-              {demoMut.isPending && demoRole === role ? "…" : role.charAt(0).toUpperCase() + role.slice(1)}
+              {demoMut.isPending && demoRole === role ? "…" : role === "hr" ? "HR" : role.charAt(0).toUpperCase() + role.slice(1)}
             </button>
           ))}
         </div>
